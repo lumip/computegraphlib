@@ -6,7 +6,9 @@
 
 #include "nodes/InputNode.hpp"
 #include "nodes/VectorAddNode.hpp"
+#include "GraphCompilationContext.hpp"
 
+#ifdef GPU
 /**
  * Returns the first device offered by OpenCL.
  */
@@ -50,19 +52,25 @@ void PrintDeviceName(cl_device_id device)
     std::cout << buffer << std::endl;
     delete[](buffer);
 }
+#endif
 
 int main(int argc, const char* argv[])
 {
-    std::cout << "Runs" << std::endl;
+#ifdef GPU
     auto device = SelectDevice();
     PrintDeviceName(device);
+#endif
     InputNode i1(4);
-    InputNode i2(6);
+    InputNode i2(4);
     VectorAddNode an(&i1, &i2);
     for (auto inputPair : an.GetInputs())
     {
         std::cout << inputPair.second << std::endl;
     }
+    GraphCompilationContext context;
+    context.RegisterNodeMemory(&i1, 15, 4);
+    context.RegisterNodeMemory(&i2, 15, 4);
+    context.RegisterNodeMemory(&an, 15, 4);
     
     return 0;
 }

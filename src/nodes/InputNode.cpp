@@ -1,4 +1,4 @@
-#include "InputNode.hpp"
+#include "nodes/InputNode.hpp"
 
 InputNode::InputNode(size_t dim)
     : _dim(dim)

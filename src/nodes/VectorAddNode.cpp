@@ -1,4 +1,4 @@
-#include "VectorAddNode.hpp"
+#include "nodes/VectorAddNode.hpp"
 
 VectorAddNode::VectorAddNode(Node::ptr a, Node::ptr b) 
     : Node(), 

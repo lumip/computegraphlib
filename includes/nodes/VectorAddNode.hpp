@@ -19,7 +19,7 @@ public:
     VectorAddNode(Node::ptr a, Node::ptr b);
     virtual ~VectorAddNode();
     ConstNodeMap GetInputs() const;
-    void Compile(void* const context) const;
+    void Compile(GraphCompilationContext* const context) const;
 };
 
 #endif

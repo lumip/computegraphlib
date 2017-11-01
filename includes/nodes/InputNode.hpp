@@ -15,7 +15,7 @@ public:
     InputNode(size_t dim);
     virtual ~InputNode();
     ConstNodeMap GetInputs() const;
-    void Compile(void* const context) const;
+    void Compile(GraphCompilationContext* const context) const;
 };
 
 #endif

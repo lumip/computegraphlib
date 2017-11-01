@@ -6,6 +6,8 @@
 #include <vector>
 #include <set>
 
+class GraphCompilationContext;
+
 class Node
 {
 public:
@@ -28,7 +30,7 @@ public:
     Node() {}
     virtual ~Node() {}
     virtual ConstNodeMap GetInputs() const = 0;
-    virtual void Compile(void* const context) const = 0;
+    virtual void Compile(GraphCompilationContext* const context) const = 0;
 };
 
 #endif
