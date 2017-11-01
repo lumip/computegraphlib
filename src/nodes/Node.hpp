@@ -25,14 +25,10 @@ public:
 private:
     ConstNodeSet _subscribers;
 public:
-    Node();
-    virtual ~Node();
+    Node() {}
+    virtual ~Node() {}
     virtual ConstNodeMap GetInputs() const = 0;
-    ConstNodeList GetSubscribers() const;
     virtual void Compile(void* const context) const = 0;
-protected:
-    void AddSubscriber(Node::const_ptr const subscriber);
-    void RemoveSubscriber(Node::const_ptr const subscriber);
 };
 
 #endif

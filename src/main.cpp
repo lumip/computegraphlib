@@ -59,9 +59,9 @@ int main(int argc, const char* argv[])
     InputNode i1(4);
     InputNode i2(6);
     VectorAddNode an(&i1, &i2);
-    for (auto s : i1.GetSubscribers())
+    for (auto inputPair : an.GetInputs())
     {
-        std::cout << s << std::endl;
+        std::cout << inputPair.second << std::endl;
     }
     
     return 0;
