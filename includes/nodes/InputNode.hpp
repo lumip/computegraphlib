@@ -10,9 +10,10 @@ public:
     typedef std::shared_ptr<InputNode> shared_ptr;
     typedef std::unique_ptr<InputNode> unique_ptr;
 private:
+    std::string _name;
     size_t _dim;
 public:
-    InputNode(size_t dim);
+    InputNode(std::string name, size_t dim);
     virtual ~InputNode();
     ConstNodeMap GetInputs() const;
     void Compile(GraphCompilationContext* const context) const;

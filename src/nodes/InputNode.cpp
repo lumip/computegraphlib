@@ -1,7 +1,8 @@
 #include "nodes/InputNode.hpp"
 
-InputNode::InputNode(size_t dim)
-    : _dim(dim)
+InputNode::InputNode(std::string name, size_t dim)
+    : _name(name)
+    , _dim(dim)
 {
 }
 

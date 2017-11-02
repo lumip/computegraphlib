@@ -4,9 +4,11 @@
 
 #include <CL/cl.h>
 
+#include "types.hpp"
 #include "nodes/InputNode.hpp"
 #include "nodes/VectorAddNode.hpp"
 #include "GraphCompilationContext.hpp"
+#include "GraphCompiler.hpp"
 
 #ifdef GPU
 /**
@@ -60,17 +62,25 @@ int main(int argc, const char* argv[])
     auto device = SelectDevice();
     PrintDeviceName(device);
 #endif
-    InputNode i1(4);
-    InputNode i2(4);
+    InputNode i1("x", 4);
+    InputNode i2("y", 4);
     VectorAddNode an(&i1, &i2);
     for (auto inputPair : an.GetInputs())
     {
         std::cout << inputPair.second << std::endl;
     }
-    GraphCompilationContext context;
-    context.RegisterNodeMemory(&i1, 15, 4);
-    context.RegisterNodeMemory(&i2, 15, 4);
-    context.RegisterNodeMemory(&an, 15, 4);
+
+    std::vector<Node::const_ptr> nodes;
+    nodes.push_back(&i1);
+    nodes.push_back(&i2);
+    nodes.push_back(&an);
+    float input1[5][4] = { {1,2,3,4}, {2,2,2,2}, {0,0,0,0}, {1,0,-1,0}, {-1,-3,-5,-7} };
+    float input2[5][4] = { {4,3,2,1}, {2,-2,2,-2}, {1,2,3,4}, {-1,0,1,0}, {3, 5, 7, -3} };
+    InputDataMap inputs;
+    inputs["x"] = static_cast<InputDataBufferHandle>(&input1[0][0]);
+    inputs["y"] = static_cast<InputDataBufferHandle>(&input2[0][0]);
+    GraphCompiler compiler;
+    compiler.Compile(nodes, inputs);
     
     return 0;
 }

@@ -1,6 +1,8 @@
+#ifdef GPU
 #include "nodes/InputNode.hpp"
 
-void InputNode::Compile(void* const context) const
+void InputNode::Compile(GraphCompilationContext* const context) const
 {
 
 }
+#endif
