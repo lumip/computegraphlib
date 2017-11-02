@@ -13,3 +13,8 @@ Node::ConstNodeMap InputNode::GetInputs() const
     ConstNodeMap m;
     return m;
 }
+
+std::string InputNode::ToString() const
+{
+    return "<InputNode " + _name + ">";
+}

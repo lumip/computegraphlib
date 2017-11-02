@@ -67,7 +67,11 @@ int main(int argc, const char* argv[])
     VectorAddNode an(&i1, &i2);
     for (auto inputPair : an.GetInputs())
     {
-        std::cout << inputPair.second << std::endl;
+        std::cout << inputPair.second->ToString() << std::endl;
+    }
+    for (auto x : i1.GetSubscribers())
+    {
+        std::cout << x->ToString() << std::endl;
     }
 
     std::vector<Node::const_ptr> nodes;

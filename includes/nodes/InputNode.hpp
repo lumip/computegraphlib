@@ -17,6 +17,7 @@ public:
     virtual ~InputNode();
     ConstNodeMap GetInputs() const;
     void Compile(GraphCompilationContext* const context) const;
+    std::string ToString() const;
 };
 
 #endif
