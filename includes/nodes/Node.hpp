@@ -29,8 +29,8 @@ private:
 public:
     Node();
     virtual ~Node();
-    virtual ConstNodeMap GetInputs() const = 0;
     ConstNodeList GetSubscribers() const;
+    virtual ConstNodeMap GetInputs() const = 0;
     virtual void Compile(GraphCompilationContext* const context) const = 0; // todo: should probably turn this into a reference. but then have to include GraphCompilationContext -> circular include -> bad. think how to resolve
     virtual std::string ToString() const = 0;
 private:

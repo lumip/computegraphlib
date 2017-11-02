@@ -1,4 +1,5 @@
 #include "nodes/VectorAddNode.hpp"
+#include <sstream>
 
 VectorAddNode::VectorAddNode(Node::ptr a, Node::ptr b) 
     : Node(), 
@@ -21,5 +22,7 @@ Node::ConstNodeMap VectorAddNode::GetInputs() const
 
 std::string VectorAddNode::ToString() const
 {
-    return "<VectorAddNode " + _summandA->ToString() + " + " + _summandB->ToString() + ">";
+    std::stringstream ss;
+    ss << "<VectorAddNode " << (this) << ">";
+    return ss.str();
 }

@@ -7,6 +7,7 @@
 #include "types.hpp"
 #include "nodes/InputNode.hpp"
 #include "nodes/VectorAddNode.hpp"
+#include "nodes/VariableNode.hpp"
 #include "GraphCompilationContext.hpp"
 #include "GraphCompiler.hpp"
 
@@ -64,20 +65,27 @@ int main(int argc, const char* argv[])
 #endif
     InputNode i1("x", 4);
     InputNode i2("y", 4);
-    VectorAddNode an(&i1, &i2);
-    for (auto inputPair : an.GetInputs())
-    {
-        std::cout << inputPair.second->ToString() << std::endl;
-    }
-    for (auto x : i1.GetSubscribers())
-    {
-        std::cout << x->ToString() << std::endl;
-    }
+    VariableNode v("v", 4);
+    VectorAddNode p1(&i1, &v);
+    VectorAddNode p2(&p1, &i2);
+    v.SetInput(&p2);
+    v.SetInput(nullptr);
 
-    std::vector<Node::const_ptr> nodes;
-    nodes.push_back(&i1);
-    nodes.push_back(&i2);
-    nodes.push_back(&an);
+    std::vector<Node::const_ptr> nodes({&i1,&i2,&p1,&p2,&v});
+    for (auto node : nodes)
+    {
+        std::cout << node->ToString() << std::endl;
+        std::cout << "inputs:" << std::endl;
+        for (auto input : node->GetInputs())
+        {
+            std::cout << "\t" << input.second->ToString() << std::endl;
+        }
+        std::cout << "subscribers:" << std::endl;
+        for (auto sub : node->GetSubscribers())
+        {
+            std::cout << "\t" << sub->ToString() << std::endl;
+        }
+    }
     float input1[5][4] = { {1,2,3,4}, {2,2,2,2}, {0,0,0,0}, {1,0,-1,0}, {-1,-3,-5,-7} };
     float input2[5][4] = { {4,3,2,1}, {2,-2,2,-2}, {1,2,3,4}, {-1,0,1,0}, {3, 5, 7, -3} };
     InputDataMap inputs;
