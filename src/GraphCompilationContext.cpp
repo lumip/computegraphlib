@@ -1,6 +1,6 @@
 #include "GraphCompilationContext.hpp"
 
-GraphCompilationContext::GraphCompilationContext(const std::map<std::string, const float*>& inputData)
+GraphCompilationContext::GraphCompilationContext(const InputDataMap& inputData)
     : _inputData(inputData)
     , _memoryMap()
 {
@@ -27,7 +27,7 @@ GraphCompilationContext::NodeMemory GraphCompilationContext::GetNodeMemory(Node:
     return this->_memoryMap.at(node);
 }
 
-InputDataBufferHandle GraphCompilationContext::GetInputDataBuffer(std::string inputName) const
+InputDataBuffer GraphCompilationContext::GetInputDataBuffer(std::string inputName) const
 {
     return this->_inputData.at(inputName);
 }

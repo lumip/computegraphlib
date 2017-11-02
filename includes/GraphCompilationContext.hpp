@@ -19,11 +19,11 @@ private:
     std::map<Node::const_ptr, NodeMemory> _memoryMap;
     const InputDataMap& _inputData;
 public:
-    GraphCompilationContext(const std::map<std::string, const float*>& inputData); // todo: decouple compilation from input data
+    GraphCompilationContext(const InputDataMap& inputData); // todo: decouple compilation from input data
     virtual ~GraphCompilationContext();
     void RegisterNodeMemory(Node::const_ptr const node, size_t n, size_t dimensions);
     NodeMemory GetNodeMemory(Node::const_ptr const node) const;
-    InputDataBufferHandle GetInputDataBuffer(std::string inputName) const;
+    InputDataBuffer GetInputDataBuffer(std::string inputName) const;
 private:
     NodeMemoryHandle AllocateMemory(size_t size);
 };

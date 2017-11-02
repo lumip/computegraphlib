@@ -6,5 +6,7 @@
 void InputNode::Compile(GraphCompilationContext* const context) const
 {
     std::cout << "InputNode " << this->_name << " compiling." << std::endl;
+    InputDataBuffer input = context->GetInputDataBuffer(_name);
+    //context->RegisterNodeMemory(this, );
 }
 #endif

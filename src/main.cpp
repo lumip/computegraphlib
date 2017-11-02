@@ -11,6 +11,8 @@
 #include "GraphCompilationContext.hpp"
 #include "GraphCompiler.hpp"
 
+#include <functional>
+
 #ifdef GPU
 /**
  * Returns the first device offered by OpenCL.
@@ -71,7 +73,7 @@ int main(int argc, const char* argv[])
     v.SetInput(&p2);
     v.SetInput(nullptr);
 
-    std::vector<Node::const_ptr> nodes({&i1,&i2,&p1,&p2,&v});
+    std::vector<Node::const_ptr> nodes {&i1,&i2,&p1,&p2,&v};
     for (auto node : nodes)
     {
         std::cout << node->ToString() << std::endl;
@@ -86,11 +88,15 @@ int main(int argc, const char* argv[])
             std::cout << "\t" << sub->ToString() << std::endl;
         }
     }
-    float input1[5][4] = { {1,2,3,4}, {2,2,2,2}, {0,0,0,0}, {1,0,-1,0}, {-1,-3,-5,-7} };
-    float input2[5][4] = { {4,3,2,1}, {2,-2,2,-2}, {1,2,3,4}, {-1,0,1,0}, {3, 5, 7, -3} };
+    InputDataBuffer input1 { 1,2,3,4, 2,2,2,2, 0,0,0,0, 1,0,-1,0, -1,-3,-5,-7 };
+    InputDataBuffer input2 { 4,3,2,1, 2,-2,2,-2, 1,2,3,4, -1,0,1,0, 3,5,7,-3 };
+
+    int a(4);
+    std::reference_wrapper<int> a_ref(a);
+
     InputDataMap inputs;
-    inputs["x"] = static_cast<InputDataBufferHandle>(&input1[0][0]);
-    inputs["y"] = static_cast<InputDataBufferHandle>(&input2[0][0]);
+    inputs.emplace("x", std::ref(input1));
+    inputs.emplace("y", std::ref(input2));
     GraphCompiler compiler;
     compiler.Compile(nodes, inputs);
     

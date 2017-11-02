@@ -2,7 +2,7 @@
 #include "nodes/Node.hpp"
 
 GraphCompiler::GraphCompiler()
-    : _context(std::map<std::string, const float*>())
+    : _context(InputDataMap())
 {
 
 }
