@@ -13,7 +13,7 @@ private:
 public:
     GraphCompiler();
     virtual ~GraphCompiler();
-    void Compile(const std::vector<Node::const_ptr>& nodes, const InputDataMap& inputData);
+    void Compile(const std::vector<ConstNodePtr>& nodes, const InputDataMap& inputData);
 };
 
 #endif

@@ -73,7 +73,7 @@ int main(int argc, const char* argv[])
     v.SetInput(&p2);
     v.SetInput(nullptr);
 
-    std::vector<Node::const_ptr> nodes {&i1,&i2,&p1,&p2,&v};
+    std::vector<ConstNodePtr> nodes {&i1,&i2,&p1,&p2,&v};
     for (auto node : nodes)
     {
         std::cout << node->ToString() << std::endl;
@@ -99,6 +99,6 @@ int main(int argc, const char* argv[])
     inputs.emplace("y", std::ref(input2));
     GraphCompiler compiler;
     compiler.Compile(nodes, inputs);
-    
+
     return 0;
 }

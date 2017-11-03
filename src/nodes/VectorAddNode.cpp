@@ -1,7 +1,7 @@
 #include "nodes/VectorAddNode.hpp"
 #include <sstream>
 
-VectorAddNode::VectorAddNode(Node::ptr a, Node::ptr b) 
+VectorAddNode::VectorAddNode(NodePtr a, NodePtr b)
     : Node(), 
     _summandA(a), 
     _summandB(b)

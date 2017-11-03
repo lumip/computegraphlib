@@ -9,7 +9,7 @@ VariableNode::VariableNode(std::string name, size_t dim)
 
 VariableNode::~VariableNode() {}
 
-void VariableNode::SetInput(const Node::ptr inputNode)
+void VariableNode::SetInput(const NodePtr inputNode)
 {
     if (_input != nullptr)
     {

@@ -7,25 +7,20 @@
 #include <set>
 
 #include "Kernel.hpp"
+#include "types.hpp"
 
 class GraphCompilationContext;
 
 class Node
 {
-public:
-    typedef std::weak_ptr<Node> weak_ptr;
-    typedef std::shared_ptr<Node> shared_ptr;
-    typedef std::unique_ptr<Node> unique_ptr;
-    typedef Node* ptr;
-    typedef const Node* const_ptr;
 protected:
-    typedef std::set<Node::ptr> NodeSet;
-    typedef std::vector<Node::ptr> NodeList;
-    typedef std::map<std::string, Node::ptr> NodeMap;
+    typedef std::set<NodePtr> NodeSet;
+    typedef std::vector<NodePtr> NodeList;
+    typedef std::map<std::string, NodePtr> NodeMap;
 public:
-    typedef std::set<Node::const_ptr> ConstNodeSet;
-    typedef std::map<std::string, Node::const_ptr> ConstNodeMap;
-    typedef std::vector<Node::const_ptr> ConstNodeList;
+    typedef std::set<ConstNodePtr> ConstNodeSet;
+    typedef std::map<std::string, ConstNodePtr> ConstNodeMap;
+    typedef std::vector<ConstNodePtr> ConstNodeList;
 private:
     ConstNodeSet _subscribers;
 public:
@@ -36,11 +31,11 @@ public:
     virtual std::unique_ptr<const Kernel> Compile(GraphCompilationContext* const context) const = 0; // todo: should probably turn this into a reference. but then have to include GraphCompilationContext -> circular include -> bad. think how to resolve
     virtual std::string ToString() const = 0;
 private:
-    void InternalAddSubscriber(const Node::const_ptr sub);
-    void InternalRemoveSubscriber(const Node::const_ptr sub);
+    void InternalAddSubscriber(const ConstNodePtr sub);
+    void InternalRemoveSubscriber(const ConstNodePtr sub);
 protected:
-    void SubscribeTo(const Node::ptr node) const;
-    void UnsubscribeFrom(const Node::ptr node) const;
+    void SubscribeTo(const NodePtr node) const;
+    void UnsubscribeFrom(const NodePtr node) const;
 };
 
 #endif

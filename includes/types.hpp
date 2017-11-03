@@ -11,4 +11,8 @@ typedef ConstDataBuffer InputDataBuffer;
 
 typedef std::map<std::string, std::reference_wrapper<InputDataBuffer>> InputDataMap;
 
+class Node;
+typedef Node* NodePtr;
+typedef const Node* ConstNodePtr;
+
 #endif

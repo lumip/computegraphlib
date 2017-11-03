@@ -13,12 +13,12 @@ Node::ConstNodeList Node::GetSubscribers() const
     return ConstNodeList(std::begin(_subscribers), std::end(_subscribers));
 }
 
-void Node::InternalAddSubscriber(const Node::const_ptr sub)
+void Node::InternalAddSubscriber(const ConstNodePtr sub)
 {
     _subscribers.insert(sub);
 }
 
-void Node::InternalRemoveSubscriber(const Node::const_ptr sub)
+void Node::InternalRemoveSubscriber(const ConstNodePtr sub)
 {
     auto it = _subscribers.find(sub);
     if (it != _subscribers.end())
@@ -27,12 +27,12 @@ void Node::InternalRemoveSubscriber(const Node::const_ptr sub)
     }
 }
 
-void Node::SubscribeTo(const Node::ptr node) const
+void Node::SubscribeTo(const NodePtr node) const
 {
     node->InternalAddSubscriber(this);
 }
 
-void Node::UnsubscribeFrom(const Node::ptr node) const
+void Node::UnsubscribeFrom(const NodePtr node) const
 {
     node->InternalRemoveSubscriber(this);
 }

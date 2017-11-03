@@ -9,7 +9,7 @@ GraphCompiler::GraphCompiler()
 
 GraphCompiler::~GraphCompiler() { }
 
-void GraphCompiler::Compile(const std::vector<Node::const_ptr>& nodes, const InputDataMap& inputData)
+void GraphCompiler::Compile(const std::vector<ConstNodePtr>& nodes, const InputDataMap& inputData)
 {
     GraphCompilationContext context(inputData);
     for (auto node : nodes)

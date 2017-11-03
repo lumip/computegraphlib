@@ -13,10 +13,10 @@ public:
     typedef std::shared_ptr<VectorAddNode> shared_ptr;
     typedef std::unique_ptr<VectorAddNode> unique_ptr;
 private:
-    Node::ptr _summandA;
-    Node::ptr _summandB;
+    NodePtr _summandA;
+    NodePtr _summandB;
 public:
-    VectorAddNode(Node::ptr a, Node::ptr b);
+    VectorAddNode(NodePtr a, NodePtr b);
     virtual ~VectorAddNode();
     ConstNodeMap GetInputs() const;
     std::unique_ptr<const Kernel> Compile(GraphCompilationContext* const context) const;

@@ -5,10 +5,6 @@
 
 class InputNode : public Node
 {
-public:
-    typedef std::weak_ptr<InputNode> weak_ptr;
-    typedef std::shared_ptr<InputNode> shared_ptr;
-    typedef std::unique_ptr<InputNode> unique_ptr;
 private:
     std::string _name;
     size_t _dim;

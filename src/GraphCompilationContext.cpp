@@ -23,12 +23,12 @@ GraphCompilationContext::NodeMemoryHandle GraphCompilationContext::RegisterMemor
     return memDesc.handle;
 }
 
-void GraphCompilationContext::AssignNodeMemory(Node::const_ptr const node, const NodeMemoryHandle memoryHandle)
+void GraphCompilationContext::AssignNodeMemory(const ConstNodePtr node, const NodeMemoryHandle memoryHandle)
 {
     this->_memoryMap[node] = memoryHandle;
 }
 
-GraphCompilationContext::NodeMemoryDescriptor GraphCompilationContext::GetNodeMemoryDescriptor(Node::const_ptr const node) const
+GraphCompilationContext::NodeMemoryDescriptor GraphCompilationContext::GetNodeMemoryDescriptor(const ConstNodePtr node) const
 {
     return this->_memoryDescriptors.at(this->_memoryMap.at(node));
 }
