@@ -20,7 +20,7 @@ public:
     {
     }
     virtual ~VectorAddNodeCPUKernel() { }
-    void Run()
+    void Run() const
     {
         for (size_t i = 0; i < _size; ++i)
         {

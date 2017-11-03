@@ -6,7 +6,7 @@ class Kernel
 public:
     Kernel() { }
     virtual ~Kernel() { }
-    virtual void Run() = 0;
+    virtual void Run() const = 0;
 };
 
 #endif

@@ -9,7 +9,7 @@ class VariableNodeCPUKernel : public Kernel
 public:
     VariableNodeCPUKernel() { }
     ~VariableNodeCPUKernel() { }
-    void Run() { }
+    void Run() const { }
 };
 
 std::unique_ptr<const Kernel> VariableNode::Compile(GraphCompilationContext* const context) const

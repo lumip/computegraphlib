@@ -9,7 +9,7 @@ class InputNodeCPUKernel : public Kernel
 public:
     InputNodeCPUKernel() { }
     ~InputNodeCPUKernel() { }
-    void Run() { }
+    void Run() const { }
 };
 
 std::unique_ptr<const Kernel> InputNode::Compile(GraphCompilationContext* const context) const
