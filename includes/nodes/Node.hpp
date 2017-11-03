@@ -6,6 +6,8 @@
 #include <vector>
 #include <set>
 
+#include "Kernel.hpp"
+
 class GraphCompilationContext;
 
 class Node
@@ -31,7 +33,7 @@ public:
     virtual ~Node();
     ConstNodeList GetSubscribers() const;
     virtual ConstNodeMap GetInputs() const = 0;
-    virtual void Compile(GraphCompilationContext* const context) const = 0; // todo: should probably turn this into a reference. but then have to include GraphCompilationContext -> circular include -> bad. think how to resolve
+    virtual std::unique_ptr<const Kernel> Compile(GraphCompilationContext* const context) const = 0; // todo: should probably turn this into a reference. but then have to include GraphCompilationContext -> circular include -> bad. think how to resolve
     virtual std::string ToString() const = 0;
 private:
     void InternalAddSubscriber(const Node::const_ptr sub);

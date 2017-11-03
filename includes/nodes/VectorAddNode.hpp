@@ -19,7 +19,7 @@ public:
     VectorAddNode(Node::ptr a, Node::ptr b);
     virtual ~VectorAddNode();
     ConstNodeMap GetInputs() const;
-    void Compile(GraphCompilationContext* const context) const;
+    std::unique_ptr<const Kernel> Compile(GraphCompilationContext* const context) const;
     std::string ToString() const;
 };
 
