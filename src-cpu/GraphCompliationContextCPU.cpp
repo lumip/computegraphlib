@@ -5,4 +5,14 @@ GraphCompilationContext::NodeMemoryHandle GraphCompilationContext::AllocateMemor
 {
     return reinterpret_cast<NodeMemoryHandle>(new float[size]);
 }
+
+void GraphCompilationContext::DeallocateAllMemory()
+{
+    for (auto elem : _memoryDescriptors)
+    {
+        NodeMemoryHandle buf = reinterpret_cast<NodeMemoryHandle>(elem.first);
+        delete[](buf);
+    }
+}
+
 #endif

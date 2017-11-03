@@ -2,29 +2,35 @@
 
 GraphCompilationContext::GraphCompilationContext(const InputDataMap& inputData)
     : _inputData(inputData)
+    , _memoryDescriptors()
     , _memoryMap()
 {
 }
 
-GraphCompilationContext::~GraphCompilationContext() { }
-
-void GraphCompilationContext::RegisterNodeMemory(Node::const_ptr const node, size_t n, size_t dimensions)
+GraphCompilationContext::~GraphCompilationContext()
 {
-    if (this->_memoryMap.find(node) != this->_memoryMap.end())
-    {
-        throw std::invalid_argument("Memory for this node has already been registered.");
-    }
-    NodeMemory mem;
-    mem.n = n;
-    mem.dimensions = dimensions;
-    mem.size = mem.n * mem.dimensions;
-    mem.handle = this->AllocateMemory(mem.size);
-    this->_memoryMap[node] = mem;
+    this->DeallocateAllMemory();
 }
 
-GraphCompilationContext::NodeMemory GraphCompilationContext::GetNodeMemory(Node::const_ptr const node) const
+GraphCompilationContext::NodeMemoryHandle GraphCompilationContext::RegisterMemory(size_t n, size_t dimensions)
 {
-    return this->_memoryMap.at(node);
+    NodeMemoryDescriptor memDesc;
+    memDesc.n = n;
+    memDesc.dimensions = dimensions;
+    memDesc.size = memDesc.n * memDesc.dimensions;
+    memDesc.handle = this->AllocateMemory(memDesc.size);
+    this->_memoryDescriptors[memDesc.handle] = memDesc;
+    return memDesc.handle;
+}
+
+void GraphCompilationContext::AssignNodeMemory(Node::const_ptr const node, const NodeMemoryHandle memoryHandle)
+{
+    this->_memoryMap[node] = memoryHandle;
+}
+
+GraphCompilationContext::NodeMemoryDescriptor GraphCompilationContext::GetNodeMemoryDescriptor(Node::const_ptr const node) const
+{
+    return this->_memoryDescriptors.at(this->_memoryMap.at(node));
 }
 
 InputDataBuffer GraphCompilationContext::GetInputDataBuffer(std::string inputName) const

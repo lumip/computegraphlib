@@ -7,8 +7,8 @@
 class GraphCompilationContext
 {
 public:
-    typedef size_t NodeMemoryHandle;
-    struct NodeMemory
+    typedef float* NodeMemoryHandle;
+    struct NodeMemoryDescriptor
     {
         GraphCompilationContext::NodeMemoryHandle handle;
         size_t n; // todo: decouple compilation from input data
@@ -16,16 +16,19 @@ public:
         size_t size;
     };
 private:
-    std::map<Node::const_ptr, NodeMemory> _memoryMap;
+    std::map<Node::const_ptr, NodeMemoryHandle> _memoryMap;
+    std::map<NodeMemoryHandle, NodeMemoryDescriptor> _memoryDescriptors;
     const InputDataMap& _inputData;
 public:
     GraphCompilationContext(const InputDataMap& inputData); // todo: decouple compilation from input data
     virtual ~GraphCompilationContext();
-    void RegisterNodeMemory(Node::const_ptr const node, size_t n, size_t dimensions);
-    NodeMemory GetNodeMemory(Node::const_ptr const node) const;
+    NodeMemoryHandle RegisterMemory(size_t n, size_t dimensions);
+    void AssignNodeMemory(Node::const_ptr const node, const NodeMemoryHandle memoryHandle);
+    NodeMemoryDescriptor GetNodeMemoryDescriptor(Node::const_ptr const node) const;
     InputDataBuffer GetInputDataBuffer(std::string inputName) const;
 private:
     NodeMemoryHandle AllocateMemory(size_t size);
+    void DeallocateAllMemory();
 };
 
 #endif
