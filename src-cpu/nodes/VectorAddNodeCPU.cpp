@@ -1,5 +1,4 @@
 #ifdef CPU
-#include <iostream>
 #include "nodes/VectorAddNode.hpp"
 #include "GraphCompilationContext.hpp"
 #include "Kernel.hpp"
