@@ -30,3 +30,4 @@ if(GPUImplementation)
 endif(GPUImplementation)
 
 add_executable(0s01c-VectorAddNodeSingleCPU "tests/0s01-VectorAddNodeSingle.cpp" ${Includes} ${Sources} ${CPUSources})
+add_executable(0s02c-InputNodeSingleCPU "tests/0s02-InputNodeSingle.cpp" ${Includes} ${Sources} ${CPUSources})

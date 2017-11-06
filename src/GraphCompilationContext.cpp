@@ -14,12 +14,9 @@ GraphCompilationContext::~GraphCompilationContext()
 
 GraphCompilationContext::NodeMemoryHandle GraphCompilationContext::RegisterMemory(size_t n, size_t dimensions)
 {
-    NodeMemoryDescriptor memDesc;
-    memDesc.n = n;
-    memDesc.dimensions = dimensions;
-    memDesc.size = memDesc.n * memDesc.dimensions;
-    memDesc.handle = this->AllocateMemory(memDesc.size);
-    this->_memoryDescriptors[memDesc.handle] = memDesc;
+    const size_t size = n * dimensions;
+    NodeMemoryDescriptor memDesc {this->AllocateMemory(size), n, dimensions, size};
+    this->_memoryDescriptors.emplace(memDesc.handle, memDesc);
     return memDesc.handle;
 }
 
@@ -33,7 +30,7 @@ GraphCompilationContext::NodeMemoryDescriptor GraphCompilationContext::GetNodeMe
     return this->_memoryDescriptors.at(this->_memoryMap.at(node));
 }
 
-InputDataBuffer GraphCompilationContext::GetInputDataBuffer(std::string inputName) const
+InputDataBuffer& GraphCompilationContext::GetInputDataBuffer(std::string inputName) const
 {
     return this->_inputData.at(inputName);
 }

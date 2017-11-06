@@ -9,7 +9,7 @@ public:
     typedef float* NodeMemoryHandle;
     struct NodeMemoryDescriptor
     {
-        GraphCompilationContext::NodeMemoryHandle handle;
+        const GraphCompilationContext::NodeMemoryHandle handle;
         size_t n; // todo: decouple compilation from input data
         size_t dimensions;
         size_t size;
@@ -24,7 +24,7 @@ public:
     NodeMemoryHandle RegisterMemory(size_t n, size_t dimensions);
     void AssignNodeMemory(const ConstNodePtr node, const NodeMemoryHandle memoryHandle);
     NodeMemoryDescriptor GetNodeMemoryDescriptor(const ConstNodePtr node) const;
-    InputDataBuffer GetInputDataBuffer(std::string inputName) const;
+    InputDataBuffer& GetInputDataBuffer(std::string inputName) const;
 private:
     NodeMemoryHandle AllocateMemory(size_t size);
     void DeallocateAllMemory();
