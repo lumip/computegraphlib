@@ -23,8 +23,10 @@ else(GPUImplementation)
     add_definitions(-DCPU)
 endif(GPUImplementation)
 
-add_executable(main ${Includes} ${Sources} ${CPUSources} ${GPUSources})
+add_executable(main "tests/main.cpp" ${Includes} ${Sources} ${CPUSources} ${GPUSources})
 if(GPUImplementation)
     target_include_directories(main PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
     target_link_libraries(main ${OpenCL_LIBRARY})
 endif(GPUImplementation)
+
+add_executable(0s01c-VectorAddNodeSingleCPU "tests/0s01-VectorAddNodeSingle.cpp" ${Includes} ${Sources} ${CPUSources})
