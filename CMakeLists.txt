@@ -33,6 +33,8 @@ add_executable(0s01c-VectorAddNodeSingleCPU "tests/0s01-VectorAddNodeSingle.cpp"
 target_compile_definitions(0s01c-VectorAddNodeSingleCPU PRIVATE -DCPU)
 add_executable(0s02c-InputNodeSingleCPU "tests/0s02-InputNodeSingle.cpp" ${Includes} ${Sources} ${CPUSources})
 target_compile_definitions(0s02c-InputNodeSingleCPU PRIVATE -DCPU)
+add_executable(0s03c-MatrixMultNodeSingleCPU "tests/0s03-MatrixMultNodeSingle.cpp" ${Includes} ${Sources} ${CPUSources})
+target_compile_definitions(0s03c-MatrixMultNodeSingleCPU PRIVATE -DCPU)
 
 add_executable(0s01g-VectorAddNodeSingleGPU "tests/0s01-VectorAddNodeSingle.cpp" ${Includes} ${Sources} ${GPUSources})
 target_compile_definitions(0s01g-VectorAddNodeSingleGPU PRIVATE -DGPU)
@@ -42,3 +44,7 @@ add_executable(0s02g-InputNodeSingleGPU "tests/0s02-InputNodeSingle.cpp" ${Inclu
 target_compile_definitions(0s02g-InputNodeSingleGPU PRIVATE -DGPU)
 target_include_directories(0s02g-InputNodeSingleGPU PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(0s02g-InputNodeSingleGPU ${OpenCL_LIBRARY})
+add_executable(0s03c-MatrixMultNodeSingleGPU "tests/0s03-MatrixMultNodeSingle.cpp" ${Includes} ${Sources} ${GPUSources})
+target_compile_definitions(0s03c-MatrixMultNodeSingleGPU PRIVATE -DGPU)
+target_include_directories(0s03c-MatrixMultNodeSingleGPU PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(0s03c-MatrixMultNodeSingleGPU ${OpenCL_LIBRARY})
