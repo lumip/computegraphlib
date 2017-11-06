@@ -90,6 +90,7 @@ int main(int argc, const char* argv[])
     }
     InputDataBuffer input1 { 1,2,3,4, 2,2,2,2, 0,0,0,0, 1,0,-1,0, -1,-3,-5,-7 };
     InputDataBuffer input2 { 4,3,2,1, 2,-2,2,-2, 1,2,3,4, -1,0,1,0, 3,5,7,-3 };
+    InputDataBuffer expected { 5,5,5,5, 4,0,4,0, 1,2,3,4, 0,0,0,0, 2,2,2,-10 };
 
     int a(4);
     std::reference_wrapper<int> a_ref(a);
@@ -97,8 +98,28 @@ int main(int argc, const char* argv[])
     InputDataMap inputs;
     inputs.emplace("x", std::ref(input1));
     inputs.emplace("y", std::ref(input2));
-    GraphCompiler compiler;
-    compiler.Compile(nodes, inputs);
+    /*GraphCompiler compiler;
+    compiler.Compile(nodes, inputs);*/
+
+    VectorAddNode testAddNode(&i1, &i2);
+    GraphCompilationContext context(inputs);
+    context.AssignNodeMemory(&i1, context.RegisterMemory(5, 4));
+    context.AssignNodeMemory(&i2, context.RegisterMemory(5, 4));
+    std::unique_ptr<const Kernel> kernel = testAddNode.Compile(&context);
+    // todo: have to copy input data into buffers before running
+    float* const memInA = context.GetNodeMemoryDescriptor(&i1).handle;
+    float* const memInB = context.GetNodeMemoryDescriptor(&i2).handle;
+    std::copy(input1.cbegin(), input1.cend(), memInA);
+    std::copy(input2.cbegin(), input2.cend(), memInB);
+    kernel->Run();
+
+    float* const result = context.GetNodeMemoryDescriptor(&testAddNode).handle;
+    float error = 0.0f;
+    for (size_t i = 0; i < 20; ++i)
+    {
+        error += (result[i] - expected[i]) * (result[i] - expected[i]);
+    }
+    std::cout << "Error: " << error << std::endl;
 
     return 0;
 }
