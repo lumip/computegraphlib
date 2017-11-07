@@ -12,12 +12,9 @@ VectorAddNode::VectorAddNode(NodePtr a, NodePtr b)
 
 VectorAddNode::~VectorAddNode() { }
 
-Node::ConstNodeMap VectorAddNode::GetInputs() const
+Node::ConstNodeList VectorAddNode::GetInputs() const
 {
-    ConstNodeMap m;
-    m["SummandA"] = _summandA;
-    m["SummandB"] = _summandB;
-    return m;
+    return ConstNodeList({ _summandA, _summandB });
 }
 
 std::string VectorAddNode::ToString() const
@@ -25,4 +22,9 @@ std::string VectorAddNode::ToString() const
     std::stringstream ss;
     ss << "<VectorAddNode " << (this) << ">";
     return ss.str();
+}
+
+bool VectorAddNode::IsInitialized() const
+{
+    return false;
 }

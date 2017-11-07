@@ -11,9 +11,10 @@ private:
 public:
     InputNode(std::string name, size_t dim);
     virtual ~InputNode();
-    ConstNodeMap GetInputs() const;
+    ConstNodeList GetInputs() const;
     std::unique_ptr<const Kernel> Compile(GraphCompilationContext* const context) const;
     std::string ToString() const;
+    bool IsInitialized() const;
 };
 
 #endif

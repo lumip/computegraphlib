@@ -22,17 +22,21 @@ void VariableNode::SetInput(const NodePtr inputNode)
     }
 }
 
-Node::ConstNodeMap VariableNode::GetInputs() const
+Node::ConstNodeList VariableNode::GetInputs() const
 {
-    ConstNodeMap m;
     if (_input != nullptr)
     {
-        m[_name] = _input;
+        return ConstNodeList({ _input });
     }
-    return m;
+    return ConstNodeList{};
 }
 
 std::string VariableNode::ToString() const
 {
     return "<VariableNode " + _name + ">";
+}
+
+bool VariableNode::IsInitialized() const
+{
+    return true;
 }

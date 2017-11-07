@@ -8,13 +8,17 @@ InputNode::InputNode(std::string name, size_t dim)
 
 InputNode::~InputNode() { }
 
-Node::ConstNodeMap InputNode::GetInputs() const
+Node::ConstNodeList InputNode::GetInputs() const
 {
-    ConstNodeMap m;
-    return m;
+    return ConstNodeList();
 }
 
 std::string InputNode::ToString() const
 {
     return "<InputNode " + _name + ">";
+}
+
+bool InputNode::IsInitialized() const
+{
+    return true;
 }

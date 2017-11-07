@@ -11,12 +11,9 @@ MatrixMultNode::MatrixMultNode(NodePtr a, NodePtr b)
 
 MatrixMultNode::~MatrixMultNode() { }
 
-Node::ConstNodeMap MatrixMultNode::GetInputs() const
+Node::ConstNodeList MatrixMultNode::GetInputs() const
 {
-    Node::ConstNodeMap m;
-    m.emplace("A", _a);
-    m.emplace("B", _b);
-    return m;
+    return ConstNodeList({ _a, _b });
 }
 
 std::string MatrixMultNode::ToString() const
@@ -24,4 +21,9 @@ std::string MatrixMultNode::ToString() const
     std::stringstream ss;
     ss << "<MatrixMultNode " << (this) << ">";
     return ss.str();
+}
+
+bool MatrixMultNode::IsInitialized() const
+{
+    return false;
 }

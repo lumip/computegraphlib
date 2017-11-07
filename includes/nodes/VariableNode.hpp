@@ -13,9 +13,10 @@ public:
     VariableNode(std::string name, size_t dim);
     virtual ~VariableNode();
     void SetInput(const NodePtr inputNode);
-    ConstNodeMap GetInputs() const;
+    ConstNodeList GetInputs() const;
     std::unique_ptr<const Kernel> Compile(GraphCompilationContext* const context) const;
     std::string ToString() const;
+    bool IsInitialized() const;
 };
 
 #endif

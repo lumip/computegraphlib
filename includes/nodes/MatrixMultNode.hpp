@@ -11,9 +11,10 @@ private:
 public:
     MatrixMultNode(NodePtr a, NodePtr b);
     virtual ~MatrixMultNode();
-    ConstNodeMap GetInputs() const;
+    ConstNodeList GetInputs() const;
     std::unique_ptr<const Kernel> Compile(GraphCompilationContext* const context) const;
     std::string ToString() const;
+    bool IsInitialized() const;
 };
 
 #endif
