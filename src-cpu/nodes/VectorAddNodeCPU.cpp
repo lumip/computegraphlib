@@ -36,7 +36,7 @@ std::unique_ptr<const Kernel> VectorAddNode::Compile(GraphCompilationContext* co
     {
         throw std::runtime_error("Inputs to VectorAddNode have different size.");
     }
-    GraphCompilationContext::NodeMemoryHandle mem = context->RegisterMemory(memDescA.n, memDescA.dimensions);
+    GraphCompilationContext::NodeMemoryHandle mem = context->RegisterMemory(memDescA.yDim, memDescA.xDim);
     context->AssignNodeMemory(this, mem);
     return std::unique_ptr<const Kernel>(new VectorAddNodeCPUKernel(memDescA.handle, memDescB.handle, mem, memDescA.size)); // std::make_unique only since c++14
 }

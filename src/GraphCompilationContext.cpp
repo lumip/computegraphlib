@@ -12,10 +12,10 @@ GraphCompilationContext::~GraphCompilationContext()
     this->DeallocateAllMemory();
 }
 
-GraphCompilationContext::NodeMemoryHandle GraphCompilationContext::RegisterMemory(size_t n, size_t dimensions)
+GraphCompilationContext::NodeMemoryHandle GraphCompilationContext::RegisterMemory(size_t yDim, size_t xDim)
 {
-    const size_t size = n * dimensions;
-    NodeMemoryDescriptor memDesc {this->AllocateMemory(size), n, dimensions, size};
+    const size_t size = yDim * xDim;
+    NodeMemoryDescriptor memDesc {this->AllocateMemory(size), yDim, xDim, size};
     this->_memoryDescriptors.emplace(memDesc.handle, memDesc);
     return memDesc.handle;
 }

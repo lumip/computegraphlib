@@ -22,8 +22,8 @@ public:
         : _memoryA(memoryA)
         , _memoryB(memoryB)
         , _memoryResult(memoryResDesc.handle)
-        , _m(memoryResDesc.n)
-        , _n(memoryResDesc.dimensions)
+        , _m(memoryResDesc.yDim)
+        , _n(memoryResDesc.xDim)
         , _d(vectorDim)
     { }
 
@@ -66,14 +66,17 @@ std::unique_ptr<const Kernel> MatrixMultNode::Compile(GraphCompilationContext* c
 {
     GraphCompilationContext::NodeMemoryDescriptor memDescA = context->GetNodeMemoryDescriptor(this->_a);
     GraphCompilationContext::NodeMemoryDescriptor memDescB = context->GetNodeMemoryDescriptor(this->_b);
-    if (memDescA.dimensions != memDescB.n)
+    if (memDescA.xDim != memDescB.yDim)
     {
         throw new std::invalid_argument("Matrix dimensions do not agree.");
     }
-    GraphCompilationContext::NodeMemoryHandle mem = context->RegisterMemory(memDescA.n, memDescB.dimensions);
+    auto m = memDescA.yDim;
+    auto d = memDescA.xDim; // == memDescB.yDim;
+    auto n = memDescB.xDim;
+    GraphCompilationContext::NodeMemoryHandle mem = context->RegisterMemory(m, n);
     context->AssignNodeMemory(this, mem);
     GraphCompilationContext::NodeMemoryDescriptor desc = context->GetNodeMemoryDescriptor(this);
-    return std::unique_ptr<const Kernel>(new MatrixMultCPUKernel(memDescA.handle, memDescB.handle, desc, memDescA.dimensions)); // std::make_unique only since c++14
+    return std::unique_ptr<const Kernel>(new MatrixMultCPUKernel(memDescA.handle, memDescB.handle, desc, d)); // std::make_unique only since c++14
 }
 
 #endif

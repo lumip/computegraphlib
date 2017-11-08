@@ -10,8 +10,8 @@ public:
     struct NodeMemoryDescriptor
     {
         const GraphCompilationContext::NodeMemoryHandle handle;
-        size_t n; // todo: decouple compilation from input data
-        size_t dimensions;
+        size_t yDim; // todo: decouple compilation from input data
+        size_t xDim;
         size_t size;
     };
 private:
@@ -21,7 +21,7 @@ private:
 public:
     GraphCompilationContext(const InputDataMap& inputData); // todo: decouple compilation from input data
     virtual ~GraphCompilationContext();
-    NodeMemoryHandle RegisterMemory(size_t n, size_t dimensions);
+    NodeMemoryHandle RegisterMemory(size_t yDim, size_t xDim);
     void AssignNodeMemory(const ConstNodePtr node, const NodeMemoryHandle memoryHandle);
     NodeMemoryDescriptor GetNodeMemoryDescriptor(const ConstNodePtr node) const;
     InputDataBuffer& GetInputDataBuffer(std::string inputName) const;
