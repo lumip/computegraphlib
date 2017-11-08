@@ -2,8 +2,11 @@
 
 GraphCompilationContext::GraphCompilationContext(const InputDataMap& inputData)
     : _inputData(inputData)
+    , _context(InitContext())
     , _memoryDescriptors()
     , _memoryMap()
+    , _inputMemoryMap()
+    , _outputMemoryMap()
 {
 }
 
@@ -22,7 +25,7 @@ GraphCompilationContext::NodeMemoryHandle GraphCompilationContext::RegisterMemor
 
 void GraphCompilationContext::AssignNodeMemory(const ConstNodePtr node, const NodeMemoryHandle memoryHandle)
 {
-    this->_memoryMap[node] = memoryHandle;
+    this->_memoryMap.emplace(node, memoryHandle);
 }
 
 GraphCompilationContext::NodeMemoryDescriptor GraphCompilationContext::GetNodeMemoryDescriptor(const ConstNodePtr node) const
@@ -33,4 +36,14 @@ GraphCompilationContext::NodeMemoryDescriptor GraphCompilationContext::GetNodeMe
 InputDataBuffer& GraphCompilationContext::GetInputDataBuffer(std::string inputName) const
 {
     return this->_inputData.at(inputName);
+}
+
+void GraphCompilationContext::RegisterInputMemory(const std::string inputName, const NodeMemoryHandle memoryHandle)
+{
+    this->_inputMemoryMap.emplace(inputName, memoryHandle);
+}
+
+void GraphCompilationContext::RegisterOutputMemory(const std::string outputName, const NodeMemoryHandle memoryHandle)
+{
+    this->_outputMemoryMap.emplace(outputName, memoryHandle);
 }
