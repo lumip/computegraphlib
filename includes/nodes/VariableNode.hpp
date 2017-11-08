@@ -7,10 +7,11 @@ class VariableNode : public Node
 {
 private:
     std::string _name;
-    size_t _dim;
+    size_t _xDim;
+    size_t _yDim;
     NodePtr _input;
 public:
-    VariableNode(std::string name, size_t dim);
+    VariableNode(std::string name, size_t xDim, size_t yDim);
     virtual ~VariableNode();
     void SetInput(const NodePtr inputNode);
     ConstNodeList GetInputs() const;

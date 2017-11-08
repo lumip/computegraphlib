@@ -1,8 +1,9 @@
 #include "nodes/VariableNode.hpp"
 
-VariableNode::VariableNode(std::string name, size_t dim)
+VariableNode::VariableNode(std::string name, size_t xDim, size_t yDim)
     : _name(name)
-    , _dim(dim)
+    , _xDim(xDim)
+    , _yDim(yDim)
     , _input(nullptr)
 {
 }

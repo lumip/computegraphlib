@@ -14,6 +14,7 @@ public:
 
 std::unique_ptr<const Kernel> VariableNode::Compile(GraphCompilationContext* const context) const
 {
+    throw new std::logic_error("not yet implemented.");
     return std::unique_ptr<const Kernel>(new VariableNodeCPUKernel());  // std::make_unique only since c++14
 }
 
