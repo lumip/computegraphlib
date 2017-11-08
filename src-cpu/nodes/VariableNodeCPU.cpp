@@ -12,10 +12,9 @@ public:
     void Run() const { }
 };
 
-std::unique_ptr<const Kernel> VariableNode::Compile(GraphCompilationContext* const context) const
+void VariableNode::Compile(GraphCompilationContext& context) const
 {
     throw new std::logic_error("not yet implemented.");
-    return std::unique_ptr<const Kernel>(new VariableNodeCPUKernel());  // std::make_unique only since c++14
 }
 
 #endif

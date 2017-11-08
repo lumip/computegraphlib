@@ -34,15 +34,13 @@ std::vector<ConstNodePtr> GraphCompiler::DetermineNodeOrder(const ConstNodePtr o
     return nodeTopology;
 }
 
-std::vector<std::unique_ptr<const Kernel>> GraphCompiler::Compile(const ConstNodePtr outputNode, const InputDataMap& inputData)
+void GraphCompiler::Compile(const ConstNodePtr outputNode, const InputDataMap& inputData)
 {
     GraphCompilationContext context(inputData);
 
     const std::vector<ConstNodePtr> nodeTopology = DetermineNodeOrder(outputNode);
-    std::vector<std::unique_ptr<const Kernel>> kernels(nodeTopology.size());
     for (size_t i = 0; i < nodeTopology.size(); ++i)
     {
-        kernels[i] = nodeTopology[i]->Compile(&context);
+        nodeTopology[i]->Compile(context);
     }
-    return kernels;
 }

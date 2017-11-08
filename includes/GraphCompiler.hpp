@@ -16,7 +16,7 @@ private:
 public:
     GraphCompiler();
     virtual ~GraphCompiler();
-    std::vector<std::unique_ptr<const Kernel>> Compile(const ConstNodePtr outputNode, const InputDataMap& inputData); // todo: change this. for OpenCL we do not want many separate kernels that only then set up the GPU.. all that should happend within Compile().
+    void Compile(const ConstNodePtr outputNode, const InputDataMap& inputData);
 };
 
 #endif

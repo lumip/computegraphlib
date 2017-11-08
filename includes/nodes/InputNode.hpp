@@ -12,7 +12,7 @@ public:
     InputNode(std::string name, size_t dim);
     virtual ~InputNode();
     ConstNodeList GetInputs() const;
-    std::unique_ptr<const Kernel> Compile(GraphCompilationContext* const context) const;
+    void Compile(GraphCompilationContext& context) const;
     std::string ToString() const;
     bool IsInitialized() const;
 };

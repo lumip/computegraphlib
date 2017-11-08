@@ -15,7 +15,7 @@ public:
     virtual ~VariableNode();
     void SetInput(const NodePtr inputNode);
     ConstNodeList GetInputs() const;
-    std::unique_ptr<const Kernel> Compile(GraphCompilationContext* const context) const;
+    void Compile(GraphCompilationContext& context) const;
     std::string ToString() const;
     bool IsInitialized() const;
 };

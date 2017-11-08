@@ -26,7 +26,7 @@ void GraphCompilationContext::DeallocateAllMemory()
     delete reinterpret_cast<CPUContext* const>(this->_context);
 }
 
-void GraphCompilationContext::EnqueueKernel(std::unique_ptr<const Kernel>& kernel)
+void GraphCompilationContext::EnqueueKernel(std::unique_ptr<const Kernel>&& kernel)
 {
     reinterpret_cast<CPUContext* const>(this->_context)->kernels.emplace_back(std::move(kernel));
 }

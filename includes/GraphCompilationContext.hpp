@@ -33,7 +33,7 @@ public:
     InputDataBuffer& GetInputDataBuffer(std::string inputName) const;
     void RegisterInputMemory(const std::string inputName, const NodeMemoryHandle memoryHandle);
     void RegisterOutputMemory(const std::string outputName, const NodeMemoryHandle memoryHandle);
-    void EnqueueKernel(std::unique_ptr<const Kernel>& kernel);
+    void EnqueueKernel(std::unique_ptr<const Kernel>&& kernel);
 private:
     NodeMemoryHandle AllocateMemory(size_t size);
     void DeallocateAllMemory();

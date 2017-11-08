@@ -77,7 +77,7 @@ public:
     TestForwardNode(const std::string name, const std::vector<ConstNodePtr>& children) : _name(name), _children(children) {}
     ~TestForwardNode() {}
     ConstNodeList GetInputs() const { return ConstNodeList(_children); }
-    std::unique_ptr<const Kernel> Compile(GraphCompilationContext* const) const { return std::unique_ptr<const Kernel>(new TestKernel(_name)); } // todo: should probably turn this into a reference. but then have to include GraphCompilationContext -> circular include -> bad. think how to resolve
+    void Compile(GraphCompilationContext& context) const { context.EnqueueKernel(std::unique_ptr<const Kernel>(new TestKernel(_name))); }
     std::string ToString() const { return _name; }
     bool IsInitialized() const { return _children.empty(); }
 };
@@ -97,12 +97,13 @@ int main(int argc, const char* argv[])
     TestForwardNode g("g", {&h});
     TestForwardNode a("a", {&e, &c, &b, &g});
 
-    GraphCompiler compiler;
+    // todo: need to get back to the kernels
+    /*GraphCompiler compiler;
     const std::vector<std::unique_ptr<const Kernel>> kernels = compiler.Compile(&a, InputDataMap());
     for (size_t i = 0; i < kernels.size(); ++i)
     {
         kernels[i]->Run();
-    }
+    }*/
 
 
     return 0;

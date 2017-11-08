@@ -28,7 +28,7 @@ public:
     virtual ~Node();
     ConstNodeList GetSubscribers() const;
     virtual ConstNodeList GetInputs() const = 0;
-    virtual std::unique_ptr<const Kernel> Compile(GraphCompilationContext* const context) const = 0; // todo: should probably turn this into a reference. but then have to include GraphCompilationContext -> circular include -> bad. think how to resolve
+    virtual void Compile(GraphCompilationContext& context) const = 0;
     virtual std::string ToString() const = 0;
     virtual bool IsInitialized() const = 0;
 private:

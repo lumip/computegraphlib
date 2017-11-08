@@ -23,7 +23,9 @@ int main(const int argc, const char * const argv[])
     // set up graph compilation context
     GraphCompilationContext context(inputs);
     // compile kernel for VectorAddNode object
-    std::unique_ptr<const Kernel> kernel = testInputNode.Compile(&context);
+    testInputNode.Compile(context);
+
+    std::unique_ptr<const Kernel> kernel = std::unique_ptr<const Kernel>(nullptr); // todo: temp
 
     // run compiled kernel
     kernel->Run();

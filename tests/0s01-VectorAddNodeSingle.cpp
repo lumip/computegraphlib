@@ -31,7 +31,9 @@ int main(int argc, const char * const argv[])
     context.AssignNodeMemory(&i1, context.RegisterMemory(n, dim));
     context.AssignNodeMemory(&i2, context.RegisterMemory(n, dim));
     // compile kernel for VectorAddNode object
-    std::unique_ptr<const Kernel> kernel = testAddNode.Compile(&context);
+    testAddNode.Compile(context);
+
+    std::unique_ptr<const Kernel> kernel = std::unique_ptr<const Kernel>(nullptr); // todo: temp
 
     // copy input data into node working memory (will usually be done by compiled kernels for InputNode if whole graph is run; testing only single node here)
     float* const memInA = context.GetNodeMemoryDescriptor(&i1).handle;

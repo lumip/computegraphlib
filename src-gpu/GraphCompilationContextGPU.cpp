@@ -16,7 +16,7 @@ void GraphCompilationContext::DeallocateAllMemory()
     throw std::logic_error("not implemented yet.");
 }
 
-void GraphCompilationContext::EnqueueKernel(std::unique_ptr<const Kernel>& kernel)
+void GraphCompilationContext::EnqueueKernel(std::unique_ptr<const Kernel>&& kernel)
 {
     throw std::logic_error("not implemented yet.");
 }
