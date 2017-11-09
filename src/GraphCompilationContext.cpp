@@ -47,3 +47,9 @@ void GraphCompilationContext::RegisterOutputMemory(const std::string outputName,
 {
     this->_outputMemoryMap.emplace(outputName, memoryHandle);
 }
+
+void GraphCompilationContext::GetOutputData(std::string outputName, DataBuffer& outputBuffer) const
+{
+    const NodeMemoryHandle memHandle = this->_outputMemoryMap.at(outputName);
+    this->CopyOutputData(memHandle, outputBuffer);
+}

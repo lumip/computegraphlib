@@ -25,10 +25,8 @@ int main(const int argc, const char * const argv[])
     // compile kernel for VectorAddNode object
     testInputNode.Compile(context);
 
-    std::unique_ptr<const Kernel> kernel = std::unique_ptr<const Kernel>(nullptr); // todo: temp
-
     // run compiled kernel
-    kernel->Run();
+    context.Evaluate();
 
     // get output (pointer to working memory of VectorAddNode which holds the computation result)
     float* const result = context.GetNodeMemoryDescriptor(&testInputNode).handle;

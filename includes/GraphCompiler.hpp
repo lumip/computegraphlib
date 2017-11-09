@@ -2,9 +2,11 @@
 #define _GRAPH_COMPILER_CPP_
 
 #include <vector>
+#include <memory>
 
 #include "nodes/Node.hpp"
 #include "GraphCompilationContext.hpp"
+#include "CompiledGraph.hpp"
 
 class GraphCompiler
 {
@@ -16,7 +18,7 @@ private:
 public:
     GraphCompiler();
     virtual ~GraphCompiler();
-    void Compile(const ConstNodePtr outputNode, const InputDataMap& inputData);
+    std::unique_ptr<const CompiledGraph> Compile(const ConstNodePtr outputNode, const InputDataMap& inputData);
 };
 
 #endif

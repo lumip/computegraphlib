@@ -97,14 +97,9 @@ int main(int argc, const char* argv[])
     TestForwardNode g("g", {&h});
     TestForwardNode a("a", {&e, &c, &b, &g});
 
-    // todo: need to get back to the kernels
-    /*GraphCompiler compiler;
-    const std::vector<std::unique_ptr<const Kernel>> kernels = compiler.Compile(&a, InputDataMap());
-    for (size_t i = 0; i < kernels.size(); ++i)
-    {
-        kernels[i]->Run();
-    }*/
-
+    GraphCompiler compiler;
+    const std::unique_ptr<const CompiledGraph> graph = compiler.Compile(&a, InputDataMap());
+    graph->Evaluate();
 
     return 0;
 }

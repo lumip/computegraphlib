@@ -33,8 +33,6 @@ int main(int argc, const char * const argv[])
     // compile kernel for VectorAddNode object
     testAddNode.Compile(context);
 
-    std::unique_ptr<const Kernel> kernel = std::unique_ptr<const Kernel>(nullptr); // todo: temp
-
     // copy input data into node working memory (will usually be done by compiled kernels for InputNode if whole graph is run; testing only single node here)
     float* const memInA = context.GetNodeMemoryDescriptor(&i1).handle;
     float* const memInB = context.GetNodeMemoryDescriptor(&i2).handle;
@@ -42,7 +40,7 @@ int main(int argc, const char * const argv[])
     std::copy(input2.cbegin(), input2.cend(), memInB);
 
     // run compiled kernel
-    kernel->Run();
+    context.Evaluate();
 
     // get output (pointer to working memory of VectorAddNode which holds the computation result)
     float* const result = context.GetNodeMemoryDescriptor(&testAddNode).handle;

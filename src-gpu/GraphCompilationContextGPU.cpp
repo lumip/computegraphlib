@@ -21,4 +21,14 @@ void GraphCompilationContext::EnqueueKernel(std::unique_ptr<const Kernel>&& kern
     throw std::logic_error("not implemented yet.");
 }
 
+void GraphCompilationContext::Evaluate() const
+{
+    throw std::logic_error("not implemented yet.");
+}
+
+void GraphCompilationContext::CopyOutputData(const NodeMemoryHandle outputNodeMemory, DataBuffer& outputBuffer) const
+{
+    throw std::logic_error("not implemented yet.");
+}
+
 #endif

@@ -31,4 +31,20 @@ void GraphCompilationContext::EnqueueKernel(std::unique_ptr<const Kernel>&& kern
     reinterpret_cast<CPUContext* const>(this->_context)->kernels.emplace_back(std::move(kernel));
 }
 
+void GraphCompilationContext::Evaluate() const
+{
+    const std::vector<std::unique_ptr<const Kernel>>& kernels = reinterpret_cast<CPUContext* const>(this->_context)->kernels;
+    for (const std::unique_ptr<const Kernel>& kernel : kernels)
+    {
+        kernel->Run();
+    }
+}
+
+void GraphCompilationContext::CopyOutputData(const NodeMemoryHandle outputNodeMemory, DataBuffer& outputBuffer) const
+{
+    const NodeMemoryDescriptor& memDesc = this->_memoryDescriptors.at(outputNodeMemory);
+    outputBuffer.resize(memDesc.size);
+    std::copy(outputNodeMemory, (outputNodeMemory + memDesc.size), std::begin(outputBuffer));
+}
+
 #endif

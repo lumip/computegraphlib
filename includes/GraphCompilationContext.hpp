@@ -5,8 +5,9 @@
 
 #include "types.hpp"
 #include "Kernel.hpp"
+#include "CompiledGraph.hpp"
 
-class GraphCompilationContext
+class GraphCompilationContext : public CompiledGraph
 {
 public:
     typedef float* NodeMemoryHandle;
@@ -34,10 +35,13 @@ public:
     void RegisterInputMemory(const std::string inputName, const NodeMemoryHandle memoryHandle);
     void RegisterOutputMemory(const std::string outputName, const NodeMemoryHandle memoryHandle);
     void EnqueueKernel(std::unique_ptr<const Kernel>&& kernel);
+    void Evaluate() const;
+    void GetOutputData(std::string outputName, DataBuffer& outputBuffer) const;
 private:
     NodeMemoryHandle AllocateMemory(size_t size);
     void DeallocateAllMemory();
     void* InitContext(); // todo: this must not survive. hack to have some arbitrary implementation dependent context until proper solution. either subclassing or strategy pattern.
+    void CopyOutputData(const NodeMemoryHandle outputNodeMemory, DataBuffer& outputBuffer) const;
 };
 
 #endif
