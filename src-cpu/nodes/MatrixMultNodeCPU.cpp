@@ -18,10 +18,10 @@ private:
         return i * stride + j;
     }
 public:
-    MatrixMultCPUKernel(const float* const memoryA, const float* const memoryB, const GraphCompilationContext::NodeMemoryDescriptor memoryResDesc, const size_t vectorDim)
+    MatrixMultCPUKernel(const float* const memoryA, const float* const memoryB, const NodeMemoryDescriptor memoryResDesc, const size_t vectorDim)
         : _memoryA(memoryA)
         , _memoryB(memoryB)
-        , _memoryResult(memoryResDesc.handle)
+        , _memoryResult(reinterpret_cast<float* const>(memoryResDesc.handle))
         , _m(memoryResDesc.yDim)
         , _n(memoryResDesc.xDim)
         , _d(vectorDim)
@@ -64,8 +64,8 @@ public:
 
 void MatrixMultNode::Compile(GraphCompilationContext& context) const
 {
-    GraphCompilationContext::NodeMemoryDescriptor memDescA = context.GetNodeMemoryDescriptor(this->_a);
-    GraphCompilationContext::NodeMemoryDescriptor memDescB = context.GetNodeMemoryDescriptor(this->_b);
+    NodeMemoryDescriptor memDescA = context.GetNodeMemoryDescriptor(this->_a);
+    NodeMemoryDescriptor memDescB = context.GetNodeMemoryDescriptor(this->_b);
     if (memDescA.xDim != memDescB.yDim)
     {
         throw new std::invalid_argument("Matrix dimensions do not agree.");
@@ -73,10 +73,12 @@ void MatrixMultNode::Compile(GraphCompilationContext& context) const
     auto m = memDescA.yDim;
     auto d = memDescA.xDim; // == memDescB.yDim;
     auto n = memDescB.xDim;
-    GraphCompilationContext::NodeMemoryHandle mem = context.RegisterMemory(m, n);
+    NodeMemoryHandle mem = context.RegisterMemory(m, n);
     context.AssignNodeMemory(this, mem);
-    GraphCompilationContext::NodeMemoryDescriptor desc = context.GetNodeMemoryDescriptor(this);
-    context.EnqueueKernel(std::unique_ptr<const Kernel>(new MatrixMultCPUKernel(memDescA.handle, memDescB.handle, desc, d))); // std::make_unique only since c++14
+    NodeMemoryDescriptor desc = context.GetNodeMemoryDescriptor(this);
+    float* const inputAMemBuffer = reinterpret_cast<float* const>(memDescA.handle);
+    float* const inputBMemBuffer = reinterpret_cast<float* const>(memDescB.handle);
+    context.EnqueueKernel(std::unique_ptr<const Kernel>(new MatrixMultCPUKernel(inputAMemBuffer, inputBMemBuffer, desc, d))); // std::make_unique only since c++14
 }
 
 #endif

@@ -1,50 +1,54 @@
 #ifdef CPU
 #include "GraphCompilationContext.hpp"
 
-struct CPUContext
+class GraphCompilationCPUStrategy : public GraphCompilationTargetStrategy
 {
-    std::vector<std::unique_ptr<const Kernel>> kernels;
+private:
+    std::vector<std::unique_ptr<const Kernel>> _kernels;
+public:
+    GraphCompilationCPUStrategy() { }
+
+    ~GraphCompilationCPUStrategy() { }
+
+    NodeMemoryHandle AllocateMemory(size_t size)
+    {
+        return reinterpret_cast<NodeMemoryHandle>(new float[size]); // consider using std::valarray instead of raw float arrays?
+    }
+
+    void DeallocateMemory(const NodeMemoryHandle mem)
+    {
+        delete[] reinterpret_cast<float* const>(mem);
+    }
+
+    void EnqueueKernel(std::unique_ptr<const Kernel>&& kernel)
+    {
+        _kernels.emplace_back(std::move(kernel));
+    }
+
+    void CopyOutputData(const NodeMemoryHandle outputNodeMemory, DataBuffer& outputBuffer, size_t size) const
+    {
+        float* const nodeMemBuffer = reinterpret_cast<float* const>(outputNodeMemory);
+        std::copy(nodeMemBuffer, (nodeMemBuffer + size), std::begin(outputBuffer));
+    }
+
+    void CopyInputData(const NodeMemoryHandle inputNodeMemory, InputDataBuffer& inputBuffer, size_t size) const
+    {
+        float* const nodeMemBuffer = reinterpret_cast<float* const>(inputNodeMemory);
+        std::copy(std::begin(inputBuffer), std::begin(inputBuffer) + size, nodeMemBuffer);
+    }
+
+    void Evaluate() const
+    {
+        for (const std::unique_ptr<const Kernel>& kernel : _kernels)
+        {
+            kernel->Run();
+        }
+    }
 };
 
-void* GraphCompilationContext::InitContext()
+std::unique_ptr<GraphCompilationTargetStrategy> GraphCompilationContext::InitStrategy()
 {
-    return new CPUContext;
-}
-
-GraphCompilationContext::NodeMemoryHandle GraphCompilationContext::AllocateMemory(size_t size)
-{
-    return static_cast<NodeMemoryHandle>(new float[size]);
-}
-
-void GraphCompilationContext::DeallocateAllMemory()
-{
-    for (auto elem : _memoryDescriptors)
-    {
-        NodeMemoryHandle buf = static_cast<NodeMemoryHandle>(elem.first);
-        delete[](buf);
-    }
-    delete reinterpret_cast<CPUContext* const>(this->_context);
-}
-
-void GraphCompilationContext::EnqueueKernel(std::unique_ptr<const Kernel>&& kernel)
-{
-    reinterpret_cast<CPUContext* const>(this->_context)->kernels.emplace_back(std::move(kernel));
-}
-
-void GraphCompilationContext::Evaluate() const
-{
-    const std::vector<std::unique_ptr<const Kernel>>& kernels = reinterpret_cast<CPUContext* const>(this->_context)->kernels;
-    for (const std::unique_ptr<const Kernel>& kernel : kernels)
-    {
-        kernel->Run();
-    }
-}
-
-void GraphCompilationContext::CopyOutputData(const NodeMemoryHandle outputNodeMemory, DataBuffer& outputBuffer) const
-{
-    const NodeMemoryDescriptor& memDesc = this->_memoryDescriptors.at(outputNodeMemory);
-    outputBuffer.resize(memDesc.size);
-    std::copy(outputNodeMemory, (outputNodeMemory + memDesc.size), std::begin(outputBuffer));
+    return std::unique_ptr<GraphCompilationTargetStrategy>(new GraphCompilationCPUStrategy);
 }
 
 #endif

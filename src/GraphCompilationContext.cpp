@@ -2,7 +2,7 @@
 
 GraphCompilationContext::GraphCompilationContext(const InputDataMap& inputData)
     : _inputData(inputData)
-    , _context(InitContext())
+    , _strategy(InitStrategy())
     , _memoryDescriptors()
     , _memoryMap()
     , _inputMemoryMap()
@@ -12,13 +12,16 @@ GraphCompilationContext::GraphCompilationContext(const InputDataMap& inputData)
 
 GraphCompilationContext::~GraphCompilationContext()
 {
-    this->DeallocateAllMemory();
+    for (auto elem : _memoryDescriptors)
+    {
+        _strategy->DeallocateMemory(elem.first);
+    }
 }
 
-GraphCompilationContext::NodeMemoryHandle GraphCompilationContext::RegisterMemory(size_t yDim, size_t xDim)
+NodeMemoryHandle GraphCompilationContext::RegisterMemory(size_t yDim, size_t xDim)
 {
     const size_t size = yDim * xDim;
-    NodeMemoryDescriptor memDesc {this->AllocateMemory(size), yDim, xDim, size};
+    NodeMemoryDescriptor memDesc {_strategy->AllocateMemory(size), yDim, xDim};
     this->_memoryDescriptors.emplace(memDesc.handle, memDesc);
     return memDesc.handle;
 }
@@ -28,7 +31,7 @@ void GraphCompilationContext::AssignNodeMemory(const ConstNodePtr node, const No
     this->_memoryMap.emplace(node, memoryHandle);
 }
 
-GraphCompilationContext::NodeMemoryDescriptor GraphCompilationContext::GetNodeMemoryDescriptor(const ConstNodePtr node) const
+NodeMemoryDescriptor GraphCompilationContext::GetNodeMemoryDescriptor(const ConstNodePtr node) const
 {
     return this->_memoryDescriptors.at(this->_memoryMap.at(node));
 }
@@ -51,5 +54,17 @@ void GraphCompilationContext::RegisterOutputMemory(const std::string outputName,
 void GraphCompilationContext::GetOutputData(std::string outputName, DataBuffer& outputBuffer) const
 {
     const NodeMemoryHandle memHandle = this->_outputMemoryMap.at(outputName);
-    this->CopyOutputData(memHandle, outputBuffer);
+    const NodeMemoryDescriptor memDesc = this->_memoryDescriptors.at(memHandle);
+    outputBuffer.resize(memDesc.size());
+    this->_strategy->CopyOutputData(memHandle, outputBuffer, memDesc.size());
+}
+
+void GraphCompilationContext::EnqueueKernel(std::unique_ptr<const Kernel>&& kernel)
+{
+    _strategy->EnqueueKernel(std::move(kernel));
+}
+
+void GraphCompilationContext::Evaluate() const
+{
+    _strategy->Evaluate();
 }

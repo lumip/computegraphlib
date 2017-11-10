@@ -7,9 +7,9 @@ class InputNodeCPUKernel : public Kernel
 {
 private:
     InputDataBuffer& _inputBuffer;
-    const GraphCompilationContext::NodeMemoryDescriptor _mem;
+    const NodeMemoryDescriptor _mem;
 public:
-    InputNodeCPUKernel(const GraphCompilationContext::NodeMemoryDescriptor workingMemory, InputDataBuffer& inputBuffer)
+    InputNodeCPUKernel(const NodeMemoryDescriptor workingMemory, InputDataBuffer& inputBuffer)
         : _mem(workingMemory)
         , _inputBuffer(inputBuffer)
     {
@@ -19,7 +19,7 @@ public:
 
     void Run() const
     {
-        std::copy(_inputBuffer.cbegin(), _inputBuffer.cend(), _mem.handle);
+        std::copy(_inputBuffer.cbegin(), _inputBuffer.cend(), reinterpret_cast<float* const>(_mem.handle));
     }
 };
 
@@ -32,7 +32,7 @@ void InputNode::Compile(GraphCompilationContext& context) const
     }
     size_t n = input.size() / this->_dim;
     context.AssignNodeMemory(this, context.RegisterMemory(n, this->_dim));
-    const GraphCompilationContext::NodeMemoryDescriptor mem = context.GetNodeMemoryDescriptor(this);
+    const NodeMemoryDescriptor mem = context.GetNodeMemoryDescriptor(this);
     context.RegisterInputMemory(_name, mem.handle);
     context.EnqueueKernel(std::unique_ptr<const Kernel>(new InputNodeCPUKernel(mem, input))); // std::make_unique only since c++14
 }

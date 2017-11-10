@@ -5,7 +5,7 @@
 #include <vector>
 #include <functional>
 
-typedef std::vector<float> DataBuffer;
+typedef std::vector<float> DataBuffer; // todo: consider using std::valarray
 typedef const DataBuffer ConstDataBuffer;
 typedef ConstDataBuffer InputDataBuffer;
 
