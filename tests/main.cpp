@@ -11,6 +11,8 @@
 #include "GraphCompilationContext.hpp"
 #include "GraphCompiler.hpp"
 
+#include "ImplementationStrategyFactory.hpp"
+
 #include "Kernel.hpp"
 
 #ifdef GPU
@@ -97,7 +99,7 @@ int main(int argc, const char* argv[])
     TestForwardNode g("g", {&h});
     TestForwardNode a("a", {&e, &c, &b, &g});
 
-    GraphCompiler compiler;
+    GraphCompiler compiler(std::unique_ptr<const ImplementationStrategyFactory>(new ImplementationStrategyFactory));
     const std::unique_ptr<const CompiledGraph> graph = compiler.Compile(&a, InputDataMap());
     graph->Evaluate();
 

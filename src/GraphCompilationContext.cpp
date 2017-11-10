@@ -1,8 +1,8 @@
 #include "GraphCompilationContext.hpp"
 
-GraphCompilationContext::GraphCompilationContext(const InputDataMap& inputData)
+GraphCompilationContext::GraphCompilationContext(const InputDataMap& inputData, std::unique_ptr<GraphCompilationTargetStrategy>&& strategy)
     : _inputData(inputData)
-    , _strategy(InitStrategy())
+    , _strategy(std::move(strategy))
     , _memoryDescriptors()
     , _memoryMap()
     , _inputMemoryMap()

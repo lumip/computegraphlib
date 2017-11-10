@@ -7,18 +7,19 @@
 #include "nodes/Node.hpp"
 #include "GraphCompilationContext.hpp"
 #include "CompiledGraph.hpp"
+#include "ImplementationStrategyFactory.hpp"
 
 class GraphCompiler
 {
 private:
-    GraphCompilationContext _context;
+    const std::unique_ptr<const ImplementationStrategyFactory> _strategyFactory;
 private:
     void VisitNode(const ConstNodePtr node, std::vector<ConstNodePtr>& nodeTopology, std::set<ConstNodePtr>& visitedNodes) const;
     std::vector<ConstNodePtr> DetermineNodeOrder(const ConstNodePtr outputNode) const;
 public:
-    GraphCompiler();
+    GraphCompiler(std::unique_ptr<const ImplementationStrategyFactory>&& strategyFactory);
     virtual ~GraphCompiler();
-    std::unique_ptr<const CompiledGraph> Compile(const ConstNodePtr outputNode, const InputDataMap& inputData);
+    std::unique_ptr<const CompiledGraph> Compile(const ConstNodePtr outputNode, const InputDataMap& inputData) const;
 };
 
 #endif

@@ -2,8 +2,8 @@
 #include "nodes/Node.hpp"
 #include "nodes/VariableNode.hpp"
 
-GraphCompiler::GraphCompiler()
-    : _context(InputDataMap())
+GraphCompiler::GraphCompiler(std::unique_ptr<const ImplementationStrategyFactory>&& strategyFactory)
+    : _strategyFactory(std::move(strategyFactory))
 {
 
 }
@@ -34,9 +34,9 @@ std::vector<ConstNodePtr> GraphCompiler::DetermineNodeOrder(const ConstNodePtr o
     return nodeTopology;
 }
 
-std::unique_ptr<const CompiledGraph> GraphCompiler::Compile(const ConstNodePtr outputNode, const InputDataMap& inputData)
+std::unique_ptr<const CompiledGraph> GraphCompiler::Compile(const ConstNodePtr outputNode, const InputDataMap& inputData) const
 {
-    std::unique_ptr<GraphCompilationContext> context(new GraphCompilationContext(inputData));
+    std::unique_ptr<GraphCompilationContext> context(new GraphCompilationContext(inputData, _strategyFactory->CreateGraphCompilationTargetStrategy()));
 
     const std::vector<ConstNodePtr> nodeTopology = DetermineNodeOrder(outputNode);
     for (size_t i = 0; i < nodeTopology.size(); ++i)

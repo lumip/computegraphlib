@@ -42,7 +42,7 @@ private:
     std::map<std::string, const NodeMemoryHandle> _inputMemoryMap;
     std::map<std::string, const NodeMemoryHandle> _outputMemoryMap;
 public:
-    GraphCompilationContext(const InputDataMap& inputData); // todo: decouple compilation from input data
+    GraphCompilationContext(const InputDataMap& inputData, std::unique_ptr<GraphCompilationTargetStrategy>&& strategy); // todo: decouple compilation from input data
     virtual ~GraphCompilationContext();
     NodeMemoryHandle RegisterMemory(size_t yDim, size_t xDim);
     void AssignNodeMemory(const ConstNodePtr node, const NodeMemoryHandle memoryHandle);
@@ -53,8 +53,6 @@ public:
     void EnqueueKernel(std::unique_ptr<const Kernel>&& kernel);
     void Evaluate() const;
     void GetOutputData(std::string outputName, DataBuffer& outputBuffer) const;
-private:
-    std::unique_ptr<GraphCompilationTargetStrategy> InitStrategy();
 };
 
 #endif
