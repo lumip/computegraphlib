@@ -59,6 +59,21 @@ void GraphCompilationContext::GetOutputData(std::string outputName, DataBuffer& 
     this->_strategy->CopyOutputData(memHandle, outputBuffer, memDesc.size());
 }
 
+void GraphCompilationContext::GetNodeData(const ConstNodePtr node, DataBuffer& outputBuffer) const
+{
+    const NodeMemoryHandle memHandle = this->_memoryMap.at(node);
+    const NodeMemoryDescriptor memDesc = this->_memoryDescriptors.at(memHandle);
+    outputBuffer.resize(memDesc.size());
+    this->_strategy->CopyOutputData(memHandle, outputBuffer, memDesc.size());
+}
+
+void GraphCompilationContext::SetNodeData(const ConstNodePtr node, InputDataBuffer& inputBuffer) const
+{
+    const NodeMemoryHandle memHandle = this->_memoryMap.at(node);
+    const NodeMemoryDescriptor memDesc = this->_memoryDescriptors.at(memHandle);
+    this->_strategy->CopyInputData(memHandle, inputBuffer, memDesc.size());
+}
+
 void GraphCompilationContext::EnqueueKernel(std::unique_ptr<const Kernel>&& kernel)
 {
     _strategy->EnqueueKernel(std::move(kernel));

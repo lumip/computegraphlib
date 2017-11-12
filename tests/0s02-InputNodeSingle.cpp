@@ -3,6 +3,7 @@
 #include "types.hpp"
 #include "nodes/InputNode.hpp"
 #include "GraphCompilationContext.hpp"
+#include "ImplementationStrategyFactory.hpp"
 
 int main(const int argc, const char * const argv[])
 {
@@ -21,7 +22,7 @@ int main(const int argc, const char * const argv[])
     inputs.emplace("x", std::ref(input1));
 
     // set up graph compilation context
-    GraphCompilationContext context(inputs);
+    GraphCompilationContext context(inputs, ImplementationStrategyFactory().CreateGraphCompilationTargetStrategy());
     // compile kernel for VectorAddNode object
     testInputNode.Compile(context);
 
@@ -29,7 +30,8 @@ int main(const int argc, const char * const argv[])
     context.Evaluate();
 
     // get output (pointer to working memory of VectorAddNode which holds the computation result)
-    float* const result = context.GetNodeMemoryDescriptor(&testInputNode).handle;
+    DataBuffer result;
+    context.GetNodeData(&testInputNode, result);
 
     // compute and output squared error
     float error = 0.0f;

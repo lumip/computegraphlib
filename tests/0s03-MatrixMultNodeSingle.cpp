@@ -4,6 +4,7 @@
 #include "nodes/InputNode.hpp"
 #include "nodes/MatrixMultNode.hpp"
 #include "GraphCompilationContext.hpp"
+#include "ImplementationStrategyFactory.hpp"
 
 int main(int argc, const char * const argv[])
 {
@@ -26,7 +27,7 @@ int main(int argc, const char * const argv[])
     inputs.emplace("y", std::ref(input2));
 
     // set up graph compilation context
-    GraphCompilationContext context(inputs);
+    GraphCompilationContext context(inputs, ImplementationStrategyFactory().CreateGraphCompilationTargetStrategy());
     // set up working memory for input nodes (will usually be done during compilation if whole graph is compiled; testing only single node here)
     context.AssignNodeMemory(&i1, context.RegisterMemory(5, 4));
     context.AssignNodeMemory(&i2, context.RegisterMemory(4, 5));
@@ -34,16 +35,15 @@ int main(int argc, const char * const argv[])
     testMultNode.Compile(context);
 
     // copy input data into node working memory (will usually be done by compiled kernels for InputNode if whole graph is run; testing only single node here)
-    float* const memInA = context.GetNodeMemoryDescriptor(&i1).handle;
-    float* const memInB = context.GetNodeMemoryDescriptor(&i2).handle;
-    std::copy(input1.cbegin(), input1.cend(), memInA);
-    std::copy(input2.cbegin(), input2.cend(), memInB);
+    context.SetNodeData(&i1, input1);
+    context.SetNodeData(&i2, input2);
 
     // run compiled kernel
     context.Evaluate();
 
     // get output (pointer to working memory of VectorAddNode which holds the computation result)
-    float* const result = context.GetNodeMemoryDescriptor(&testMultNode).handle;
+    DataBuffer result;
+    context.GetNodeData(&testMultNode, result);
 
     // compute and output squared error
     float error = 0.0f;

@@ -53,6 +53,8 @@ public:
     void EnqueueKernel(std::unique_ptr<const Kernel>&& kernel);
     void Evaluate() const;
     void GetOutputData(std::string outputName, DataBuffer& outputBuffer) const;
+    void GetNodeData(const ConstNodePtr node, DataBuffer& outputBuffer) const;
+    void SetNodeData(const ConstNodePtr node, InputDataBuffer& inputBuffer) const;
 };
 
 #endif
