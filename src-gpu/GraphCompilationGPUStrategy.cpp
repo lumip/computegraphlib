@@ -33,7 +33,7 @@ void GraphCompilationGPUStrategy::CopyInputData(const NodeMemoryHandle inputNode
     throw std::logic_error("not implemented yet.");
 }
 
-void GraphCompilationGPUStrategy::Evaluate(const InputDataMap& inputData)
+void GraphCompilationGPUStrategy::Evaluate(const std::vector<std::pair<const NodeMemoryDescriptor, InputDataBuffer&>>& inputData)
 {
     throw std::logic_error("not implemented yet.");
 }

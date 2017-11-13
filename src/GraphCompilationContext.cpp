@@ -80,13 +80,14 @@ void GraphCompilationContext::EnqueueKernel(std::unique_ptr<Kernel>&& kernel)
 
 void GraphCompilationContext::Evaluate(const InputDataMap& inputData)
 {
+    std::vector<std::pair<const NodeMemoryDescriptor, const InputDataBuffer&>> inputs;
     for (auto input : inputData)
     {
         std::string inputName = input.first;
         const InputDataBuffer& inputBuffer = input.second;
         const NodeMemoryHandle memHandle = this->_inputMemoryMap.at(inputName);
         const NodeMemoryDescriptor memDesc = this->_memoryDescriptors.at(memHandle);
-        _strategy->CopyInputData(memHandle, inputBuffer, memDesc.dimensions.size());
+        inputs.emplace_back(memDesc, inputBuffer);
     }
-    _strategy->Evaluate(inputData);
+    _strategy->Evaluate(inputs);
 }

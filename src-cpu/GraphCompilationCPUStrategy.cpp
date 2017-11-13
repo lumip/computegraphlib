@@ -36,8 +36,12 @@ void GraphCompilationCPUStrategy::CopyInputData(const NodeMemoryHandle inputNode
     std::copy(std::begin(inputBuffer), std::begin(inputBuffer) + size, nodeMemBuffer);
 }
 
-void GraphCompilationCPUStrategy::Evaluate(const InputDataMap& inputData)
+void GraphCompilationCPUStrategy::Evaluate(const std::vector<std::pair<const NodeMemoryDescriptor, InputDataBuffer&>>& inputData)
 {
+    for (auto input : inputData)
+    {
+         CopyInputData(input.first.handle, input.second, input.first.dimensions.size());
+    }
     for (const std::unique_ptr<Kernel>& kernel : _kernels)
     {
         kernel->Run();

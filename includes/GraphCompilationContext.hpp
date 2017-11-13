@@ -24,7 +24,7 @@ public:
     virtual void EnqueueKernel(std::unique_ptr<Kernel>&& kernel) = 0;
     virtual void CopyOutputData(const NodeMemoryHandle outputNodeMemory, DataBuffer& outputBuffer, size_t size) const = 0;
     virtual void CopyInputData(const NodeMemoryHandle inputNodeMemory, InputDataBuffer& inputBuffer, size_t size) = 0;
-    virtual void Evaluate(const InputDataMap& inputData) = 0;
+    virtual void Evaluate(const std::vector<std::pair<const NodeMemoryDescriptor, InputDataBuffer&>>& inputData) = 0;
 };
 
 class GraphCompilationContext : public CompiledGraph
