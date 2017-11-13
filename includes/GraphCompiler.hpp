@@ -19,7 +19,7 @@ private:
 public:
     GraphCompiler(std::unique_ptr<const ImplementationStrategyFactory>&& strategyFactory);
     virtual ~GraphCompiler();
-    std::unique_ptr<const CompiledGraph> Compile(const ConstNodePtr outputNode, const InputDataMap& inputData) const;
+    std::unique_ptr<const CompiledGraph> Compile(const ConstNodePtr outputNode, const InputDimensionsMap& inputDimensions) const;
 };
 
 #endif

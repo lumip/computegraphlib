@@ -32,16 +32,16 @@ void VectorAddNode::Compile(GraphCompilationContext& context) const
 {
     NodeMemoryDescriptor memDescA = context.GetNodeMemoryDescriptor(this->_summandA);
     NodeMemoryDescriptor memDescB = context.GetNodeMemoryDescriptor(this->_summandB);
-    if (memDescA.size() != memDescB.size())
+    if (memDescA.dimensions.size() != memDescB.dimensions.size())
     {
-        throw std::runtime_error("Inputs to VectorAddNode have different size.");
+        throw std::runtime_error("Inputs to VectorAddNode have different dimension.");
     }
-    NodeMemoryHandle memHandle = context.RegisterMemory(memDescA.yDim, memDescA.xDim);
-    context.AssignNodeMemory(this, memHandle);
-    float* const inputAMemBuffer = reinterpret_cast<float* const>(memDescA.handle);
-    float* const inputBMemBuffer = reinterpret_cast<float* const>(memDescB.handle);
-    float* const resultMemBuffer = reinterpret_cast<float* const>(memHandle);
-    context.EnqueueKernel(std::unique_ptr<const Kernel>(new VectorAddNodeCPUKernel(inputAMemBuffer, inputBMemBuffer, resultMemBuffer, memDescA.size()))); // std::make_unique only since c++14
+    const NodeMemoryDescriptor memDesc= context.RegisterMemory({memDescA.dimensions.yDim, memDescA.dimensions.xDim});
+    context.AssignNodeMemory(this, memDesc.handle);
+    const float* const inputAMemBuffer = reinterpret_cast<const float* const>(memDescA.handle);
+    const float* const inputBMemBuffer = reinterpret_cast<const float* const>(memDescB.handle);
+    float* const resultMemBuffer = reinterpret_cast<float* const>(memDesc.handle);
+    context.EnqueueKernel(std::unique_ptr<const Kernel>(new VectorAddNodeCPUKernel(inputAMemBuffer, inputBMemBuffer, resultMemBuffer, memDescA.dimensions.size()))); // std::make_unique only since c++14
 }
 
 #endif

@@ -100,7 +100,7 @@ int main(int argc, const char* argv[])
     TestForwardNode a("a", {&e, &c, &b, &g});
 
     GraphCompiler compiler(std::unique_ptr<const ImplementationStrategyFactory>(new ImplementationStrategyFactory));
-    const std::unique_ptr<const CompiledGraph> graph = compiler.Compile(&a, InputDataMap());
+    const std::unique_ptr<const CompiledGraph> graph = compiler.Compile(&a, InputDimensionsMap());
     graph->Evaluate();
 
     return 0;

@@ -11,12 +11,7 @@ typedef uint64_t NodeMemoryHandle;
 struct NodeMemoryDescriptor
 {
     const NodeMemoryHandle handle;
-    const size_t yDim; // todo: decouple compilation from input data
-    const size_t xDim;
-    size_t size() const
-    {
-        return yDim * xDim;
-    }
+    const MemoryDimensions dimensions;
 };
 
 class GraphCompilationTargetStrategy
@@ -38,16 +33,16 @@ private:
     const std::unique_ptr<GraphCompilationTargetStrategy> _strategy;
     std::map<ConstNodePtr, NodeMemoryHandle> _memoryMap;
     std::map<NodeMemoryHandle, NodeMemoryDescriptor> _memoryDescriptors;
-    const InputDataMap& _inputData;
+    const InputDimensionsMap _inputDimensions;
     std::map<std::string, const NodeMemoryHandle> _inputMemoryMap;
     std::map<std::string, const NodeMemoryHandle> _outputMemoryMap;
 public:
-    GraphCompilationContext(const InputDataMap& inputData, std::unique_ptr<GraphCompilationTargetStrategy>&& strategy); // todo: decouple compilation from input data
+    GraphCompilationContext(const InputDimensionsMap& inputDimensions, std::unique_ptr<GraphCompilationTargetStrategy>&& strategy);
     virtual ~GraphCompilationContext();
-    NodeMemoryHandle RegisterMemory(size_t yDim, size_t xDim);
+    NodeMemoryDescriptor RegisterMemory(const MemoryDimensions memoryDimensions);
     void AssignNodeMemory(const ConstNodePtr node, const NodeMemoryHandle memoryHandle);
     NodeMemoryDescriptor GetNodeMemoryDescriptor(const ConstNodePtr node) const;
-    InputDataBuffer& GetInputDataBuffer(std::string inputName) const;
+    MemoryDimensions GetInputDimensions(std::string inputName) const;
     void RegisterInputMemory(const std::string inputName, const NodeMemoryHandle memoryHandle);
     void RegisterOutputMemory(const std::string outputName, const NodeMemoryHandle memoryHandle);
     void EnqueueKernel(std::unique_ptr<const Kernel>&& kernel);

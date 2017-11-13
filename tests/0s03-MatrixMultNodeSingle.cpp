@@ -21,16 +21,16 @@ int main(int argc, const char * const argv[])
     InputDataBuffer input2 { 4,3,2,1,2, -2,2,-2,1,2, 3,4,-1,0,1, 0,3,5,7,-3 }; // 4 x 5
     ConstDataBuffer expected { 9,31,15,31,-3, 10,24,8,18,4, 0,0,0,0,0, 1,-1,3,1,1, -13,-50,-26,-53,8 };
 
-    // populate input data mapping
-    InputDataMap inputs;
-    inputs.emplace("x", std::ref(input1));
-    inputs.emplace("y", std::ref(input2));
+    // provide input data dimensions
+    InputDimensionsMap inputDimensions;
+    inputDimensions.emplace("x", MemoryDimensions({n, dim}));
+    inputDimensions.emplace("y", MemoryDimensions({dim, n}));
 
     // set up graph compilation context
-    GraphCompilationContext context(inputs, ImplementationStrategyFactory().CreateGraphCompilationTargetStrategy());
+    GraphCompilationContext context(inputDimensions, ImplementationStrategyFactory().CreateGraphCompilationTargetStrategy());
     // set up working memory for input nodes (will usually be done during compilation if whole graph is compiled; testing only single node here)
-    context.AssignNodeMemory(&i1, context.RegisterMemory(5, 4));
-    context.AssignNodeMemory(&i2, context.RegisterMemory(4, 5));
+    context.AssignNodeMemory(&i1, context.RegisterMemory(inputDimensions.at("x")).handle);
+    context.AssignNodeMemory(&i2, context.RegisterMemory(inputDimensions.at("y")).handle);
     // compile kernel for VectorAddNode object
     testMultNode.Compile(context);
 

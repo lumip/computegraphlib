@@ -22,8 +22,8 @@ public:
         : _memoryA(memoryA)
         , _memoryB(memoryB)
         , _memoryResult(reinterpret_cast<float* const>(memoryResDesc.handle))
-        , _m(memoryResDesc.yDim)
-        , _n(memoryResDesc.xDim)
+        , _m(memoryResDesc.dimensions.yDim)
+        , _n(memoryResDesc.dimensions.xDim)
         , _d(vectorDim)
     { }
 
@@ -66,19 +66,18 @@ void MatrixMultNode::Compile(GraphCompilationContext& context) const
 {
     NodeMemoryDescriptor memDescA = context.GetNodeMemoryDescriptor(this->_a);
     NodeMemoryDescriptor memDescB = context.GetNodeMemoryDescriptor(this->_b);
-    if (memDescA.xDim != memDescB.yDim)
+    if (memDescA.dimensions.xDim != memDescB.dimensions.yDim)
     {
         throw new std::invalid_argument("Matrix dimensions do not agree.");
     }
-    auto m = memDescA.yDim;
-    auto d = memDescA.xDim; // == memDescB.yDim;
-    auto n = memDescB.xDim;
-    NodeMemoryHandle mem = context.RegisterMemory(m, n);
-    context.AssignNodeMemory(this, mem);
-    NodeMemoryDescriptor desc = context.GetNodeMemoryDescriptor(this);
-    float* const inputAMemBuffer = reinterpret_cast<float* const>(memDescA.handle);
-    float* const inputBMemBuffer = reinterpret_cast<float* const>(memDescB.handle);
-    context.EnqueueKernel(std::unique_ptr<const Kernel>(new MatrixMultCPUKernel(inputAMemBuffer, inputBMemBuffer, desc, d))); // std::make_unique only since c++14
+    auto m = memDescA.dimensions.yDim;
+    auto d = memDescA.dimensions.xDim; // == memDescB.yDim;
+    auto n = memDescB.dimensions.xDim;
+    const NodeMemoryDescriptor memDesc = context.RegisterMemory({m, n});
+    context.AssignNodeMemory(this, memDesc.handle);
+    const float* const inputAMemBuffer = reinterpret_cast<const float* const>(memDescA.handle);
+    const float* const inputBMemBuffer = reinterpret_cast<const float* const>(memDescB.handle);
+    context.EnqueueKernel(std::unique_ptr<const Kernel>(new MatrixMultCPUKernel(inputAMemBuffer, inputBMemBuffer, memDesc, d))); // std::make_unique only since c++14
 }
 
 #endif

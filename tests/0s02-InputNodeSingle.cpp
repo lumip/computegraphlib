@@ -17,12 +17,12 @@ int main(const int argc, const char * const argv[])
     InputDataBuffer input1 { 1,2,3,4, 2,2,2,2, 0,0,0,0, 1,0,-1,0, -1,-3,-5,-7 };
     InputDataBuffer& expected(input1);
 
-    // populate input data mapping
-    InputDataMap inputs;
-    inputs.emplace("x", std::ref(input1));
+    // provide input data dimensions
+    InputDimensionsMap inputDimensions;
+    inputDimensions.emplace("x", MemoryDimensions({n, dim}));
 
     // set up graph compilation context
-    GraphCompilationContext context(inputs, ImplementationStrategyFactory().CreateGraphCompilationTargetStrategy());
+    GraphCompilationContext context(inputDimensions, ImplementationStrategyFactory().CreateGraphCompilationTargetStrategy());
     // compile kernel for VectorAddNode object
     testInputNode.Compile(context);
 

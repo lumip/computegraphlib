@@ -34,9 +34,9 @@ std::vector<ConstNodePtr> GraphCompiler::DetermineNodeOrder(const ConstNodePtr o
     return nodeTopology;
 }
 
-std::unique_ptr<const CompiledGraph> GraphCompiler::Compile(const ConstNodePtr outputNode, const InputDataMap& inputData) const
+std::unique_ptr<const CompiledGraph> GraphCompiler::Compile(const ConstNodePtr outputNode, const InputDimensionsMap& inputDimensions) const
 {
-    std::unique_ptr<GraphCompilationContext> context(new GraphCompilationContext(inputData, _strategyFactory->CreateGraphCompilationTargetStrategy()));
+    std::unique_ptr<GraphCompilationContext> context(new GraphCompilationContext(inputDimensions, _strategyFactory->CreateGraphCompilationTargetStrategy()));
 
     const std::vector<ConstNodePtr> nodeTopology = DetermineNodeOrder(outputNode);
     for (size_t i = 0; i < nodeTopology.size(); ++i)
