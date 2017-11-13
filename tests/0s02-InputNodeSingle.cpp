@@ -26,8 +26,12 @@ int main(const int argc, const char * const argv[])
     // compile kernel for VectorAddNode object
     testInputNode.Compile(context);
 
+    // prepare input data
+    InputDataMap inputs;
+    inputs.emplace("x", input1);
+
     // run compiled kernel
-    context.Evaluate();
+    context.Evaluate(inputs);
 
     // get output (pointer to working memory of VectorAddNode which holds the computation result)
     DataBuffer result;

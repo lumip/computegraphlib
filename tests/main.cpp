@@ -67,7 +67,7 @@ private:
     std::string _name;
 public:
     TestKernel(std::string name) : _name(name) { }
-    void Run() const { std::cout << _name << std::endl; }
+    void Run() { std::cout << _name << std::endl; }
 };
 
 class TestForwardNode : public Node
@@ -79,7 +79,7 @@ public:
     TestForwardNode(const std::string name, const std::vector<ConstNodePtr>& children) : _name(name), _children(children) {}
     ~TestForwardNode() {}
     ConstNodeList GetInputs() const { return ConstNodeList(_children); }
-    void Compile(GraphCompilationContext& context) const { context.EnqueueKernel(std::unique_ptr<const Kernel>(new TestKernel(_name))); }
+    void Compile(GraphCompilationContext& context) const { context.EnqueueKernel(std::unique_ptr<Kernel>(new TestKernel(_name))); }
     std::string ToString() const { return _name; }
     bool IsInitialized() const { return _children.empty(); }
 };
@@ -100,8 +100,8 @@ int main(int argc, const char* argv[])
     TestForwardNode a("a", {&e, &c, &b, &g});
 
     GraphCompiler compiler(std::unique_ptr<const ImplementationStrategyFactory>(new ImplementationStrategyFactory));
-    const std::unique_ptr<const CompiledGraph> graph = compiler.Compile(&a, InputDimensionsMap());
-    graph->Evaluate();
+    const std::unique_ptr<CompiledGraph> graph = compiler.Compile(&a, InputDimensionsMap());
+    graph->Evaluate(InputDataMap());
 
     return 0;
 }

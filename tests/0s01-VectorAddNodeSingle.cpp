@@ -40,7 +40,7 @@ int main(int argc, const char * const argv[])
     context.SetNodeData(&i2, input2);
 
     // run compiled kernel
-    context.Evaluate();
+    context.Evaluate(InputDataMap());
 
     // get output (pointer to working memory of VectorAddNode which holds the computation result)
     DataBuffer result;

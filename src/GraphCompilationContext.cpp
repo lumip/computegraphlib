@@ -66,19 +66,27 @@ void GraphCompilationContext::GetNodeData(const ConstNodePtr node, DataBuffer& o
     this->_strategy->CopyOutputData(memHandle, outputBuffer, memDesc.dimensions.size());
 }
 
-void GraphCompilationContext::SetNodeData(const ConstNodePtr node, InputDataBuffer& inputBuffer) const
+void GraphCompilationContext::SetNodeData(const ConstNodePtr node, InputDataBuffer& inputBuffer)
 {
     const NodeMemoryHandle memHandle = this->_memoryMap.at(node);
     const NodeMemoryDescriptor memDesc = this->_memoryDescriptors.at(memHandle);
     this->_strategy->CopyInputData(memHandle, inputBuffer, memDesc.dimensions.size());
 }
 
-void GraphCompilationContext::EnqueueKernel(std::unique_ptr<const Kernel>&& kernel)
+void GraphCompilationContext::EnqueueKernel(std::unique_ptr<Kernel>&& kernel)
 {
     _strategy->EnqueueKernel(std::move(kernel));
 }
 
-void GraphCompilationContext::Evaluate() const
+void GraphCompilationContext::Evaluate(const InputDataMap& inputData)
 {
-    _strategy->Evaluate();
+    for (auto input : inputData)
+    {
+        std::string inputName = input.first;
+        const InputDataBuffer& inputBuffer = input.second;
+        const NodeMemoryHandle memHandle = this->_inputMemoryMap.at(inputName);
+        const NodeMemoryDescriptor memDesc = this->_memoryDescriptors.at(memHandle);
+        _strategy->CopyInputData(memHandle, inputBuffer, memDesc.dimensions.size());
+    }
+    _strategy->Evaluate(inputData);
 }

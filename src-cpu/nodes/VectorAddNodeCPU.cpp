@@ -19,7 +19,7 @@ public:
     {
     }
     virtual ~VectorAddNodeCPUKernel() { }
-    void Run() const
+    void Run()
     {
         for (size_t i = 0; i < _size; ++i)
         {
@@ -41,7 +41,7 @@ void VectorAddNode::Compile(GraphCompilationContext& context) const
     const float* const inputAMemBuffer = reinterpret_cast<const float* const>(memDescA.handle);
     const float* const inputBMemBuffer = reinterpret_cast<const float* const>(memDescB.handle);
     float* const resultMemBuffer = reinterpret_cast<float* const>(memDesc.handle);
-    context.EnqueueKernel(std::unique_ptr<const Kernel>(new VectorAddNodeCPUKernel(inputAMemBuffer, inputBMemBuffer, resultMemBuffer, memDescA.dimensions.size()))); // std::make_unique only since c++14
+    context.EnqueueKernel(std::unique_ptr<Kernel>(new VectorAddNodeCPUKernel(inputAMemBuffer, inputBMemBuffer, resultMemBuffer, memDescA.dimensions.size()))); // std::make_unique only since c++14
 }
 
 #endif

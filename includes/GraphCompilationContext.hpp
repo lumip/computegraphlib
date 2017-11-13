@@ -21,10 +21,10 @@ public:
     virtual ~GraphCompilationTargetStrategy() { }
     virtual NodeMemoryHandle AllocateMemory(size_t size) = 0;
     virtual void DeallocateMemory(const NodeMemoryHandle mem) = 0;
-    virtual void EnqueueKernel(std::unique_ptr<const Kernel>&& kernel) = 0;
+    virtual void EnqueueKernel(std::unique_ptr<Kernel>&& kernel) = 0;
     virtual void CopyOutputData(const NodeMemoryHandle outputNodeMemory, DataBuffer& outputBuffer, size_t size) const = 0;
-    virtual void CopyInputData(const NodeMemoryHandle inputNodeMemory, InputDataBuffer& inputBuffer, size_t size) const = 0;
-    virtual void Evaluate() const = 0;
+    virtual void CopyInputData(const NodeMemoryHandle inputNodeMemory, InputDataBuffer& inputBuffer, size_t size) = 0;
+    virtual void Evaluate(const InputDataMap& inputData) = 0;
 };
 
 class GraphCompilationContext : public CompiledGraph
@@ -45,11 +45,11 @@ public:
     MemoryDimensions GetInputDimensions(std::string inputName) const;
     void RegisterInputMemory(const std::string inputName, const NodeMemoryHandle memoryHandle);
     void RegisterOutputMemory(const std::string outputName, const NodeMemoryHandle memoryHandle);
-    void EnqueueKernel(std::unique_ptr<const Kernel>&& kernel);
-    void Evaluate() const;
+    void EnqueueKernel(std::unique_ptr<Kernel>&& kernel);
+    void Evaluate(const InputDataMap& inputData);
     void GetOutputData(std::string outputName, DataBuffer& outputBuffer) const;
     void GetNodeData(const ConstNodePtr node, DataBuffer& outputBuffer) const;
-    void SetNodeData(const ConstNodePtr node, InputDataBuffer& inputBuffer) const;
+    void SetNodeData(const ConstNodePtr node, InputDataBuffer& inputBuffer);
 };
 
 #endif

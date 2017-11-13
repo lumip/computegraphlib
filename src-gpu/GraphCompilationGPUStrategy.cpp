@@ -18,7 +18,7 @@ void GraphCompilationGPUStrategy::DeallocateMemory(const NodeMemoryHandle mem)
     throw std::logic_error("not implemented yet.");
 }
 
-void GraphCompilationGPUStrategy::EnqueueKernel(std::unique_ptr<const Kernel>&& kernel)
+void GraphCompilationGPUStrategy::EnqueueKernel(std::unique_ptr<Kernel>&& kernel)
 {
     throw std::logic_error("not implemented yet.");
 }
@@ -28,12 +28,12 @@ void GraphCompilationGPUStrategy::CopyOutputData(const NodeMemoryHandle outputNo
     throw std::logic_error("not implemented yet.");
 }
 
-void GraphCompilationGPUStrategy::CopyInputData(const NodeMemoryHandle inputNodeMemory, InputDataBuffer& inputBuffer, size_t size) const
+void GraphCompilationGPUStrategy::CopyInputData(const NodeMemoryHandle inputNodeMemory, InputDataBuffer& inputBuffer, size_t size)
 {
     throw std::logic_error("not implemented yet.");
 }
 
-void GraphCompilationGPUStrategy::Evaluate() const
+void GraphCompilationGPUStrategy::Evaluate(const InputDataMap& inputData)
 {
     throw std::logic_error("not implemented yet.");
 }

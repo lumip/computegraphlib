@@ -19,7 +19,7 @@ void GraphCompilationCPUStrategy::DeallocateMemory(const NodeMemoryHandle mem)
     delete[] reinterpret_cast<float* const>(mem);
 }
 
-void GraphCompilationCPUStrategy::EnqueueKernel(std::unique_ptr<const Kernel>&& kernel)
+void GraphCompilationCPUStrategy::EnqueueKernel(std::unique_ptr<Kernel>&& kernel)
 {
     _kernels.emplace_back(std::move(kernel));
 }
@@ -30,15 +30,15 @@ void GraphCompilationCPUStrategy::CopyOutputData(const NodeMemoryHandle outputNo
     std::copy(nodeMemBuffer, (nodeMemBuffer + size), std::begin(outputBuffer));
 }
 
-void GraphCompilationCPUStrategy::CopyInputData(const NodeMemoryHandle inputNodeMemory, InputDataBuffer& inputBuffer, size_t size) const
+void GraphCompilationCPUStrategy::CopyInputData(const NodeMemoryHandle inputNodeMemory, InputDataBuffer& inputBuffer, size_t size)
 {
     float* const nodeMemBuffer = reinterpret_cast<float* const>(inputNodeMemory);
     std::copy(std::begin(inputBuffer), std::begin(inputBuffer) + size, nodeMemBuffer);
 }
 
-void GraphCompilationCPUStrategy::Evaluate() const
+void GraphCompilationCPUStrategy::Evaluate(const InputDataMap& inputData)
 {
-    for (const std::unique_ptr<const Kernel>& kernel : _kernels)
+    for (const std::unique_ptr<Kernel>& kernel : _kernels)
     {
         kernel->Run();
     }

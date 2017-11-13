@@ -9,7 +9,7 @@ class VariableNodeCPUKernel : public Kernel
 public:
     VariableNodeCPUKernel() { }
     ~VariableNodeCPUKernel() { }
-    void Run() const { }
+    void Run() { }
 };
 
 void VariableNode::Compile(GraphCompilationContext& context) const
