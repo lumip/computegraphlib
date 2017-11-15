@@ -39,6 +39,7 @@ std::unique_ptr<CompiledGraph> GraphCompiler::Compile(const ConstNodePtr outputN
     std::unique_ptr<GraphCompilationContext> context(new GraphCompilationContext(inputDimensions, _strategyFactory->CreateGraphCompilationTargetStrategy()));
 
     const std::vector<ConstNodePtr> nodeTopology = DetermineNodeOrder(outputNode);
+    // todo: add functionality which determines which nodes need separate memory and which do not (temporary results only used in one other node can be overwritten)
     for (size_t i = 0; i < nodeTopology.size(); ++i)
     {
         nodeTopology[i]->Compile(*context);
