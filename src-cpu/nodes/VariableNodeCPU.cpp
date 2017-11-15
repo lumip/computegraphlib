@@ -1,4 +1,3 @@
-#ifdef CPU
 #include <memory>
 
 #include "nodes/VariableNode.hpp"
@@ -16,5 +15,3 @@ void VariableNode::Compile(GraphCompilationContext& context) const
 {
     throw new std::logic_error("not yet implemented.");
 }
-
-#endif

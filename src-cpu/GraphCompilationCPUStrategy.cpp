@@ -1,5 +1,3 @@
-#ifdef CPU
-
 #include "GraphCompilationCPUStrategy.hpp"
 
 GraphCompilationCPUStrategy::GraphCompilationCPUStrategy()
@@ -47,5 +45,3 @@ void GraphCompilationCPUStrategy::Evaluate(const std::vector<std::pair<const Nod
         kernel->Run();
     }
 }
-
-#endif

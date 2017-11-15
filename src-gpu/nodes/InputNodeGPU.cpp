@@ -1,4 +1,3 @@
-#ifdef GPU
 #include "nodes/InputNode.hpp"
 #include "GraphCompilationContext.hpp"
 
@@ -13,5 +12,3 @@ void InputNode::Compile(GraphCompilationContext& context) const
     context.AssignNodeMemory(this, memDesc.handle);
     context.RegisterInputMemory(_name, memDesc.handle);
 }
-
-#endif

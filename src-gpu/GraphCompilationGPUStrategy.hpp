@@ -1,5 +1,3 @@
-#ifdef GPU
-
 #ifndef _GRAPH_COMPILATION_GPU_STRATEGY_HPP_
 #define _GRAPH_COMPILATION_GPU_STRATEGY_HPP_
 
@@ -32,8 +30,4 @@ public:
 
 };
 
-
 #endif
-
-#endif
-

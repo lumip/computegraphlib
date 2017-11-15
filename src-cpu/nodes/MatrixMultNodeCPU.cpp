@@ -1,4 +1,3 @@
-#ifdef CPU
 #include "nodes/MatrixMultNode.hpp"
 #include "GraphCompilationContext.hpp"
 #include "Kernel.hpp"
@@ -79,5 +78,3 @@ void MatrixMultNode::Compile(GraphCompilationContext& context) const
     const float* const inputBMemBuffer = reinterpret_cast<const float* const>(memDescB.handle);
     context.EnqueueKernel(std::unique_ptr<Kernel>(new MatrixMultCPUKernel(inputAMemBuffer, inputBMemBuffer, memDesc, d))); // std::make_unique only since c++14
 }
-
-#endif

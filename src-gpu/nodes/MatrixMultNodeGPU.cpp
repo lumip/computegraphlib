@@ -1,5 +1,3 @@
-#ifdef GPU
-
 #include <CL/cl.h>
 
 #include "nodes/MatrixMultNode.hpp"
@@ -50,5 +48,3 @@ void MatrixMultNode::Compile(GraphCompilationContext& context) const
     const cl_mem inputBMemBuffer = reinterpret_cast<const cl_mem>(memDescB.handle);
     context.EnqueueKernel(std::unique_ptr<Kernel>(new MatrixMultGPUKernel(inputAMemBuffer, inputBMemBuffer, memDesc, d))); // std::make_unique only since c++14
 }
-
-#endif

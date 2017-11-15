@@ -1,5 +1,3 @@
-#ifdef GPU
-
 #include "GraphCompilationGPUStrategy.hpp"
 #include <sstream>
 
@@ -111,5 +109,3 @@ cl_program GraphCompilationGPUStrategy::CompileKernel(const std::string& kernelS
     , "clBuildprogram");
     return program;
 }
-
-#endif

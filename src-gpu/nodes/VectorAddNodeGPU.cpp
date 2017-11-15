@@ -1,4 +1,3 @@
-#ifdef GPU
 #include <CL/cl.h>
 
 #include "nodes/VectorAddNode.hpp"
@@ -43,5 +42,3 @@ void VectorAddNode::Compile(GraphCompilationContext& context) const
     const cl_mem resultMemBuffer = reinterpret_cast<const cl_mem>(memDesc.handle);
     context.EnqueueKernel(std::unique_ptr<Kernel>(new VectorAddNodeGPUKernel(inputAMemBuffer, inputBMemBuffer, resultMemBuffer, memDescA.dimensions.size()))); // std::make_unique only since c++14
 }
-
-#endif

@@ -1,4 +1,3 @@
-#ifdef CPU
 #include "nodes/VectorAddNode.hpp"
 #include "GraphCompilationContext.hpp"
 #include "Kernel.hpp"
@@ -43,5 +42,3 @@ void VectorAddNode::Compile(GraphCompilationContext& context) const
     float* const resultMemBuffer = reinterpret_cast<float* const>(memDesc.handle);
     context.EnqueueKernel(std::unique_ptr<Kernel>(new VectorAddNodeCPUKernel(inputAMemBuffer, inputBMemBuffer, resultMemBuffer, memDescA.dimensions.size()))); // std::make_unique only since c++14
 }
-
-#endif

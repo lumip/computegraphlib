@@ -1,5 +1,3 @@
-#ifdef GPU
-
 #include <CL/cl.h>
 
 #include "ImplementationStrategyFactory.hpp"
@@ -21,5 +19,3 @@ std::unique_ptr<GraphCompilationTargetStrategy> ImplementationStrategyFactory::C
 
     return std::unique_ptr<GraphCompilationTargetStrategy>(new GraphCompilationGPUStrategy(context));
 }
-
-#endif

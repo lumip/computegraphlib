@@ -1,5 +1,3 @@
-#ifdef CPU
-
 #ifndef _GRAPH_COMPILATION_CPU_STRATEGY_HPP_
 #define _GRAPH_COMPILATION_CPU_STRATEGY_HPP_
 
@@ -20,8 +18,4 @@ public:
     void Evaluate(const std::vector<std::pair<const NodeMemoryDescriptor, InputDataBuffer&>>& inputData);
 };
 
-
 #endif
-
-#endif
-
