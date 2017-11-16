@@ -15,7 +15,7 @@ std::unique_ptr<GraphCompilationTargetStrategy> ImplementationStrategyFactory::C
         (cl_context_properties)platformId, 0
     };
     cl_int status = CL_SUCCESS;
-    cl_context context = clCreateContextFromType(contextProperties, CL_DEVICE_TYPE_GPU, NULL, NULL, &status);
+    cl_context context = clCreateContextFromType(contextProperties, CL_DEVICE_TYPE_GPU, nullptr, nullptr, &status);
     GraphCompilationGPUStrategy::CheckCLError(status, "clCreateContextFromType");
 
     return std::unique_ptr<GraphCompilationTargetStrategy>(new GraphCompilationGPUStrategy(context));
