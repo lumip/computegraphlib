@@ -22,7 +22,7 @@ int main(const int argc, const char * const argv[])
     inputDimensions.emplace("x", MemoryDimensions({n, dim}));
 
     ImplementationStrategyFactory fact;
-    std::unique_ptr<GraphCompilationTargetStrategy> strategy = fact.CreateGraphCompilationTargetStrategy();
+    std::unique_ptr<GraphCompilationPlatform> strategy = fact.CreateGraphCompilationTargetStrategy();
     std::unique_ptr<NodeCompiler> nodeCompiler = fact.CreateNodeCompiler(strategy.get());
 
     // set up graph compilation context

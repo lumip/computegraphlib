@@ -27,7 +27,7 @@ int main(int argc, const char * const argv[])
     inputDimensions.emplace("y", MemoryDimensions({dim, n}));
 
     ImplementationStrategyFactory fact;
-    std::unique_ptr<GraphCompilationTargetStrategy> strategy = fact.CreateGraphCompilationTargetStrategy();
+    std::unique_ptr<GraphCompilationPlatform> strategy = fact.CreateGraphCompilationTargetStrategy();
     std::unique_ptr<NodeCompiler> nodeCompiler = fact.CreateNodeCompiler(strategy.get());
 
     // set up graph compilation context

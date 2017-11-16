@@ -5,7 +5,7 @@
 
 #include "GraphCompilationContext.hpp"
 
-class GraphCompilationGPUStrategy : public GraphCompilationTargetStrategy
+class GraphCompilationGPUStrategy : public GraphCompilationPlatform
 {
 private:
     const cl_context _clContext;

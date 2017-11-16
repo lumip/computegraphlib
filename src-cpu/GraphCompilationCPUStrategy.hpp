@@ -3,7 +3,7 @@
 
 #include "GraphCompilationContext.hpp"
 
-class GraphCompilationCPUStrategy : public GraphCompilationTargetStrategy
+class GraphCompilationCPUStrategy : public GraphCompilationPlatform
 {
 private:
     std::vector<std::unique_ptr<Kernel>> _kernels;

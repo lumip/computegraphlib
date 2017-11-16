@@ -6,38 +6,19 @@
 #include "types.hpp"
 #include "Kernel.hpp"
 #include "CompiledGraph.hpp"
-
-typedef uint64_t NodeMemoryHandle;
-struct NodeMemoryDescriptor
-{
-    const NodeMemoryHandle handle;
-    const MemoryDimensions dimensions;
-};
-
-class GraphCompilationTargetStrategy
-{
-public:
-    GraphCompilationTargetStrategy() { }
-    virtual ~GraphCompilationTargetStrategy() { }
-    virtual NodeMemoryHandle AllocateMemory(size_t size) = 0;
-    virtual void DeallocateMemory(const NodeMemoryHandle mem) = 0;
-    virtual void EnqueueKernel(std::unique_ptr<Kernel>&& kernel) = 0;
-    virtual void CopyOutputData(const NodeMemoryHandle outputNodeMemory, DataBuffer& outputBuffer, size_t size) const = 0;
-    virtual void CopyInputData(const NodeMemoryHandle inputNodeMemory, InputDataBuffer& inputBuffer, size_t size) = 0;
-    virtual void Evaluate(const std::vector<std::pair<const NodeMemoryDescriptor, InputDataBuffer&>>& inputData) = 0;
-};
+#include "GraphCompilationPlatform.hpp"
 
 class GraphCompilationContext : public CompiledGraph
 {
 private:
-    const std::unique_ptr<GraphCompilationTargetStrategy> _strategy;
+    const std::unique_ptr<GraphCompilationPlatform> _strategy;
     std::map<ConstNodePtr, NodeMemoryHandle> _memoryMap;
     std::map<NodeMemoryHandle, NodeMemoryDescriptor> _memoryDescriptors;
     const InputDimensionsMap _inputDimensions;
     std::map<std::string, const NodeMemoryHandle> _inputMemoryMap;
     std::map<std::string, const NodeMemoryHandle> _outputMemoryMap;
 public:
-    GraphCompilationContext(const InputDimensionsMap& inputDimensions, std::unique_ptr<GraphCompilationTargetStrategy>&& strategy);
+    GraphCompilationContext(const InputDimensionsMap& inputDimensions, std::unique_ptr<GraphCompilationPlatform>&& strategy);
     virtual ~GraphCompilationContext();
     NodeMemoryDescriptor AllocateMemory(const MemoryDimensions memoryDimensions);
     void AssignNodeMemory(const ConstNodePtr node, const NodeMemoryHandle memoryHandle);

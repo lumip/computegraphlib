@@ -4,7 +4,7 @@
 #include "GraphCompilationGPUStrategy.hpp"
 #include "NodeCompilerGPU.hpp"
 
-std::unique_ptr<GraphCompilationTargetStrategy> ImplementationStrategyFactory::CreateGraphCompilationTargetStrategy() const
+std::unique_ptr<GraphCompilationPlatform> ImplementationStrategyFactory::CreateGraphCompilationTargetStrategy() const
 {
     cl_platform_id platformId;
     GraphCompilationGPUStrategy::CheckCLError(clGetPlatformIDs(1, &platformId, nullptr), "clGetPlatformIDs");
@@ -18,10 +18,10 @@ std::unique_ptr<GraphCompilationTargetStrategy> ImplementationStrategyFactory::C
     cl_context context = clCreateContextFromType(contextProperties, CL_DEVICE_TYPE_GPU, nullptr, nullptr, &status);
     GraphCompilationGPUStrategy::CheckCLError(status, "clCreateContextFromType");
 
-    return std::unique_ptr<GraphCompilationTargetStrategy>(new GraphCompilationGPUStrategy(context));
+    return std::unique_ptr<GraphCompilationPlatform>(new GraphCompilationGPUStrategy(context));
 }
 
-std::unique_ptr<NodeCompiler> ImplementationStrategyFactory::CreateNodeCompiler(GraphCompilationTargetStrategy* strategy) const
+std::unique_ptr<NodeCompiler> ImplementationStrategyFactory::CreateNodeCompiler(GraphCompilationPlatform* strategy) const
 {
     return std::unique_ptr<NodeCompiler>(new NodeCompilerGPU(dynamic_cast<GraphCompilationGPUStrategy*>(strategy)));
 }

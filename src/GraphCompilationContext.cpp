@@ -1,6 +1,6 @@
 #include "GraphCompilationContext.hpp"
 
-GraphCompilationContext::GraphCompilationContext(const InputDimensionsMap& inputDimensions, std::unique_ptr<GraphCompilationTargetStrategy>&& strategy)
+GraphCompilationContext::GraphCompilationContext(const InputDimensionsMap& inputDimensions, std::unique_ptr<GraphCompilationPlatform>&& strategy)
     : _inputDimensions(inputDimensions)
     , _strategy(std::move(strategy))
     , _memoryDescriptors()
