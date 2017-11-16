@@ -18,7 +18,7 @@ GraphCompilationContext::~GraphCompilationContext()
     }
 }
 
-NodeMemoryDescriptor GraphCompilationContext::RegisterMemory(const MemoryDimensions memoryDimensions)
+NodeMemoryDescriptor GraphCompilationContext::AllocateMemory(const MemoryDimensions memoryDimensions)
 {
     NodeMemoryDescriptor memDesc {_strategy->AllocateMemory(memoryDimensions.size()), memoryDimensions};
     this->_memoryDescriptors.emplace(memDesc.handle, memDesc);

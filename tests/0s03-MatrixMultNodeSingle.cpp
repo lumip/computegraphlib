@@ -33,8 +33,8 @@ int main(int argc, const char * const argv[])
     // set up graph compilation context
     GraphCompilationContext context(inputDimensions, std::move(strategy));
     // set up working memory for input nodes (will usually be done during compilation if whole graph is compiled; testing only single node here)
-    context.AssignNodeMemory(&i1, context.RegisterMemory(inputDimensions.at("x")).handle);
-    context.AssignNodeMemory(&i2, context.RegisterMemory(inputDimensions.at("y")).handle);
+    context.AssignNodeMemory(&i1, context.AllocateMemory(inputDimensions.at("x")).handle);
+    context.AssignNodeMemory(&i2, context.AllocateMemory(inputDimensions.at("y")).handle);
     // compile kernel for VectorAddNode object
     testMultNode.Compile(context, *nodeCompiler);
 

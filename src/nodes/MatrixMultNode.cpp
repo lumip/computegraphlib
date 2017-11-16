@@ -39,7 +39,7 @@ void MatrixMultNode::Compile(GraphCompilationContext& context, NodeCompiler& nod
     auto m = memDescA.dimensions.yDim;
     auto d = memDescA.dimensions.xDim; // == memDescB.yDim;
     auto n = memDescB.dimensions.xDim;
-    const NodeMemoryDescriptor memDesc = context.RegisterMemory({m, n});
+    const NodeMemoryDescriptor memDesc = context.AllocateMemory({m, n});
     context.AssignNodeMemory(this, memDesc.handle);
     context.EnqueueKernel(nodeCompiler.CompileMatrixMultNode(memDescA, memDescB, memDesc));
 }

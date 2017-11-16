@@ -39,7 +39,7 @@ private:
 public:
     GraphCompilationContext(const InputDimensionsMap& inputDimensions, std::unique_ptr<GraphCompilationTargetStrategy>&& strategy);
     virtual ~GraphCompilationContext();
-    NodeMemoryDescriptor RegisterMemory(const MemoryDimensions memoryDimensions);
+    NodeMemoryDescriptor AllocateMemory(const MemoryDimensions memoryDimensions);
     void AssignNodeMemory(const ConstNodePtr node, const NodeMemoryHandle memoryHandle);
     NodeMemoryDescriptor GetNodeMemoryDescriptor(const ConstNodePtr node) const;
     MemoryDimensions GetInputDimensions(std::string inputName) const;

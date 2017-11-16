@@ -37,7 +37,7 @@ void VectorAddNode::Compile(GraphCompilationContext& context, NodeCompiler& node
     {
         throw std::runtime_error("Inputs to VectorAddNode have different dimension.");
     }
-    const NodeMemoryDescriptor memDesc= context.RegisterMemory({memDescA.dimensions.yDim, memDescA.dimensions.xDim});
+    const NodeMemoryDescriptor memDesc= context.AllocateMemory({memDescA.dimensions.yDim, memDescA.dimensions.xDim});
     context.AssignNodeMemory(this, memDesc.handle);
     context.EnqueueKernel(nodeCompiler.CompileVectorAddNode(memDescA, memDescB, memDesc));
 }

@@ -30,7 +30,7 @@ void InputNode::Compile(GraphCompilationContext &context, NodeCompiler &nodeComp
     {
         throw std::invalid_argument("Dimension size for input " + _name + "differ between node declaration and input map declaration.");
     }
-    const NodeMemoryDescriptor memDesc = context.RegisterMemory(dim);
+    const NodeMemoryDescriptor memDesc = context.AllocateMemory(dim);
     context.AssignNodeMemory(this, memDesc.handle);
     context.RegisterInputMemory(_name, memDesc.handle);
 }
