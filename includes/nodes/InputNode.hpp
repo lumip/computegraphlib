@@ -12,8 +12,8 @@ public:
     InputNode(std::string name, size_t dim);
     virtual ~InputNode();
     ConstNodeList GetInputs() const;
-    void Compile(GraphCompilationContext& context, NodeCompiler& nodeCompiler) const;
-    MemoryDimensions GetMemoryDimensions(const InputDimensionsMap& inputDimensions, const std::map<ConstNodePtr, MemoryDimensions>& nodeMemoryDimensions) const;
+    void Compile(MemoryCompilationMap& context, NodeCompiler& nodeCompiler) const;
+    void GetMemoryDimensions(MemoryCompilationMap& memoryMap) const;
     std::string ToString() const;
     bool IsInitialized() const;
 };

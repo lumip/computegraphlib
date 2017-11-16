@@ -1,5 +1,7 @@
-#include "nodes/VectorAddNode.hpp"
 #include <sstream>
+
+#include "nodes/VectorAddNode.hpp"
+#include "GraphCompilationContext.hpp"
 
 VectorAddNode::VectorAddNode(NodePtr a, NodePtr b)
     : Node(), 
@@ -29,26 +31,19 @@ bool VectorAddNode::IsInitialized() const
     return false;
 }
 
-void VectorAddNode::Compile(GraphCompilationContext& context, NodeCompiler& nodeCompiler) const
+void VectorAddNode::Compile(MemoryCompilationMap& context, NodeCompiler& nodeCompiler) const
 {
-    NodeMemoryDescriptor memDescA = context.GetNodeMemoryDescriptor(this->_summandA);
-    NodeMemoryDescriptor memDescB = context.GetNodeMemoryDescriptor(this->_summandB);
-    if (memDescA.dimensions.size() != memDescB.dimensions.size())
-    {
-        throw std::runtime_error("Inputs to VectorAddNode have different dimension.");
-    }
-    const NodeMemoryDescriptor memDesc= context.AllocateMemory({memDescA.dimensions.yDim, memDescA.dimensions.xDim});
-    context.AssignNodeMemory(this, memDesc.handle);
-    context.EnqueueKernel(nodeCompiler.CompileVectorAddNode(memDescA, memDescB, memDesc));
+    nodeCompiler.CompileVectorAddNode(_summandA, _summandB, this);
+    //context.EnqueueKernel(nodeCompiler.CompileVectorAddNode(memDescA, memDescB, memDesc));
 }
 
-MemoryDimensions VectorAddNode::GetMemoryDimensions(const InputDimensionsMap& inputDimensions, const std::map<ConstNodePtr, MemoryDimensions>& nodeMemoryDimensions) const
+void VectorAddNode::GetMemoryDimensions(MemoryCompilationMap& memoryMap) const
 {
-    const MemoryDimensions dimA = nodeMemoryDimensions.at(_summandA);
-    const MemoryDimensions dimB = nodeMemoryDimensions.at(_summandB);
+    const MemoryDimensions dimA = memoryMap.GetNodeMemoryDimensions(_summandA);
+    const MemoryDimensions dimB = memoryMap.GetNodeMemoryDimensions(_summandB);
     if (dimA != dimB)
     {
         throw std::runtime_error("Inputs to VectorAddNode have different dimensions.");
     }
-    return dimA;
+    memoryMap.RegisterNodeMemory(this, dimA);
 }

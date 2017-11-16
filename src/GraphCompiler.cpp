@@ -1,6 +1,7 @@
 #include "GraphCompiler.hpp"
 #include "nodes/Node.hpp"
 #include "NodeCompiler.hpp"
+#include "CompiledGraph.hpp"
 
 GraphCompiler::GraphCompiler(std::unique_ptr<const ImplementationStrategyFactory>&& strategyFactory)
     : _strategyFactory(std::move(strategyFactory))
@@ -36,23 +37,22 @@ std::vector<ConstNodePtr> GraphCompiler::DetermineNodeOrder(const ConstNodePtr o
 
 std::unique_ptr<CompiledGraph> GraphCompiler::Compile(const ConstNodePtr outputNode, const InputDimensionsMap& inputDimensions) const
 {
-    std::unique_ptr<GraphCompilationPlatform> strategy = _strategyFactory->CreateGraphCompilationTargetStrategy();
-    std::unique_ptr<NodeCompiler> nodeCompiler(_strategyFactory->CreateNodeCompiler(&(*strategy)));
-    std::unique_ptr<GraphCompilationContext> context(new GraphCompilationContext(inputDimensions, std::move(strategy)));
+    std::unique_ptr<MemoryCompilationMap> context(new MemoryCompilationMap(inputDimensions));
+    std::unique_ptr<GraphCompilationPlatform> strategy = _strategyFactory->CreateGraphCompilationTargetStrategy(*context);
+    //std::unique_ptr<NodeCompiler> nodeCompiler(_strategyFactory->CreateNodeCompiler(&(*strategy)));
 
     const std::vector<ConstNodePtr> nodeTopology = DetermineNodeOrder(outputNode);
     // todo: add functionality which determines which nodes need separate memory and which do not (temporary results only used in one other node can be overwritten)
-    std::map<ConstNodePtr, MemoryDimensions> nodeMemoryDimensions;
     for (size_t i = 0; i < nodeTopology.size(); ++i)
     {
-        const MemoryDimensions dim = nodeTopology[i]->GetMemoryDimensions(inputDimensions, nodeMemoryDimensions);
-        nodeMemoryDimensions.emplace(nodeTopology[i], dim);
+        ConstNodePtr node = nodeTopology[i];
+        node->GetMemoryDimensions(*context);
+        strategy->AllocateMemory(node);
     }
-    // todo: above is temporary. find better way to store.
     // todo: figure out how to check output and input size of variable node for consistency.
     for (size_t i = 0; i < nodeTopology.size(); ++i)
     {
-        nodeTopology[i]->Compile(*context, *nodeCompiler);
+        nodeTopology[i]->Compile(*context, *strategy);
     }
-    return std::move(context);
+    return std::unique_ptr<CompiledGraph>(new CompiledGraph(std::move(strategy), std::move(context)));
 }

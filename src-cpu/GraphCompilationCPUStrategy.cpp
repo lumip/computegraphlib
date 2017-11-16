@@ -1,45 +1,50 @@
 #include "GraphCompilationCPUStrategy.hpp"
+#include "GraphCompilationContext.hpp"
 
-GraphCompilationCPUStrategy::GraphCompilationCPUStrategy()
+GraphCompilationCPUStrategy::GraphCompilationCPUStrategy(const MemoryCompilationMap& memoryCompilationMap)
     : _kernels()
+    , _bufferMap()
+    , _dimensionsMap(memoryCompilationMap)
 {
 }
 
 GraphCompilationCPUStrategy::~GraphCompilationCPUStrategy() { }
 
-NodeMemoryHandle GraphCompilationCPUStrategy::AllocateMemory(size_t size)
+void GraphCompilationCPUStrategy::AllocateMemory(const ConstNodePtr node)
 {
-    return reinterpret_cast<NodeMemoryHandle>(new float[size]); // consider using std::valarray instead of raw float arrays?
+    MemoryDimensions dims = _dimensionsMap.GetNodeMemoryDimensions(node);
+    std::unique_ptr<float[]> mem(new float[dims.size()]); // consider using std::valarray instead of raw float arrays?
+    _bufferMap.emplace(node, std::move(mem));
 }
 
-void GraphCompilationCPUStrategy::DeallocateMemory(const NodeMemoryHandle mem)
+/*void GraphCompilationCPUStrategy::DeallocateMemory(const NodeMemoryHandle mem)
 {
     delete[] reinterpret_cast<float* const>(mem);
-}
+}*/
 
-void GraphCompilationCPUStrategy::EnqueueKernel(std::unique_ptr<Kernel>&& kernel)
+/*void GraphCompilationCPUStrategy::EnqueueKernel(std::unique_ptr<Kernel>&& kernel)
 {
     _kernels.emplace_back(std::move(kernel));
-}
+}*/
 
-void GraphCompilationCPUStrategy::CopyOutputData(const NodeMemoryHandle outputNodeMemory, DataBuffer& outputBuffer, size_t size) const
+void GraphCompilationCPUStrategy::CopyOutputData(const ConstNodePtr outputNode, DataBuffer& outputBuffer) const
 {
-    float* const nodeMemBuffer = reinterpret_cast<float* const>(outputNodeMemory);
+    MemoryDimensions dims = _dimensionsMap.GetNodeMemoryDimensions(outputNode);
+    size_t size = dims.size();
+    outputBuffer.resize(size);
+    MemoryHandle nodeMemBuffer = _bufferMap.at(outputNode).get();
     std::copy(nodeMemBuffer, (nodeMemBuffer + size), std::begin(outputBuffer));
 }
 
-void GraphCompilationCPUStrategy::CopyInputData(const NodeMemoryHandle inputNodeMemory, InputDataBuffer& inputBuffer, size_t size)
+void GraphCompilationCPUStrategy::CopyInputData(const ConstNodePtr inputNode, InputDataBuffer& inputBuffer)
 {
-    float* const nodeMemBuffer = reinterpret_cast<float* const>(inputNodeMemory);
-    std::copy(std::begin(inputBuffer), std::begin(inputBuffer) + size, nodeMemBuffer);
+    MemoryDimensions dims = _dimensionsMap.GetNodeMemoryDimensions(inputNode);
+    MemoryHandle nodeMemBuffer = _bufferMap.at(inputNode).get();
+    std::copy(std::begin(inputBuffer), std::begin(inputBuffer) + dims.size(), nodeMemBuffer);
 }
 
-void GraphCompilationCPUStrategy::Evaluate(const std::vector<std::pair<const NodeMemoryDescriptor, InputDataBuffer&>>& inputData)
+void GraphCompilationCPUStrategy::Evaluate()
 {
-    for (auto input : inputData)
-    {
-         CopyInputData(input.first.handle, input.second, input.first.dimensions.size());
-    }
     for (const std::unique_ptr<Kernel>& kernel : _kernels)
     {
         kernel->Run();

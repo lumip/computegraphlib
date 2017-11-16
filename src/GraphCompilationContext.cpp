@@ -1,93 +1,46 @@
 #include "GraphCompilationContext.hpp"
 
-GraphCompilationContext::GraphCompilationContext(const InputDimensionsMap& inputDimensions, std::unique_ptr<GraphCompilationPlatform>&& strategy)
+MemoryCompilationMap::MemoryCompilationMap(const InputDimensionsMap& inputDimensions)
     : _inputDimensions(inputDimensions)
-    , _strategy(std::move(strategy))
-    , _memoryDescriptors()
     , _memoryMap()
     , _inputMemoryMap()
     , _outputMemoryMap()
 {
 }
 
-GraphCompilationContext::~GraphCompilationContext()
+MemoryCompilationMap::~MemoryCompilationMap() { }
+
+void MemoryCompilationMap::RegisterNodeMemory(const ConstNodePtr node, const MemoryDimensions memoryDimensions)
 {
-    for (auto elem : _memoryDescriptors)
-    {
-        _strategy->DeallocateMemory(elem.first);
-    }
+    this->_memoryMap.emplace(node, memoryDimensions);
 }
 
-NodeMemoryDescriptor GraphCompilationContext::AllocateMemory(const MemoryDimensions memoryDimensions)
+MemoryDimensions MemoryCompilationMap::GetNodeMemoryDimensions(const ConstNodePtr node) const
 {
-    NodeMemoryDescriptor memDesc {_strategy->AllocateMemory(memoryDimensions.size()), memoryDimensions};
-    this->_memoryDescriptors.emplace(memDesc.handle, memDesc);
-    return memDesc;
+    return this->_memoryMap.at(node);
 }
 
-void GraphCompilationContext::AssignNodeMemory(const ConstNodePtr node, const NodeMemoryHandle memoryHandle)
-{
-    this->_memoryMap.emplace(node, memoryHandle);
-}
-
-NodeMemoryDescriptor GraphCompilationContext::GetNodeMemoryDescriptor(const ConstNodePtr node) const
-{
-    return this->_memoryDescriptors.at(this->_memoryMap.at(node));
-}
-
-MemoryDimensions GraphCompilationContext::GetInputDimensions(std::string inputName) const
+MemoryDimensions MemoryCompilationMap::GetInputDimensions(std::string inputName) const
 {
     return this->_inputDimensions.at(inputName);
 }
 
-void GraphCompilationContext::RegisterInputMemory(const std::string inputName, const NodeMemoryHandle memoryHandle)
+void MemoryCompilationMap::RegisterInputMemory(const std::string inputName, const ConstNodePtr node)
 {
-    this->_inputMemoryMap.emplace(inputName, memoryHandle);
+    this->_inputMemoryMap.emplace(inputName, node);
 }
 
-void GraphCompilationContext::RegisterOutputMemory(const std::string outputName, const NodeMemoryHandle memoryHandle)
+void MemoryCompilationMap::RegisterOutputMemory(const std::string outputName, const ConstNodePtr node)
 {
-    this->_outputMemoryMap.emplace(outputName, memoryHandle);
+    this->_outputMemoryMap.emplace(outputName, node);
 }
 
-void GraphCompilationContext::GetOutputData(std::string outputName, DataBuffer& outputBuffer) const
+ConstNodePtr MemoryCompilationMap::GetInputNode(const std::string inputName) const
 {
-    const NodeMemoryHandle memHandle = this->_outputMemoryMap.at(outputName);
-    const NodeMemoryDescriptor memDesc = this->_memoryDescriptors.at(memHandle);
-    outputBuffer.resize(memDesc.dimensions.size());
-    this->_strategy->CopyOutputData(memHandle, outputBuffer, memDesc.dimensions.size());
+    return this->_inputMemoryMap.at(inputName);
 }
 
-void GraphCompilationContext::GetNodeData(const ConstNodePtr node, DataBuffer& outputBuffer) const
+ConstNodePtr MemoryCompilationMap::GetOutputNode(const std::string outputName) const
 {
-    const NodeMemoryHandle memHandle = this->_memoryMap.at(node);
-    const NodeMemoryDescriptor memDesc = this->_memoryDescriptors.at(memHandle);
-    outputBuffer.resize(memDesc.dimensions.size());
-    this->_strategy->CopyOutputData(memHandle, outputBuffer, memDesc.dimensions.size());
-}
-
-void GraphCompilationContext::SetNodeData(const ConstNodePtr node, InputDataBuffer& inputBuffer)
-{
-    const NodeMemoryHandle memHandle = this->_memoryMap.at(node);
-    const NodeMemoryDescriptor memDesc = this->_memoryDescriptors.at(memHandle);
-    this->_strategy->CopyInputData(memHandle, inputBuffer, memDesc.dimensions.size());
-}
-
-void GraphCompilationContext::EnqueueKernel(std::unique_ptr<Kernel>&& kernel)
-{
-    _strategy->EnqueueKernel(std::move(kernel));
-}
-
-void GraphCompilationContext::Evaluate(const InputDataMap& inputData)
-{
-    std::vector<std::pair<const NodeMemoryDescriptor, const InputDataBuffer&>> inputs;
-    for (auto input : inputData)
-    {
-        std::string inputName = input.first;
-        const InputDataBuffer& inputBuffer = input.second;
-        const NodeMemoryHandle memHandle = this->_inputMemoryMap.at(inputName);
-        const NodeMemoryDescriptor memDesc = this->_memoryDescriptors.at(memHandle);
-        inputs.emplace_back(memDesc, inputBuffer);
-    }
-    _strategy->Evaluate(inputs);
+    return this->_outputMemoryMap.at(outputName);
 }

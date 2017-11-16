@@ -1,4 +1,5 @@
 #include "nodes/InputNode.hpp"
+#include "GraphCompilationContext.hpp"
 
 InputNode::InputNode(std::string name, size_t dim)
     : _name(name)
@@ -23,24 +24,17 @@ bool InputNode::IsInitialized() const
     return true;
 }
 
-void InputNode::Compile(GraphCompilationContext &context, NodeCompiler &nodeCompiler) const
+void InputNode::Compile(MemoryCompilationMap &context, NodeCompiler& nodeCompiler) const
 {
-    const MemoryDimensions dim = context.GetInputDimensions(_name);
-    if (dim.xDim != this->_dim)
-    {
-        throw std::invalid_argument("Dimension sizes for input " + _name + " differ between node declaration and input map declaration.");
-    }
-    const NodeMemoryDescriptor memDesc = context.AllocateMemory(dim);
-    context.AssignNodeMemory(this, memDesc.handle);
-    context.RegisterInputMemory(_name, memDesc.handle);
 }
 
-MemoryDimensions InputNode::GetMemoryDimensions(const InputDimensionsMap& inputDimensions, const std::map<ConstNodePtr, MemoryDimensions>& nodeMemoryDimensions) const
+void InputNode::GetMemoryDimensions(MemoryCompilationMap& memoryMap) const
 {
-    const MemoryDimensions dim = inputDimensions.at(_name);
+    const MemoryDimensions dim = memoryMap.GetInputDimensions(_name);
     if (dim.xDim != this->_dim)
     {
         throw std::invalid_argument("Dimension sizes for input " + _name + " differ between node declaration and input map delcaration.");
     }
-    return dim;
+    memoryMap.RegisterNodeMemory(this, dim);
+    memoryMap.RegisterInputMemory(_name, this);
 }

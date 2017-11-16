@@ -28,28 +28,34 @@ int main(int argc, const char * const argv[])
     inputDimensions.emplace("x", dims);
     inputDimensions.emplace("y", dims);
 
+    // set up graph compilation context and platform
     ImplementationStrategyFactory fact;
-    std::unique_ptr<GraphCompilationPlatform> strategy = fact.CreateGraphCompilationTargetStrategy();
-    std::unique_ptr<NodeCompiler> nodeCompiler = fact.CreateNodeCompiler(strategy.get());
+    MemoryCompilationMap memoryCompilationMap(inputDimensions);
+    std::unique_ptr<GraphCompilationPlatform> platform = fact.CreateGraphCompilationTargetStrategy(memoryCompilationMap);
 
-    // set up graph compilation context
-    GraphCompilationContext context(inputDimensions, std::move(strategy));
     // set up working memory for input nodes (will usually be done during compilation if whole graph is compiled; testing only single node here)
-    context.AssignNodeMemory(&i1, context.AllocateMemory(dims).handle);
-    context.AssignNodeMemory(&i2, context.AllocateMemory(dims).handle);
+    memoryCompilationMap.RegisterNodeMemory(&i1, dims);
+    memoryCompilationMap.RegisterNodeMemory(&i2, dims);
+    testAddNode.GetMemoryDimensions(memoryCompilationMap);
+
+    platform->AllocateMemory(&i1);
+    platform->AllocateMemory(&i2);
+    platform->AllocateMemory(&testAddNode);
+
     // compile kernel for VectorAddNode object
-    testAddNode.Compile(context, *nodeCompiler);
+    testAddNode.Compile(memoryCompilationMap, *platform);
 
     // copy input data into node working memory (will usually be done by compiled kernels for InputNode if whole graph is run; testing only single node here)
-    context.SetNodeData(&i1, input1);
-    context.SetNodeData(&i2, input2);
+    platform->CopyInputData(&i1, input1);
+    platform->CopyInputData(&i2, input2);
 
     // run compiled kernel
-    context.Evaluate(InputDataMap());
+    platform->Evaluate();
 
     // get output (pointer to working memory of VectorAddNode which holds the computation result)
-    DataBuffer result;
-    context.GetNodeData(&testAddNode, result);
+    DataBuffer result(size);
+    platform->CopyOutputData(&testAddNode, result);
+    //context.GetNodeData(&testAddNode, result);
 
     // compute and output squared error
     float error = 0.0f;

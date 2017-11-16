@@ -55,7 +55,7 @@ public:
     }
 };
 
-std::unique_ptr<Kernel> NodeCompilerGPU::CompileMatrixMultNode(const NodeMemoryDescriptor inputAMem, const NodeMemoryDescriptor inputBMem, const NodeMemoryDescriptor resultMem)
+std::unique_ptr<Kernel> NodeCompilerGPU::CompileMatrixMultNode(const ConstNodePtr inputANode, const ConstNodePtr inputBNode, const MatrixMultNode* const node)
 {
     cl_kernel kernel = _strategy->CompileKernel(MatrixMultSource);
     return std::unique_ptr<Kernel>(new MatrixMultNodeGPUKernel(kernel,

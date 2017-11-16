@@ -17,6 +17,7 @@ public:
 private:
     cl_device_id SelectDevice();
     cl_command_queue CreateCommandQueue();
+    cl_kernel CompileKernel(const std::string& kernelSource);
 public:
     static void CheckCLError(cl_int status);
     static void CheckCLError(cl_int status, const std::string& methodName);
@@ -29,8 +30,11 @@ public:
     void CopyOutputData(const NodeMemoryHandle outputNodeMemory, DataBuffer& outputBuffer, size_t size) const;
     void CopyInputData(const NodeMemoryHandle inputNodeMemory, InputDataBuffer& inputBuffer, size_t size);
     void Evaluate(const std::vector<std::pair<const NodeMemoryDescriptor, InputDataBuffer&>>& inputData);
-    cl_kernel CompileKernel(const std::string& kernelSource);
 
+    void CompileInputNode(const InputNode* const node);
+    void CompileMatrixMultNode(const ConstNodePtr inputANode, const ConstNodePtr inputBNode, const MatrixMultNode* const node);
+    void CompileVariableNode(const VariableNode* const node);
+    void CompileVectorAddNode(const ConstNodePtr inputANode, const ConstNodePtr inputBNode, const VectorAddNode* const node);
 };
 
 #endif

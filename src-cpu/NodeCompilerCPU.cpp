@@ -1,17 +1,19 @@
-#include "NodeCompilerCPU.hpp"
+#include "GraphCompilationCPUStrategy.hpp"
+#include "GraphCompilationContext.hpp"
 
-NodeCompilerCPU::NodeCompilerCPU() { }
+#include "nodes/InputNode.hpp"
+#include "nodes/MatrixMultNode.hpp"
+#include "nodes/VariableNode.hpp"
+#include "nodes/VectorAddNode.hpp"
 
-NodeCompilerCPU::~NodeCompilerCPU() { }
-
-std::unique_ptr<Kernel> NodeCompilerCPU::CompileInputNode(const InputNode * const node) { }
+void GraphCompilationCPUStrategy::CompileInputNode(const InputNode* const node) { }
 
 class MatrixMultNodeCPUKernel : public Kernel
 {
 private:
-    const float* const _memoryA;
-    const float* const _memoryB;
-    float* const _memoryResult;
+    const float* const _memA;
+    const float* const _memB;
+    float* const _memRes;
     const size_t _m;
     const size_t _n;
     const size_t _d;
@@ -21,13 +23,13 @@ private:
         return i * stride + j;
     }
 public:
-    MatrixMultNodeCPUKernel(const float* const memoryA, const float* const memoryB, const NodeMemoryDescriptor memoryResDesc, const size_t vectorDim)
-        : _memoryA(memoryA)
-        , _memoryB(memoryB)
-        , _memoryResult(reinterpret_cast<float* const>(memoryResDesc.handle))
-        , _m(memoryResDesc.dimensions.yDim)
-        , _n(memoryResDesc.dimensions.xDim)
-        , _d(vectorDim)
+    MatrixMultNodeCPUKernel(const float* const memA, const float* const memB, float* const memRes, const size_t m, const size_t n, const size_t d)
+        : _memA(memA)
+        , _memB(memB)
+        , _memRes(memRes)
+        , _m(m)
+        , _n(n)
+        , _d(d)
     { }
 
     virtual ~MatrixMultNodeCPUKernel() { }
@@ -41,9 +43,9 @@ public:
                 float r_ij = 0.0f;
                 for (size_t k = 0; k < _d; ++k)
                 {
-                    r_ij += _memoryA[GetIndex(i, k, _d)] * _memoryB[GetIndex(k, j, _n)];
+                    r_ij += _memA[GetIndex(i, k, _d)] * _memB[GetIndex(k, j, _n)];
                 }
-                _memoryResult[GetIndex(i, j, _n)] = r_ij;
+                _memRes[GetIndex(i, j, _n)] = r_ij;
             }
         }
         // todo: the above is probably the most inefficient thing (that poor cache :/ )
@@ -65,15 +67,26 @@ public:
     }
 };
 
-std::unique_ptr<Kernel> NodeCompilerCPU::CompileMatrixMultNode(const NodeMemoryDescriptor inputAMem, const NodeMemoryDescriptor inputBMem, const NodeMemoryDescriptor resultMem)
+void GraphCompilationCPUStrategy::CompileMatrixMultNode(const ConstNodePtr inputANode, const ConstNodePtr inputBNode, const MatrixMultNode* const node)
 {
-    return std::unique_ptr<Kernel>(new MatrixMultNodeCPUKernel(reinterpret_cast<const float* const>(inputAMem.handle),
-                                                               reinterpret_cast<const float* const>(inputBMem.handle),
-                                                               resultMem,
-                                                               inputAMem.dimensions.xDim));
+    MemoryDimensions inputADims = _dimensionsMap.GetNodeMemoryDimensions(inputANode);
+    MemoryDimensions inputBDims = _dimensionsMap.GetNodeMemoryDimensions(inputBNode);
+    MemoryDimensions resultDims = _dimensionsMap.GetNodeMemoryDimensions(node);
+    const MemoryHandle inputABuffer = _bufferMap.at(inputANode).get();
+    const MemoryHandle inputBBuffer = _bufferMap.at(inputBNode).get();
+    const MemoryHandle resultBuffer = _bufferMap.at(node).get();
+    auto m = inputADims.yDim;
+    auto n = inputBDims.xDim;
+    auto d = inputADims.xDim;
+    _kernels.emplace_back(
+           std::unique_ptr<Kernel>(new MatrixMultNodeCPUKernel(inputABuffer,
+                                                               inputBBuffer,
+                                                               resultBuffer,
+                                                               m, n, d))
+    );
 }
 
-std::unique_ptr<Kernel> NodeCompilerCPU::CompileVariableNode(const VariableNode * const node) { }
+void GraphCompilationCPUStrategy::CompileVariableNode(const VariableNode* const node) { }
 
 class VectorAddNodeCPUKernel : public Kernel
 {
@@ -100,10 +113,16 @@ public:
     }
 };
 
-std::unique_ptr<Kernel> NodeCompilerCPU::CompileVectorAddNode(const NodeMemoryDescriptor inputAMem, const NodeMemoryDescriptor inputBMem, const NodeMemoryDescriptor resultMem)
+void GraphCompilationCPUStrategy::CompileVectorAddNode(const ConstNodePtr inputANode, const ConstNodePtr inputBNode, const VectorAddNode* const node)
 {
-    return std::unique_ptr<Kernel>(new VectorAddNodeCPUKernel(reinterpret_cast<const float* const>(inputAMem.handle),
-                                                              reinterpret_cast<const float* const>(inputBMem.handle),
-                                                              reinterpret_cast<float* const>(resultMem.handle),
-                                                              resultMem.dimensions.size()));
+    MemoryDimensions resultDims = _dimensionsMap.GetNodeMemoryDimensions(node);
+    const MemoryHandle inputABuffer = _bufferMap.at(inputANode).get();
+    const MemoryHandle inputBBuffer = _bufferMap.at(inputBNode).get();
+    const MemoryHandle resultBuffer = _bufferMap.at(node).get();
+    _kernels.emplace_back(
+           std::unique_ptr<Kernel>(new VectorAddNodeCPUKernel(inputABuffer,
+                                                              inputBBuffer,
+                                                              resultBuffer,
+                                                              resultDims.size()))
+    );
 }

@@ -21,25 +21,32 @@ int main(const int argc, const char * const argv[])
     InputDimensionsMap inputDimensions;
     inputDimensions.emplace("x", MemoryDimensions({n, dim}));
 
+    // set up graph compilation context and platform
     ImplementationStrategyFactory fact;
-    std::unique_ptr<GraphCompilationPlatform> strategy = fact.CreateGraphCompilationTargetStrategy();
-    std::unique_ptr<NodeCompiler> nodeCompiler = fact.CreateNodeCompiler(strategy.get());
+    MemoryCompilationMap memoryCompilationMap(inputDimensions);
+    std::unique_ptr<GraphCompilationPlatform> platform = fact.CreateGraphCompilationTargetStrategy(memoryCompilationMap);
 
-    // set up graph compilation context
-    GraphCompilationContext context(inputDimensions, std::move(strategy));
-    // compile kernel for VectorAddNode object
-    testInputNode.Compile(context, *nodeCompiler);
+    // set up working memory for input nodes (will usually be done during compilation if whole graph is compiled; testing only single node here)
+    testInputNode.GetMemoryDimensions(memoryCompilationMap);
+
+    platform->AllocateMemory(&testInputNode);
+
+    // compile kernel for InputNode object
+    testInputNode.Compile(memoryCompilationMap, *platform);
+
+    platform->CopyInputData(&testInputNode, input1);
 
     // prepare input data
     InputDataMap inputs;
     inputs.emplace("x", input1);
 
     // run compiled kernel
-    context.Evaluate(inputs);
+    platform->Evaluate(); // todo: currently InputNodes do nothing, not even copying the data.. should probably change
 
     // get output (pointer to working memory of VectorAddNode which holds the computation result)
-    DataBuffer result;
-    context.GetNodeData(&testInputNode, result);
+    DataBuffer result(size);
+    platform->CopyOutputData(&testInputNode, result);
+    //context.GetNodeData(&testInputNode, result);
 
     // compute and output squared error
     float error = 0.0f;
