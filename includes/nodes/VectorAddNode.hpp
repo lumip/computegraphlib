@@ -19,7 +19,7 @@ public:
     VectorAddNode(NodePtr a, NodePtr b);
     virtual ~VectorAddNode();
     ConstNodeList GetInputs() const;
-    void Compile(GraphCompilationContext& context) const;
+    void Compile(GraphCompilationContext& context, NodeCompiler& nodeCompiler) const;
     std::string ToString() const;
     bool IsInitialized() const;
 };

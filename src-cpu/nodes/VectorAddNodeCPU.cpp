@@ -2,7 +2,7 @@
 #include "GraphCompilationContext.hpp"
 #include "Kernel.hpp"
 
-class VectorAddNodeCPUKernel : public Kernel
+/*class VectorAddNodeCPUKernel : public Kernel
 {
 private:
     const float* const _memoryA;
@@ -25,9 +25,9 @@ public:
             _memoryResult[i] = _memoryA[i] + _memoryB[i];
         }
     }
-};
+};*/
 
-void VectorAddNode::Compile(GraphCompilationContext& context) const
+/*void VectorAddNode::Compile(GraphCompilationContext& context, NodeCompiler& nodeCompiler) const
 {
     NodeMemoryDescriptor memDescA = context.GetNodeMemoryDescriptor(this->_summandA);
     NodeMemoryDescriptor memDescB = context.GetNodeMemoryDescriptor(this->_summandB);
@@ -41,4 +41,17 @@ void VectorAddNode::Compile(GraphCompilationContext& context) const
     const float* const inputBMemBuffer = reinterpret_cast<const float* const>(memDescB.handle);
     float* const resultMemBuffer = reinterpret_cast<float* const>(memDesc.handle);
     context.EnqueueKernel(std::unique_ptr<Kernel>(new VectorAddNodeCPUKernel(inputAMemBuffer, inputBMemBuffer, resultMemBuffer, memDescA.dimensions.size()))); // std::make_unique only since c++14
+}*/
+
+void VectorAddNode::Compile(GraphCompilationContext& context, NodeCompiler& nodeCompiler) const
+{
+    NodeMemoryDescriptor memDescA = context.GetNodeMemoryDescriptor(this->_summandA);
+    NodeMemoryDescriptor memDescB = context.GetNodeMemoryDescriptor(this->_summandB);
+    if (memDescA.dimensions.size() != memDescB.dimensions.size())
+    {
+        throw std::runtime_error("Inputs to VectorAddNode have different dimension.");
+    }
+    const NodeMemoryDescriptor memDesc= context.RegisterMemory({memDescA.dimensions.yDim, memDescA.dimensions.xDim});
+    context.AssignNodeMemory(this, memDesc.handle);
+    context.EnqueueKernel(nodeCompiler.CompileVectorAddNode(memDescA, memDescB, memDesc));
 }

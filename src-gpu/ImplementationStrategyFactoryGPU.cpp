@@ -2,6 +2,7 @@
 
 #include "ImplementationStrategyFactory.hpp"
 #include "GraphCompilationGPUStrategy.hpp"
+#include "NodeCompilerGPU.hpp"
 
 std::unique_ptr<GraphCompilationTargetStrategy> ImplementationStrategyFactory::CreateGraphCompilationTargetStrategy() const
 {
@@ -18,4 +19,9 @@ std::unique_ptr<GraphCompilationTargetStrategy> ImplementationStrategyFactory::C
     GraphCompilationGPUStrategy::CheckCLError(status, "clCreateContextFromType");
 
     return std::unique_ptr<GraphCompilationTargetStrategy>(new GraphCompilationGPUStrategy(context));
+}
+
+std::unique_ptr<NodeCompiler> ImplementationStrategyFactory::CreateNodeCompiler(GraphCompilationTargetStrategy* strategy) const
+{
+    return std::unique_ptr<NodeCompiler>(new NodeCompilerGPU(dynamic_cast<GraphCompilationGPUStrategy*>(strategy)));
 }

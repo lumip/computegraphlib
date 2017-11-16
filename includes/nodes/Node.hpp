@@ -7,6 +7,7 @@
 #include <set>
 
 #include "Kernel.hpp"
+#include "NodeCompiler.hpp"
 #include "types.hpp"
 
 class GraphCompilationContext;
@@ -28,7 +29,7 @@ public:
     virtual ~Node();
     ConstNodeList GetSubscribers() const;
     virtual ConstNodeList GetInputs() const = 0;
-    virtual void Compile(GraphCompilationContext& context) const = 0;
+    virtual void Compile(GraphCompilationContext& context, NodeCompiler& compiler) const = 0;
     virtual std::string ToString() const = 0;
     virtual bool IsInitialized() const = 0;
 private:

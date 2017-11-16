@@ -4,6 +4,7 @@
 #include "nodes/VectorAddNode.hpp"
 #include "nodes/InputNode.hpp"
 #include "GraphCompilationContext.hpp"
+#include "NodeCompiler.hpp"
 #include "ImplementationStrategyFactory.hpp"
 
 int main(int argc, const char * const argv[])
@@ -27,13 +28,17 @@ int main(int argc, const char * const argv[])
     inputDimensions.emplace("x", dims);
     inputDimensions.emplace("y", dims);
 
+    ImplementationStrategyFactory fact;
+    std::unique_ptr<GraphCompilationTargetStrategy> strategy = fact.CreateGraphCompilationTargetStrategy();
+    std::unique_ptr<NodeCompiler> nodeCompiler = fact.CreateNodeCompiler(strategy.get());
+
     // set up graph compilation context
-    GraphCompilationContext context(inputDimensions, ImplementationStrategyFactory().CreateGraphCompilationTargetStrategy());
+    GraphCompilationContext context(inputDimensions, std::move(strategy));
     // set up working memory for input nodes (will usually be done during compilation if whole graph is compiled; testing only single node here)
     context.AssignNodeMemory(&i1, context.RegisterMemory(dims).handle);
     context.AssignNodeMemory(&i2, context.RegisterMemory(dims).handle);
     // compile kernel for VectorAddNode object
-    testAddNode.Compile(context);
+    testAddNode.Compile(context, *nodeCompiler);
 
     // copy input data into node working memory (will usually be done by compiled kernels for InputNode if whole graph is run; testing only single node here)
     context.SetNodeData(&i1, input1);

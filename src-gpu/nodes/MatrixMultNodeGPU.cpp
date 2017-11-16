@@ -4,7 +4,7 @@
 #include "GraphCompilationContext.hpp"
 #include "Kernel.hpp"
 
-class MatrixMultGPUKernel : public Kernel
+/*class MatrixMultGPUKernel : public Kernel
 {
 private:
     const cl_mem _memoryA;
@@ -29,9 +29,9 @@ public:
     {
         throw std::logic_error("not implemented yet.");
     }
-};
+};*/
 
-void MatrixMultNode::Compile(GraphCompilationContext& context) const
+void MatrixMultNode::Compile(GraphCompilationContext& context, NodeCompiler& nodeCompiler) const
 {
     NodeMemoryDescriptor memDescA = context.GetNodeMemoryDescriptor(this->_a);
     NodeMemoryDescriptor memDescB = context.GetNodeMemoryDescriptor(this->_b);
@@ -44,7 +44,9 @@ void MatrixMultNode::Compile(GraphCompilationContext& context) const
     auto n = memDescB.dimensions.xDim;
     const NodeMemoryDescriptor memDesc = context.RegisterMemory({m, n});
     context.AssignNodeMemory(this, memDesc.handle);
-    const cl_mem inputAMemBuffer = reinterpret_cast<const cl_mem>(memDescA.handle);
+    context.EnqueueKernel(nodeCompiler.CompileMatrixMultNode(memDescA, memDescB, memDesc));
+    //nodeCompiler.CompileMatrixMultNode()
+    /*const cl_mem inputAMemBuffer = reinterpret_cast<const cl_mem>(memDescA.handle);
     const cl_mem inputBMemBuffer = reinterpret_cast<const cl_mem>(memDescB.handle);
-    context.EnqueueKernel(std::unique_ptr<Kernel>(new MatrixMultGPUKernel(inputAMemBuffer, inputBMemBuffer, memDesc, d))); // std::make_unique only since c++14
+    context.EnqueueKernel(std::unique_ptr<Kernel>(new MatrixMultGPUKernel(inputAMemBuffer, inputBMemBuffer, memDesc, d))); // std::make_unique only since c++14*/
 }

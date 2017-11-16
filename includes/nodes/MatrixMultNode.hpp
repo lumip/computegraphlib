@@ -12,7 +12,7 @@ public:
     MatrixMultNode(NodePtr a, NodePtr b);
     virtual ~MatrixMultNode();
     ConstNodeList GetInputs() const;
-    void Compile(GraphCompilationContext& context) const;
+    void Compile(GraphCompilationContext& context, NodeCompiler& nodeCompiler) const;
     std::string ToString() const;
     bool IsInitialized() const;
 };

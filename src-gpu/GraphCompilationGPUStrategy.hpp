@@ -9,10 +9,13 @@ class GraphCompilationGPUStrategy : public GraphCompilationTargetStrategy
 {
 private:
     const cl_context _clContext;
+    const cl_device_id _clDevice;
     const cl_command_queue _clMemoryQueue;
-    const cl_command_queue _clExecutionQueue;
     std::vector<std::unique_ptr<Kernel>> _kernels;
+public:
+    const cl_command_queue _clExecutionQueue;
 private:
+    cl_device_id SelectDevice();
     cl_command_queue CreateCommandQueue();
 public:
     static void CheckCLError(cl_int status);
@@ -26,7 +29,7 @@ public:
     void CopyOutputData(const NodeMemoryHandle outputNodeMemory, DataBuffer& outputBuffer, size_t size) const;
     void CopyInputData(const NodeMemoryHandle inputNodeMemory, InputDataBuffer& inputBuffer, size_t size);
     void Evaluate(const std::vector<std::pair<const NodeMemoryDescriptor, InputDataBuffer&>>& inputData);
-    cl_program CompileKernel(const std::string& kernelSource);
+    cl_kernel CompileKernel(const std::string& kernelSource);
 
 };
 

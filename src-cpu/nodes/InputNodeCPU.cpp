@@ -1,7 +1,7 @@
 #include "nodes/InputNode.hpp"
 #include "GraphCompilationContext.hpp"
 
-void InputNode::Compile(GraphCompilationContext& context) const
+void InputNode::Compile(GraphCompilationContext& context, NodeCompiler& nodeCompiler) const
 {
     const MemoryDimensions dim = context.GetInputDimensions(_name);
     if (dim.xDim != this->_dim)

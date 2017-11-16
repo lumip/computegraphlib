@@ -21,10 +21,14 @@ int main(const int argc, const char * const argv[])
     InputDimensionsMap inputDimensions;
     inputDimensions.emplace("x", MemoryDimensions({n, dim}));
 
+    ImplementationStrategyFactory fact;
+    std::unique_ptr<GraphCompilationTargetStrategy> strategy = fact.CreateGraphCompilationTargetStrategy();
+    std::unique_ptr<NodeCompiler> nodeCompiler = fact.CreateNodeCompiler(strategy.get());
+
     // set up graph compilation context
-    GraphCompilationContext context(inputDimensions, ImplementationStrategyFactory().CreateGraphCompilationTargetStrategy());
+    GraphCompilationContext context(inputDimensions, std::move(strategy));
     // compile kernel for VectorAddNode object
-    testInputNode.Compile(context);
+    testInputNode.Compile(context, *nodeCompiler);
 
     // prepare input data
     InputDataMap inputs;

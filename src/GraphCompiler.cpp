@@ -1,6 +1,6 @@
 #include "GraphCompiler.hpp"
 #include "nodes/Node.hpp"
-#include "nodes/VariableNode.hpp"
+#include "NodeCompiler.hpp"
 
 GraphCompiler::GraphCompiler(std::unique_ptr<const ImplementationStrategyFactory>&& strategyFactory)
     : _strategyFactory(std::move(strategyFactory))
@@ -36,13 +36,15 @@ std::vector<ConstNodePtr> GraphCompiler::DetermineNodeOrder(const ConstNodePtr o
 
 std::unique_ptr<CompiledGraph> GraphCompiler::Compile(const ConstNodePtr outputNode, const InputDimensionsMap& inputDimensions) const
 {
-    std::unique_ptr<GraphCompilationContext> context(new GraphCompilationContext(inputDimensions, _strategyFactory->CreateGraphCompilationTargetStrategy()));
+    std::unique_ptr<GraphCompilationTargetStrategy> strategy = _strategyFactory->CreateGraphCompilationTargetStrategy();
+    std::unique_ptr<NodeCompiler> nodeCompiler(_strategyFactory->CreateNodeCompiler(&(*strategy)));
+    std::unique_ptr<GraphCompilationContext> context(new GraphCompilationContext(inputDimensions, std::move(strategy)));
 
     const std::vector<ConstNodePtr> nodeTopology = DetermineNodeOrder(outputNode);
     // todo: add functionality which determines which nodes need separate memory and which do not (temporary results only used in one other node can be overwritten)
     for (size_t i = 0; i < nodeTopology.size(); ++i)
     {
-        nodeTopology[i]->Compile(*context);
+        nodeTopology[i]->Compile(*context, *nodeCompiler);
     }
     return std::move(context);
 }

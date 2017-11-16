@@ -11,7 +11,7 @@ public:
     void Run() { }
 };
 
-void VariableNode::Compile(GraphCompilationContext& context) const
+void VariableNode::Compile(GraphCompilationContext& context, NodeCompiler& nodeCompiler) const
 {
     throw new std::logic_error("not yet implemented.");
 }

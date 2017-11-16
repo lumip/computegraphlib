@@ -26,13 +26,17 @@ int main(int argc, const char * const argv[])
     inputDimensions.emplace("x", MemoryDimensions({n, dim}));
     inputDimensions.emplace("y", MemoryDimensions({dim, n}));
 
+    ImplementationStrategyFactory fact;
+    std::unique_ptr<GraphCompilationTargetStrategy> strategy = fact.CreateGraphCompilationTargetStrategy();
+    std::unique_ptr<NodeCompiler> nodeCompiler = fact.CreateNodeCompiler(strategy.get());
+
     // set up graph compilation context
-    GraphCompilationContext context(inputDimensions, ImplementationStrategyFactory().CreateGraphCompilationTargetStrategy());
+    GraphCompilationContext context(inputDimensions, std::move(strategy));
     // set up working memory for input nodes (will usually be done during compilation if whole graph is compiled; testing only single node here)
     context.AssignNodeMemory(&i1, context.RegisterMemory(inputDimensions.at("x")).handle);
     context.AssignNodeMemory(&i2, context.RegisterMemory(inputDimensions.at("y")).handle);
     // compile kernel for VectorAddNode object
-    testMultNode.Compile(context);
+    testMultNode.Compile(context, *nodeCompiler);
 
     // copy input data into node working memory (will usually be done by compiled kernels for InputNode if whole graph is run; testing only single node here)
     context.SetNodeData(&i1, input1);
@@ -42,7 +46,8 @@ int main(int argc, const char * const argv[])
     context.Evaluate(InputDataMap());
 
     // get output (pointer to working memory of VectorAddNode which holds the computation result)
-    DataBuffer result;
+    DataBuffer result(25);
+    std::fill(std::begin(result), std::end(result), 3.3f);
     context.GetNodeData(&testMultNode, result);
 
     // compute and output squared error

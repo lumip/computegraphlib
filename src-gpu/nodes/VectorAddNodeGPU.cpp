@@ -5,7 +5,7 @@
 #include "../GraphCompilationGPUStrategy.hpp"
 #include "Kernel.hpp"
 
-class VectorAddNodeGPUKernel : public Kernel
+/*class VectorAddNodeGPUKernel : public Kernel
 {
 private:
     const cl_mem _memoryA;
@@ -25,9 +25,9 @@ public:
     {
         throw std::logic_error("not implemented yet.");
     }
-};
+};*/
 
-void VectorAddNode::Compile(GraphCompilationContext& context) const
+void VectorAddNode::Compile(GraphCompilationContext& context, NodeCompiler& nodeCompiler) const
 {
     NodeMemoryDescriptor memDescA = context.GetNodeMemoryDescriptor(this->_summandA);
     NodeMemoryDescriptor memDescB = context.GetNodeMemoryDescriptor(this->_summandB);
@@ -37,8 +37,9 @@ void VectorAddNode::Compile(GraphCompilationContext& context) const
     }
     const NodeMemoryDescriptor memDesc= context.RegisterMemory({memDescA.dimensions.yDim, memDescA.dimensions.xDim});
     context.AssignNodeMemory(this, memDesc.handle);
-    const cl_mem inputAMemBuffer = reinterpret_cast<const cl_mem>(memDescA.handle);
+    context.EnqueueKernel(nodeCompiler.CompileVectorAddNode(memDescA, memDescB, memDesc));
+    /*const cl_mem inputAMemBuffer = reinterpret_cast<const cl_mem>(memDescA.handle);
     const cl_mem inputBMemBuffer = reinterpret_cast<const cl_mem>(memDescB.handle);
     const cl_mem resultMemBuffer = reinterpret_cast<const cl_mem>(memDesc.handle);
-    context.EnqueueKernel(std::unique_ptr<Kernel>(new VectorAddNodeGPUKernel(inputAMemBuffer, inputBMemBuffer, resultMemBuffer, memDescA.dimensions.size()))); // std::make_unique only since c++14
+    context.EnqueueKernel(std::unique_ptr<Kernel>(new VectorAddNodeGPUKernel(inputAMemBuffer, inputBMemBuffer, resultMemBuffer, memDescA.dimensions.size()))); // std::make_unique only since c++14*/
 }
