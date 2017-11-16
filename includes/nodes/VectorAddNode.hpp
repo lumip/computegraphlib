@@ -20,6 +20,7 @@ public:
     virtual ~VectorAddNode();
     ConstNodeList GetInputs() const;
     void Compile(GraphCompilationContext& context, NodeCompiler& nodeCompiler) const;
+    MemoryDimensions GetMemoryDimensions(const InputDimensionsMap& inputDimensions, const std::map<ConstNodePtr, MemoryDimensions>& nodeMemoryDimensions) const;
     std::string ToString() const;
     bool IsInitialized() const;
 };

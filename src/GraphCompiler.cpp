@@ -42,6 +42,14 @@ std::unique_ptr<CompiledGraph> GraphCompiler::Compile(const ConstNodePtr outputN
 
     const std::vector<ConstNodePtr> nodeTopology = DetermineNodeOrder(outputNode);
     // todo: add functionality which determines which nodes need separate memory and which do not (temporary results only used in one other node can be overwritten)
+    std::map<ConstNodePtr, MemoryDimensions> nodeMemoryDimensions;
+    for (size_t i = 0; i < nodeTopology.size(); ++i)
+    {
+        const MemoryDimensions dim = nodeTopology[i]->GetMemoryDimensions(inputDimensions, nodeMemoryDimensions);
+        nodeMemoryDimensions.emplace(nodeTopology[i], dim);
+    }
+    // todo: above is temporary. find better way to store.
+    // todo: figure out how to check output and input size of variable node for consistency.
     for (size_t i = 0; i < nodeTopology.size(); ++i)
     {
         nodeTopology[i]->Compile(*context, *nodeCompiler);

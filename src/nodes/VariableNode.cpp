@@ -46,3 +46,8 @@ void VariableNode::Compile(GraphCompilationContext& context, NodeCompiler& nodeC
 {
     throw new std::logic_error("not yet implemented.");
 }
+
+MemoryDimensions VariableNode::GetMemoryDimensions(const InputDimensionsMap& inputDimensions, const std::map<ConstNodePtr, MemoryDimensions>& nodeMemoryDimensions) const
+{
+    throw new std::logic_error("not yet implemented.");
+}

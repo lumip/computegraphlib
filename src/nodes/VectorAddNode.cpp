@@ -41,3 +41,14 @@ void VectorAddNode::Compile(GraphCompilationContext& context, NodeCompiler& node
     context.AssignNodeMemory(this, memDesc.handle);
     context.EnqueueKernel(nodeCompiler.CompileVectorAddNode(memDescA, memDescB, memDesc));
 }
+
+MemoryDimensions VectorAddNode::GetMemoryDimensions(const InputDimensionsMap& inputDimensions, const std::map<ConstNodePtr, MemoryDimensions>& nodeMemoryDimensions) const
+{
+    const MemoryDimensions dimA = nodeMemoryDimensions.at(_summandA);
+    const MemoryDimensions dimB = nodeMemoryDimensions.at(_summandB);
+    if (dimA != dimB)
+    {
+        throw std::runtime_error("Inputs to VectorAddNode have different dimensions.");
+    }
+    return dimA;
+}

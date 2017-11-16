@@ -43,3 +43,16 @@ void MatrixMultNode::Compile(GraphCompilationContext& context, NodeCompiler& nod
     context.AssignNodeMemory(this, memDesc.handle);
     context.EnqueueKernel(nodeCompiler.CompileMatrixMultNode(memDescA, memDescB, memDesc));
 }
+
+MemoryDimensions MatrixMultNode::GetMemoryDimensions(const InputDimensionsMap& inputDimensions, const std::map<ConstNodePtr, MemoryDimensions>& nodeMemoryDimensions) const
+{
+    const MemoryDimensions dimA = nodeMemoryDimensions.at(_a);
+    const MemoryDimensions dimB = nodeMemoryDimensions.at(_b);
+    if (dimA.xDim != dimB.yDim)
+    {
+        throw new std::invalid_argument("Matrix dimensions do not agree.");
+    }
+    auto m = dimA.yDim;
+    auto n = dimB.xDim;
+    return MemoryDimensions({m, n});
+}

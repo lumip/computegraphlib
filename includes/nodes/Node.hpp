@@ -30,6 +30,7 @@ public:
     ConstNodeList GetSubscribers() const;
     virtual ConstNodeList GetInputs() const = 0;
     virtual void Compile(GraphCompilationContext& context, NodeCompiler& compiler) const = 0;
+    virtual MemoryDimensions GetMemoryDimensions(const InputDimensionsMap& inputDimensions, const std::map<ConstNodePtr, MemoryDimensions>& nodeMemoryDimensions) const = 0;
     virtual std::string ToString() const = 0;
     virtual bool IsInitialized() const = 0;
 private:
