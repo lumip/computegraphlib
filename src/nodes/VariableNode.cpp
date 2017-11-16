@@ -41,3 +41,8 @@ bool VariableNode::IsInitialized() const
 {
     return true;
 }
+
+void VariableNode::Compile(GraphCompilationContext& context, NodeCompiler& nodeCompiler) const
+{
+    throw new std::logic_error("not yet implemented.");
+}

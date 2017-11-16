@@ -28,3 +28,16 @@ bool VectorAddNode::IsInitialized() const
 {
     return false;
 }
+
+void VectorAddNode::Compile(GraphCompilationContext& context, NodeCompiler& nodeCompiler) const
+{
+    NodeMemoryDescriptor memDescA = context.GetNodeMemoryDescriptor(this->_summandA);
+    NodeMemoryDescriptor memDescB = context.GetNodeMemoryDescriptor(this->_summandB);
+    if (memDescA.dimensions.size() != memDescB.dimensions.size())
+    {
+        throw std::runtime_error("Inputs to VectorAddNode have different dimension.");
+    }
+    const NodeMemoryDescriptor memDesc= context.RegisterMemory({memDescA.dimensions.yDim, memDescA.dimensions.xDim});
+    context.AssignNodeMemory(this, memDesc.handle);
+    context.EnqueueKernel(nodeCompiler.CompileVectorAddNode(memDescA, memDescB, memDesc));
+}

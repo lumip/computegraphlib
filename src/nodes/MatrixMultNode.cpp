@@ -27,3 +27,19 @@ bool MatrixMultNode::IsInitialized() const
 {
     return false;
 }
+
+void MatrixMultNode::Compile(GraphCompilationContext& context, NodeCompiler& nodeCompiler) const
+{
+    NodeMemoryDescriptor memDescA = context.GetNodeMemoryDescriptor(this->_a);
+    NodeMemoryDescriptor memDescB = context.GetNodeMemoryDescriptor(this->_b);
+    if (memDescA.dimensions.xDim != memDescB.dimensions.yDim)
+    {
+        throw new std::invalid_argument("Matrix dimensions do not agree.");
+    }
+    auto m = memDescA.dimensions.yDim;
+    auto d = memDescA.dimensions.xDim; // == memDescB.yDim;
+    auto n = memDescB.dimensions.xDim;
+    const NodeMemoryDescriptor memDesc = context.RegisterMemory({m, n});
+    context.AssignNodeMemory(this, memDesc.handle);
+    context.EnqueueKernel(nodeCompiler.CompileMatrixMultNode(memDescA, memDescB, memDesc));
+}
