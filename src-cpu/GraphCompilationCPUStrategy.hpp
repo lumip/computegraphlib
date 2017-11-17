@@ -2,7 +2,6 @@
 #define _GRAPH_COMPILATION_CPU_STRATEGY_HPP_
 
 #include "GraphCompilationPlatform.hpp"
-#include "Kernel.hpp"
 
 class MemoryCompilationMap;
 

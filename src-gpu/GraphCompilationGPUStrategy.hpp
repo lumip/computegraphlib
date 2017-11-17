@@ -5,15 +5,19 @@
 
 #include "GraphCompilationContext.hpp"
 
+class MemoryCompilationMap;
+
 class GraphCompilationGPUStrategy : public GraphCompilationPlatform
 {
 private:
+    typedef cl_mem MemoryHandle;
+    const MemoryCompilationMap& _dimensionsMap;
     const cl_context _clContext;
     const cl_device_id _clDevice;
     const cl_command_queue _clMemoryQueue;
-    std::vector<std::unique_ptr<Kernel>> _kernels;
-public:
     const cl_command_queue _clExecutionQueue;
+    std::vector<std::unique_ptr<Kernel>> _kernels;
+    std::map<ConstNodePtr, MemoryHandle> _bufferMap;
 private:
     cl_device_id SelectDevice();
     cl_command_queue CreateCommandQueue();
@@ -22,14 +26,12 @@ public:
     static void CheckCLError(cl_int status);
     static void CheckCLError(cl_int status, const std::string& methodName);
 public:
-    GraphCompilationGPUStrategy(cl_context context);
+    GraphCompilationGPUStrategy(const MemoryCompilationMap& memoryCompilationMap, cl_context context);
     ~GraphCompilationGPUStrategy();
-    NodeMemoryHandle AllocateMemory(size_t size);
-    void DeallocateMemory(const NodeMemoryHandle mem);
-    void EnqueueKernel(std::unique_ptr<Kernel>&& kernel);
-    void CopyOutputData(const NodeMemoryHandle outputNodeMemory, DataBuffer& outputBuffer, size_t size) const;
-    void CopyInputData(const NodeMemoryHandle inputNodeMemory, InputDataBuffer& inputBuffer, size_t size);
-    void Evaluate(const std::vector<std::pair<const NodeMemoryDescriptor, InputDataBuffer&>>& inputData);
+    void AllocateMemory(const ConstNodePtr node);
+    void CopyOutputData(const ConstNodePtr outputNode, DataBuffer& outputBuffer) const;
+    void CopyInputData(const ConstNodePtr inputNode, InputDataBuffer& inputBuffer);
+    void Evaluate();
 
     void CompileInputNode(const InputNode* const node);
     void CompileMatrixMultNode(const ConstNodePtr inputANode, const ConstNodePtr inputBNode, const MatrixMultNode* const node);

@@ -1,4 +1,4 @@
-#ifndef _NODE_COMPILER_GPU_HPP_
+/*#ifndef _NODE_COMPILER_GPU_HPP_
 #define _NODE_COMPILER_GPU_HPP_
 
 #include "NodeCompiler.hpp"
@@ -17,4 +17,4 @@ public:
     std::unique_ptr<Kernel> CompileVectorAddNode(const NodeMemoryDescriptor inputAMem, const NodeMemoryDescriptor inputBMem, const NodeMemoryDescriptor resultMem);
 };
 
-#endif
+#endif*/

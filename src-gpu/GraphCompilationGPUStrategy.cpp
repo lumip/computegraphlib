@@ -54,6 +54,40 @@ std::string ErrorCodeToMessage(cl_int err)
     }
 }
 
+/*namespace OCLWrapper
+{
+
+    class Memory
+    {
+    private:
+        const cl_mem _memory;
+        bool _owning;
+    public:
+        Memory(const cl_mem memory) : _memory(memory), _owning(true) { }
+        ~Memory()
+        {
+            if (_owning)
+            {
+                GraphCompilationGPUStrategy::CheckCLError(
+                    clReleaseMemObject(_memory),
+                "clReleaseMemObject");
+            }
+        }
+        Memory(Memory const &) = delete;
+        void operator=(Memory const &) = delete;
+        Memory(const Memory&& moved)
+            : _memory(moved._memory), _owning(true)
+        {
+            moved._owning = false;
+        }
+        void operator=(Memory const && moved)
+        {
+            return Memory(std::move(moved));
+        }
+    };
+
+}*/
+
 void GraphCompilationGPUStrategy::CheckCLError(cl_int status, const std::string& methodName)
 {
     if (status != CL_SUCCESS)
@@ -69,12 +103,14 @@ void GraphCompilationGPUStrategy::CheckCLError(cl_int status)
     CheckCLError(status, "OpenCL call");
 }
 
-GraphCompilationGPUStrategy::GraphCompilationGPUStrategy(const cl_context context)
-    : _clContext(context)
+GraphCompilationGPUStrategy::GraphCompilationGPUStrategy(const MemoryCompilationMap& memoryCompilationMap, const cl_context context)
+    : _dimensionsMap(memoryCompilationMap)
+    , _clContext(context)
     , _clDevice(SelectDevice())
     , _clMemoryQueue(CreateCommandQueue())
     , _clExecutionQueue(CreateCommandQueue())
     , _kernels()
+    , _bufferMap()
 {
 }
 
@@ -106,50 +142,43 @@ cl_command_queue GraphCompilationGPUStrategy::CreateCommandQueue()
     return queue;
 }
 
-NodeMemoryHandle GraphCompilationGPUStrategy::AllocateMemory(size_t size)
+void GraphCompilationGPUStrategy::AllocateMemory(const ConstNodePtr node)
 {
-    cl_int status = CL_SUCCESS;
-    cl_mem buffer = clCreateBuffer(_clContext, CL_MEM_READ_WRITE, size * sizeof(float), nullptr, &status);
-    CheckCLError(status, "clCreateBuffer");
-    return reinterpret_cast<NodeMemoryHandle>(buffer);
-}
-
-void GraphCompilationGPUStrategy::DeallocateMemory(const NodeMemoryHandle mem)
-{
-    cl_mem buffer = reinterpret_cast<cl_mem>(mem);
-    CheckCLError(clReleaseMemObject(buffer), "clReleaseMemObject");
-}
-
-void GraphCompilationGPUStrategy::EnqueueKernel(std::unique_ptr<Kernel>&& kernel)
-{
-    _kernels.emplace_back(std::move(kernel));
-}
-
-void GraphCompilationGPUStrategy::CopyOutputData(const NodeMemoryHandle outputNodeMemory, DataBuffer& outputBuffer, size_t size) const
-{
-    clFinish(_clExecutionQueue);
-    CheckCLError(
-        clEnqueueReadBuffer(_clMemoryQueue, reinterpret_cast<cl_mem>(outputNodeMemory), CL_TRUE, 0, size * sizeof(float), outputBuffer.data(), 0, nullptr, nullptr) // todo: temporarily (?) blocking
-    );
-    clFinish(_clMemoryQueue);
-}
-
-void GraphCompilationGPUStrategy::CopyInputData(const NodeMemoryHandle inputNodeMemory, InputDataBuffer& inputBuffer, size_t size)
-{
-    clFinish(_clExecutionQueue);
-    CheckCLError(
-        clEnqueueWriteBuffer(_clMemoryQueue, reinterpret_cast<cl_mem>(inputNodeMemory), CL_FALSE, 0, size * sizeof(float), inputBuffer.data(), 0, nullptr, nullptr) // todo: handle events?
-    );
-}
-
-void GraphCompilationGPUStrategy::Evaluate(const std::vector<std::pair<const NodeMemoryDescriptor, InputDataBuffer&>>& inputData)
-{
-    clFinish(_clMemoryQueue);
-    clFinish(_clExecutionQueue);
-    for (auto input : inputData)
+    MemoryDimensions dims = _dimensionsMap.GetNodeMemoryDimensions(node);
+    size_t size = dims.size();
+    if (size > 0)
     {
-         CopyInputData(input.first.handle, input.second, input.first.dimensions.size());
+        cl_int status = CL_SUCCESS;
+        cl_mem buffer = clCreateBuffer(_clContext, CL_MEM_READ_WRITE, dims.size() * sizeof(float), nullptr, &status);
+        CheckCLError(status, "clCreateBuffer");
+        _bufferMap.emplace(node, buffer);
     }
+}
+
+void GraphCompilationGPUStrategy::CopyOutputData(const ConstNodePtr outputNode, DataBuffer& outputBuffer) const
+{
+    MemoryDimensions dims = _dimensionsMap.GetNodeMemoryDimensions(outputNode);
+    size_t size = dims.size();
+    outputBuffer.resize(size);
+    const cl_mem nodeMemBuffer = _bufferMap.at(outputNode);
+    clFinish(_clExecutionQueue);
+    CheckCLError(
+        clEnqueueReadBuffer(_clMemoryQueue, nodeMemBuffer, CL_TRUE, 0, size * sizeof(float), outputBuffer.data(), 0, nullptr, nullptr) // todo: temporarily (?) blocking
+    );
+}
+
+void GraphCompilationGPUStrategy::CopyInputData(const ConstNodePtr inputNode, InputDataBuffer& inputBuffer)
+{
+    MemoryDimensions dims = _dimensionsMap.GetNodeMemoryDimensions(inputNode);
+    const cl_mem nodeMemBuffer = _bufferMap.at(inputNode);
+    clFinish(_clExecutionQueue);
+    CheckCLError(
+        clEnqueueWriteBuffer(_clMemoryQueue, nodeMemBuffer, CL_FALSE, 0, dims.size() * sizeof(float), inputBuffer.data(), 0, nullptr, nullptr) // todo: handle events?
+    );
+}
+
+void GraphCompilationGPUStrategy::Evaluate()
+{
     clFinish(_clMemoryQueue);
     for (const std::unique_ptr<Kernel>& kernel : _kernels)
     {

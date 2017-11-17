@@ -1,5 +1,5 @@
-#include "CL/cl.h"
-#include "NodeCompilerGPU.hpp"
+#include <CL/cl.h>
+
 #include "GraphCompilationGPUStrategy.hpp"
 #include "Kernel.hpp"
 
@@ -11,18 +11,7 @@
 extern std::string MatrixMultSource;
 extern std::string VectorAddKernelSource;
 
-NodeCompilerGPU::NodeCompilerGPU(GraphCompilationGPUStrategy* const gpuStrat)
-    : _strategy(gpuStrat)
-{
-
-}
-
-NodeCompilerGPU::~NodeCompilerGPU() { }
-
-std::unique_ptr<Kernel> NodeCompilerGPU::CompileInputNode(const InputNode * const node)
-{
-
-}
+void GraphCompilationGPUStrategy::CompileInputNode(const InputNode* const node) { }
 
 class MatrixMultNodeGPUKernel : public Kernel
 {
@@ -55,23 +44,29 @@ public:
     }
 };
 
-std::unique_ptr<Kernel> NodeCompilerGPU::CompileMatrixMultNode(const ConstNodePtr inputANode, const ConstNodePtr inputBNode, const MatrixMultNode* const node)
+void GraphCompilationGPUStrategy::CompileMatrixMultNode(const ConstNodePtr inputANode, const ConstNodePtr inputBNode, const MatrixMultNode* const node)
 {
-    cl_kernel kernel = _strategy->CompileKernel(MatrixMultSource);
-    return std::unique_ptr<Kernel>(new MatrixMultNodeGPUKernel(kernel,
-                                                               _strategy->_clExecutionQueue,
-                                                               reinterpret_cast<const cl_mem>(inputAMem.handle),
-                                                               reinterpret_cast<const cl_mem>(inputBMem.handle),
-                                                               reinterpret_cast<const cl_mem>(resultMem.handle),
-                                                               inputAMem.dimensions.yDim,
-                                                               inputBMem.dimensions.xDim,
-                                                               inputAMem.dimensions.xDim));
+    const MemoryDimensions inputADims = _dimensionsMap.GetNodeMemoryDimensions(inputANode);
+    const MemoryDimensions inputBDims = _dimensionsMap.GetNodeMemoryDimensions(inputBNode);
+    const MemoryDimensions resultDims = _dimensionsMap.GetNodeMemoryDimensions(node);
+    const MemoryHandle inputABuffer = _bufferMap.at(inputANode);
+    const MemoryHandle inputBBuffer = _bufferMap.at(inputBNode);
+    const MemoryHandle resultBuffer = _bufferMap.at(node);
+    auto m = inputADims.yDim;
+    auto n = inputBDims.xDim;
+    auto d = inputADims.xDim;
+    cl_kernel kernel = CompileKernel(MatrixMultSource);
+    _kernels.emplace_back(
+           std::unique_ptr<Kernel>(new MatrixMultNodeGPUKernel(kernel,
+                                                               _clExecutionQueue,
+                                                               inputABuffer,
+                                                               inputBBuffer,
+                                                               resultBuffer,
+                                                               m, n, d))
+    );
 }
 
-std::unique_ptr<Kernel> NodeCompilerGPU::CompileVariableNode(const VariableNode * const node)
-{
-
-}
+void GraphCompilationGPUStrategy::CompileVariableNode(const VariableNode* const node) { }
 
 class VectorAddNodeGPUKernel : public Kernel
 {
@@ -96,13 +91,19 @@ public:
     }
 };
 
-std::unique_ptr<Kernel> NodeCompilerGPU::CompileVectorAddNode(const NodeMemoryDescriptor inputAMem, const NodeMemoryDescriptor inputBMem, const NodeMemoryDescriptor resultMem)
+void GraphCompilationGPUStrategy::CompileVectorAddNode(const ConstNodePtr inputANode, const ConstNodePtr inputBNode, const VectorAddNode* const node)
 {
-    cl_kernel kernel = _strategy->CompileKernel(VectorAddKernelSource);
-    return std::unique_ptr<Kernel>(new VectorAddNodeGPUKernel(kernel,
-                                                              _strategy->_clExecutionQueue,
-                                                              reinterpret_cast<const cl_mem>(inputAMem.handle),
-                                                              reinterpret_cast<const cl_mem>(inputBMem.handle),
-                                                              reinterpret_cast<const cl_mem>(resultMem.handle),
-                                                              resultMem.dimensions.size()));
+    cl_kernel kernel = CompileKernel(VectorAddKernelSource);
+    const MemoryDimensions resultDims = _dimensionsMap.GetNodeMemoryDimensions(node);
+    const MemoryHandle inputABuffer = _bufferMap.at(inputANode);
+    const MemoryHandle inputBBuffer = _bufferMap.at(inputBNode);
+    const MemoryHandle resultBuffer = _bufferMap.at(node);
+    _kernels.emplace_back(
+           std::unique_ptr<Kernel>(new VectorAddNodeGPUKernel(kernel,
+                                                              _clExecutionQueue,
+                                                              inputABuffer,
+                                                              inputBBuffer,
+                                                              resultBuffer,
+                                                              resultDims.size()))
+    );
 }
