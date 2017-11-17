@@ -5,7 +5,7 @@
 #include <memory>
 
 #include "nodes/Node.hpp"
-#include "GraphCompilationContext.hpp"
+#include "CompilationMemoryMap.hpp"
 #include "CompiledGraph.hpp"
 #include "ImplementationStrategyFactory.hpp"
 

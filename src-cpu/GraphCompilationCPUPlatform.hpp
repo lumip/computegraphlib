@@ -3,22 +3,20 @@
 
 #include "GraphCompilationPlatform.hpp"
 
-class MemoryCompilationMap;
+class CompilationMemoryMap;
 
-class GraphCompilationCPUStrategy : public GraphCompilationPlatform
+class GraphCompilationCPUPlatform : public GraphCompilationPlatform
 {
 private:
     typedef float* MemoryHandle;
 private:
     std::vector<std::unique_ptr<Kernel>> _kernels;
     std::map<ConstNodePtr, std::unique_ptr<float[]>> _bufferMap;
-    const MemoryCompilationMap& _dimensionsMap;
+    const CompilationMemoryMap& _dimensionsMap;
 public:
-    GraphCompilationCPUStrategy(const MemoryCompilationMap& memoryCompilationMap);
-    ~GraphCompilationCPUStrategy();
+    GraphCompilationCPUPlatform(const CompilationMemoryMap& CompilationMemoryMap);
+    ~GraphCompilationCPUPlatform();
     void AllocateMemory(const ConstNodePtr node);
-    //void DeallocateMemory(const NodeMemoryHandle mem);
-    //void EnqueueKernel(std::unique_ptr<Kernel>&& kernel);
     void CopyOutputData(const ConstNodePtr outputNode, DataBuffer& outputBuffer) const;
     void CopyInputData(const ConstNodePtr inputNode, InputDataBuffer& inputBuffer);
     void Evaluate();

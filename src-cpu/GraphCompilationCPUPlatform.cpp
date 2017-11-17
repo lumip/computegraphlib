@@ -1,16 +1,16 @@
-#include "GraphCompilationCPUStrategy.hpp"
-#include "GraphCompilationContext.hpp"
+#include "GraphCompilationCPUPlatform.hpp"
+#include "CompilationMemoryMap.hpp"
 
-GraphCompilationCPUStrategy::GraphCompilationCPUStrategy(const MemoryCompilationMap& memoryCompilationMap)
+GraphCompilationCPUPlatform::GraphCompilationCPUPlatform(const CompilationMemoryMap& CompilationMemoryMap)
     : _kernels()
     , _bufferMap()
-    , _dimensionsMap(memoryCompilationMap)
+    , _dimensionsMap(CompilationMemoryMap)
 {
 }
 
-GraphCompilationCPUStrategy::~GraphCompilationCPUStrategy() { }
+GraphCompilationCPUPlatform::~GraphCompilationCPUPlatform() { }
 
-void GraphCompilationCPUStrategy::AllocateMemory(const ConstNodePtr node)
+void GraphCompilationCPUPlatform::AllocateMemory(const ConstNodePtr node)
 {
     MemoryDimensions dims = _dimensionsMap.GetNodeMemoryDimensions(node);
     std::unique_ptr<float[]> mem(new float[dims.size()]); // consider using std::valarray instead of raw float arrays?
@@ -27,7 +27,7 @@ void GraphCompilationCPUStrategy::AllocateMemory(const ConstNodePtr node)
     _kernels.emplace_back(std::move(kernel));
 }*/
 
-void GraphCompilationCPUStrategy::CopyOutputData(const ConstNodePtr outputNode, DataBuffer& outputBuffer) const
+void GraphCompilationCPUPlatform::CopyOutputData(const ConstNodePtr outputNode, DataBuffer& outputBuffer) const
 {
     MemoryDimensions dims = _dimensionsMap.GetNodeMemoryDimensions(outputNode);
     size_t size = dims.size();
@@ -36,14 +36,14 @@ void GraphCompilationCPUStrategy::CopyOutputData(const ConstNodePtr outputNode, 
     std::copy(nodeMemBuffer, (nodeMemBuffer + size), std::begin(outputBuffer));
 }
 
-void GraphCompilationCPUStrategy::CopyInputData(const ConstNodePtr inputNode, InputDataBuffer& inputBuffer)
+void GraphCompilationCPUPlatform::CopyInputData(const ConstNodePtr inputNode, InputDataBuffer& inputBuffer)
 {
     MemoryDimensions dims = _dimensionsMap.GetNodeMemoryDimensions(inputNode);
     MemoryHandle nodeMemBuffer = _bufferMap.at(inputNode).get();
     std::copy(std::begin(inputBuffer), std::begin(inputBuffer) + dims.size(), nodeMemBuffer);
 }
 
-void GraphCompilationCPUStrategy::Evaluate()
+void GraphCompilationCPUPlatform::Evaluate()
 {
     for (const std::unique_ptr<Kernel>& kernel : _kernels)
     {

@@ -7,7 +7,7 @@
 #include "Kernel.hpp"
 #include "GraphCompilationPlatform.hpp"
 
-class MemoryCompilationMap
+class CompilationMemoryMap
 {
 private:
     std::map<ConstNodePtr, MemoryDimensions> _memoryMap;
@@ -15,8 +15,8 @@ private:
     std::map<std::string, ConstNodePtr> _inputMemoryMap;
     std::map<std::string, ConstNodePtr> _outputMemoryMap;
 public:
-    MemoryCompilationMap(const InputDimensionsMap& inputDimensions);
-    virtual ~MemoryCompilationMap();
+    CompilationMemoryMap(const InputDimensionsMap& inputDimensions);
+    virtual ~CompilationMemoryMap();
     void RegisterNodeMemory(const ConstNodePtr node, const MemoryDimensions MemoryDimensions); // todo: add readonly flag
     MemoryDimensions GetNodeMemoryDimensions(const ConstNodePtr node) const;
     MemoryDimensions GetInputDimensions(std::string inputName) const;

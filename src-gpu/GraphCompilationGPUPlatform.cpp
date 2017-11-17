@@ -1,4 +1,4 @@
-#include "GraphCompilationGPUStrategy.hpp"
+#include "GraphCompilationGPUPlatform.hpp"
 #include <sstream>
 
 std::string ErrorCodeToMessage(cl_int err)
@@ -88,7 +88,7 @@ std::string ErrorCodeToMessage(cl_int err)
 
 }*/
 
-void GraphCompilationGPUStrategy::CheckCLError(cl_int status, const std::string& methodName)
+void GraphCompilationGPUPlatform::CheckCLError(cl_int status, const std::string& methodName)
 {
     if (status != CL_SUCCESS)
     {
@@ -98,13 +98,13 @@ void GraphCompilationGPUStrategy::CheckCLError(cl_int status, const std::string&
     }
 }
 
-void GraphCompilationGPUStrategy::CheckCLError(cl_int status)
+void GraphCompilationGPUPlatform::CheckCLError(cl_int status)
 {
     CheckCLError(status, "OpenCL call");
 }
 
-GraphCompilationGPUStrategy::GraphCompilationGPUStrategy(const MemoryCompilationMap& memoryCompilationMap, const cl_context context)
-    : _dimensionsMap(memoryCompilationMap)
+GraphCompilationGPUPlatform::GraphCompilationGPUPlatform(const CompilationMemoryMap& CompilationMemoryMap, const cl_context context)
+    : _dimensionsMap(CompilationMemoryMap)
     , _clContext(context)
     , _clDevice(SelectDevice())
     , _clMemoryQueue(CreateCommandQueue())
@@ -114,14 +114,14 @@ GraphCompilationGPUStrategy::GraphCompilationGPUStrategy(const MemoryCompilation
 {
 }
 
-GraphCompilationGPUStrategy::~GraphCompilationGPUStrategy()
+GraphCompilationGPUPlatform::~GraphCompilationGPUPlatform()
 {
     clReleaseCommandQueue(_clMemoryQueue);
     clReleaseCommandQueue(_clExecutionQueue);
     clReleaseContext(_clContext);
 }
 
-cl_device_id GraphCompilationGPUStrategy::SelectDevice()
+cl_device_id GraphCompilationGPUPlatform::SelectDevice()
 {
     size_t contextDeviceCount = 0;
     CheckCLError(clGetContextInfo(_clContext, CL_CONTEXT_DEVICES, 0, nullptr, &contextDeviceCount), "clGetContextInfo");
@@ -134,7 +134,7 @@ cl_device_id GraphCompilationGPUStrategy::SelectDevice()
     return devices[0];
 }
 
-cl_command_queue GraphCompilationGPUStrategy::CreateCommandQueue()
+cl_command_queue GraphCompilationGPUPlatform::CreateCommandQueue()
 {
     cl_int status = CL_SUCCESS;
     cl_command_queue queue = clCreateCommandQueue(_clContext, _clDevice, 0/*CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE*/, &status);
@@ -142,7 +142,7 @@ cl_command_queue GraphCompilationGPUStrategy::CreateCommandQueue()
     return queue;
 }
 
-void GraphCompilationGPUStrategy::AllocateMemory(const ConstNodePtr node)
+void GraphCompilationGPUPlatform::AllocateMemory(const ConstNodePtr node)
 {
     MemoryDimensions dims = _dimensionsMap.GetNodeMemoryDimensions(node);
     size_t size = dims.size();
@@ -155,7 +155,7 @@ void GraphCompilationGPUStrategy::AllocateMemory(const ConstNodePtr node)
     }
 }
 
-void GraphCompilationGPUStrategy::CopyOutputData(const ConstNodePtr outputNode, DataBuffer& outputBuffer) const
+void GraphCompilationGPUPlatform::CopyOutputData(const ConstNodePtr outputNode, DataBuffer& outputBuffer) const
 {
     MemoryDimensions dims = _dimensionsMap.GetNodeMemoryDimensions(outputNode);
     size_t size = dims.size();
@@ -167,7 +167,7 @@ void GraphCompilationGPUStrategy::CopyOutputData(const ConstNodePtr outputNode, 
     );
 }
 
-void GraphCompilationGPUStrategy::CopyInputData(const ConstNodePtr inputNode, InputDataBuffer& inputBuffer)
+void GraphCompilationGPUPlatform::CopyInputData(const ConstNodePtr inputNode, InputDataBuffer& inputBuffer)
 {
     MemoryDimensions dims = _dimensionsMap.GetNodeMemoryDimensions(inputNode);
     const cl_mem nodeMemBuffer = _bufferMap.at(inputNode);
@@ -177,7 +177,7 @@ void GraphCompilationGPUStrategy::CopyInputData(const ConstNodePtr inputNode, In
     );
 }
 
-void GraphCompilationGPUStrategy::Evaluate()
+void GraphCompilationGPUPlatform::Evaluate()
 {
     clFinish(_clMemoryQueue);
     for (const std::unique_ptr<Kernel>& kernel : _kernels)
@@ -186,7 +186,7 @@ void GraphCompilationGPUStrategy::Evaluate()
     }
 }
 
-cl_kernel GraphCompilationGPUStrategy::CompileKernel(const std::string& kernelSource)
+cl_kernel GraphCompilationGPUPlatform::CompileKernel(const std::string& kernelSource)
 {
     size_t length = kernelSource.length();
     const char* s = kernelSource.c_str();

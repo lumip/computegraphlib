@@ -1,5 +1,5 @@
 #include "nodes/InputNode.hpp"
-#include "GraphCompilationContext.hpp"
+#include "CompilationMemoryMap.hpp"
 
 InputNode::InputNode(std::string name, size_t dim)
     : _name(name)
@@ -24,11 +24,11 @@ bool InputNode::IsInitialized() const
     return true;
 }
 
-void InputNode::Compile(MemoryCompilationMap &context, NodeCompiler& nodeCompiler) const
+void InputNode::Compile(CompilationMemoryMap &context, NodeCompiler& nodeCompiler) const
 {
 }
 
-void InputNode::GetMemoryDimensions(MemoryCompilationMap& memoryMap) const
+void InputNode::GetMemoryDimensions(CompilationMemoryMap& memoryMap) const
 {
     const MemoryDimensions dim = memoryMap.GetInputDimensions(_name);
     if (dim.xDim != this->_dim)

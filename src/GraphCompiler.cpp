@@ -37,7 +37,7 @@ std::vector<ConstNodePtr> GraphCompiler::DetermineNodeOrder(const ConstNodePtr o
 
 std::unique_ptr<CompiledGraph> GraphCompiler::Compile(const ConstNodePtr outputNode, const InputDimensionsMap& inputDimensions) const
 {
-    std::unique_ptr<MemoryCompilationMap> context(new MemoryCompilationMap(inputDimensions));
+    std::unique_ptr<CompilationMemoryMap> context(new CompilationMemoryMap(inputDimensions));
     std::unique_ptr<GraphCompilationPlatform> strategy = _strategyFactory->CreateGraphCompilationTargetStrategy(*context);
     //std::unique_ptr<NodeCompiler> nodeCompiler(_strategyFactory->CreateNodeCompiler(&(*strategy)));
 

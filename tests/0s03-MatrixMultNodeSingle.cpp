@@ -3,7 +3,7 @@
 #include "types.hpp"
 #include "nodes/InputNode.hpp"
 #include "nodes/MatrixMultNode.hpp"
-#include "GraphCompilationContext.hpp"
+#include "CompilationMemoryMap.hpp"
 #include "ImplementationStrategyFactory.hpp"
 
 int main(int argc, const char * const argv[])
@@ -32,20 +32,20 @@ int main(int argc, const char * const argv[])
 
     // set up graph compilation context and platform
     ImplementationStrategyFactory fact;
-    MemoryCompilationMap memoryCompilationMap(inputDimensions);
-    std::unique_ptr<GraphCompilationPlatform> platform = fact.CreateGraphCompilationTargetStrategy(memoryCompilationMap);
+    CompilationMemoryMap CompilationMemoryMap(inputDimensions);
+    std::unique_ptr<GraphCompilationPlatform> platform = fact.CreateGraphCompilationTargetStrategy(CompilationMemoryMap);
 
     // set up working memory for input nodes (will usually be done during compilation if whole graph is compiled; testing only single node here)
-    memoryCompilationMap.RegisterNodeMemory(&i1, dims1);
-    memoryCompilationMap.RegisterNodeMemory(&i2, dims2);
-    testMultNode.GetMemoryDimensions(memoryCompilationMap);
+    CompilationMemoryMap.RegisterNodeMemory(&i1, dims1);
+    CompilationMemoryMap.RegisterNodeMemory(&i2, dims2);
+    testMultNode.GetMemoryDimensions(CompilationMemoryMap);
 
     platform->AllocateMemory(&i1);
     platform->AllocateMemory(&i2);
     platform->AllocateMemory(&testMultNode);
 
     // compile kernel for VectorAddNode object
-    testMultNode.Compile(memoryCompilationMap, *platform);
+    testMultNode.Compile(CompilationMemoryMap, *platform);
 
     // copy input data into node working memory (will usually be done by compiled kernels for InputNode if whole graph is run; testing only single node here)
     platform->CopyInputData(&i1, input1);

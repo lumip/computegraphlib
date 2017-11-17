@@ -1,6 +1,6 @@
 #include <CL/cl.h>
 
-#include "GraphCompilationGPUStrategy.hpp"
+#include "GraphCompilationGPUPlatform.hpp"
 #include "Kernel.hpp"
 
 #include "nodes/InputNode.hpp"
@@ -11,7 +11,7 @@
 extern std::string MatrixMultSource;
 extern std::string VectorAddKernelSource;
 
-void GraphCompilationGPUStrategy::CompileInputNode(const InputNode* const node) { }
+void GraphCompilationGPUPlatform::CompileInputNode(const InputNode* const node) { }
 
 class MatrixMultNodeGPUKernel : public Kernel
 {
@@ -38,13 +38,13 @@ public:
         clSetKernelArg(_kernel, 2, sizeof(cl_mem), &_resultBuffer);
         clSetKernelArg(_kernel, 3, sizeof(cl_uint), &_d);
         size_t globalWorkSize[2] = { _m, _n };
-        GraphCompilationGPUStrategy::CheckCLError(
+        GraphCompilationGPUPlatform::CheckCLError(
                     clEnqueueNDRangeKernel(_queue, _kernel, 2, nullptr, globalWorkSize, nullptr, 0, nullptr, nullptr)
         , "clEnqueueNDRangeKernel");
     }
 };
 
-void GraphCompilationGPUStrategy::CompileMatrixMultNode(const ConstNodePtr inputANode, const ConstNodePtr inputBNode, const MatrixMultNode* const node)
+void GraphCompilationGPUPlatform::CompileMatrixMultNode(const ConstNodePtr inputANode, const ConstNodePtr inputBNode, const MatrixMultNode* const node)
 {
     const MemoryDimensions inputADims = _dimensionsMap.GetNodeMemoryDimensions(inputANode);
     const MemoryDimensions inputBDims = _dimensionsMap.GetNodeMemoryDimensions(inputBNode);
@@ -66,7 +66,7 @@ void GraphCompilationGPUStrategy::CompileMatrixMultNode(const ConstNodePtr input
     );
 }
 
-void GraphCompilationGPUStrategy::CompileVariableNode(const VariableNode* const node) { }
+void GraphCompilationGPUPlatform::CompileVariableNode(const VariableNode* const node) { }
 
 class VectorAddNodeGPUKernel : public Kernel
 {
@@ -91,7 +91,7 @@ public:
     }
 };
 
-void GraphCompilationGPUStrategy::CompileVectorAddNode(const ConstNodePtr inputANode, const ConstNodePtr inputBNode, const VectorAddNode* const node)
+void GraphCompilationGPUPlatform::CompileVectorAddNode(const ConstNodePtr inputANode, const ConstNodePtr inputBNode, const VectorAddNode* const node)
 {
     cl_kernel kernel = CompileKernel(VectorAddKernelSource);
     const MemoryDimensions resultDims = _dimensionsMap.GetNodeMemoryDimensions(node);

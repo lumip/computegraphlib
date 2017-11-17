@@ -1,12 +1,12 @@
-#include "GraphCompilationCPUStrategy.hpp"
-#include "GraphCompilationContext.hpp"
+#include "GraphCompilationCPUPlatform.hpp"
+#include "CompilationMemoryMap.hpp"
 
 #include "nodes/InputNode.hpp"
 #include "nodes/MatrixMultNode.hpp"
 #include "nodes/VariableNode.hpp"
 #include "nodes/VectorAddNode.hpp"
 
-void GraphCompilationCPUStrategy::CompileInputNode(const InputNode* const node) { }
+void GraphCompilationCPUPlatform::CompileInputNode(const InputNode* const node) { }
 
 class MatrixMultNodeCPUKernel : public Kernel
 {
@@ -67,7 +67,7 @@ public:
     }
 };
 
-void GraphCompilationCPUStrategy::CompileMatrixMultNode(const ConstNodePtr inputANode, const ConstNodePtr inputBNode, const MatrixMultNode* const node)
+void GraphCompilationCPUPlatform::CompileMatrixMultNode(const ConstNodePtr inputANode, const ConstNodePtr inputBNode, const MatrixMultNode* const node)
 {
     MemoryDimensions inputADims = _dimensionsMap.GetNodeMemoryDimensions(inputANode);
     MemoryDimensions inputBDims = _dimensionsMap.GetNodeMemoryDimensions(inputBNode);
@@ -86,7 +86,7 @@ void GraphCompilationCPUStrategy::CompileMatrixMultNode(const ConstNodePtr input
     );
 }
 
-void GraphCompilationCPUStrategy::CompileVariableNode(const VariableNode* const node) { }
+void GraphCompilationCPUPlatform::CompileVariableNode(const VariableNode* const node) { }
 
 class VectorAddNodeCPUKernel : public Kernel
 {
@@ -113,7 +113,7 @@ public:
     }
 };
 
-void GraphCompilationCPUStrategy::CompileVectorAddNode(const ConstNodePtr inputANode, const ConstNodePtr inputBNode, const VectorAddNode* const node)
+void GraphCompilationCPUPlatform::CompileVectorAddNode(const ConstNodePtr inputANode, const ConstNodePtr inputBNode, const VectorAddNode* const node)
 {
     MemoryDimensions resultDims = _dimensionsMap.GetNodeMemoryDimensions(node);
     const MemoryHandle inputABuffer = _bufferMap.at(inputANode).get();

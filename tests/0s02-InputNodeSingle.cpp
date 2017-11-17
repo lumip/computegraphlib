@@ -2,7 +2,7 @@
 
 #include "types.hpp"
 #include "nodes/InputNode.hpp"
-#include "GraphCompilationContext.hpp"
+#include "CompilationMemoryMap.hpp"
 #include "ImplementationStrategyFactory.hpp"
 
 int main(const int argc, const char * const argv[])
@@ -23,16 +23,16 @@ int main(const int argc, const char * const argv[])
 
     // set up graph compilation context and platform
     ImplementationStrategyFactory fact;
-    MemoryCompilationMap memoryCompilationMap(inputDimensions);
-    std::unique_ptr<GraphCompilationPlatform> platform = fact.CreateGraphCompilationTargetStrategy(memoryCompilationMap);
+    CompilationMemoryMap CompilationMemoryMap(inputDimensions);
+    std::unique_ptr<GraphCompilationPlatform> platform = fact.CreateGraphCompilationTargetStrategy(CompilationMemoryMap);
 
     // set up working memory for input nodes (will usually be done during compilation if whole graph is compiled; testing only single node here)
-    testInputNode.GetMemoryDimensions(memoryCompilationMap);
+    testInputNode.GetMemoryDimensions(CompilationMemoryMap);
 
     platform->AllocateMemory(&testInputNode);
 
     // compile kernel for InputNode object
-    testInputNode.Compile(memoryCompilationMap, *platform);
+    testInputNode.Compile(CompilationMemoryMap, *platform);
 
     platform->CopyInputData(&testInputNode, input1);
 

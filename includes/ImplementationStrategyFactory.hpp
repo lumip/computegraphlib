@@ -4,12 +4,12 @@
 #include <memory>
 class GraphCompilationPlatform;
 class NodeCompiler;
-class MemoryCompilationMap;
+class CompilationMemoryMap;
 
 class ImplementationStrategyFactory
 {
 public:
-    std::unique_ptr<GraphCompilationPlatform> CreateGraphCompilationTargetStrategy(MemoryCompilationMap& memoryCompilationMap) const;
+    std::unique_ptr<GraphCompilationPlatform> CreateGraphCompilationTargetStrategy(CompilationMemoryMap& CompilationMemoryMap) const;
     //std::unique_ptr<NodeCompiler> CreateNodeCompiler(GraphCompilationPlatform* strategy) const;
 };
 

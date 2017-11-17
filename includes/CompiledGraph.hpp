@@ -6,15 +6,15 @@
 #include "types.hpp"
 
 class GraphCompilationPlatform;
-class MemoryCompilationMap;
+class CompilationMemoryMap;
 
 class CompiledGraph
 {
 private:
     std::unique_ptr<GraphCompilationPlatform> _platform;
-    std::unique_ptr<MemoryCompilationMap> _memoryCompilationMap;
+    std::unique_ptr<CompilationMemoryMap> _compilationMemoryMap;
 public:
-    CompiledGraph(std::unique_ptr<GraphCompilationPlatform>&& platform, std::unique_ptr<MemoryCompilationMap>&& memoryCompilationMap);
+    CompiledGraph(std::unique_ptr<GraphCompilationPlatform>&& platform, std::unique_ptr<CompilationMemoryMap>&& CompilationMemoryMap);
     virtual ~CompiledGraph();
     //virtual DataBuffer& GetFastInputBuffer(const std::string inputName) = 0; // todo: implement this. gives a buffer for the requested input which enables fast transfer of the data written therein to the kernel (pinned memory for OpenCL, direct buffer access for CPU)
     void Evaluate(const InputDataMap& inputData);

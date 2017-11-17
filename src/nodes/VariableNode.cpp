@@ -1,5 +1,5 @@
 #include "nodes/VariableNode.hpp"
-#include "GraphCompilationContext.hpp"
+#include "CompilationMemoryMap.hpp"
 
 VariableNode::VariableNode(std::string name, size_t xDim, size_t yDim)
     : _name(name)
@@ -43,12 +43,12 @@ bool VariableNode::IsInitialized() const
     return true;
 }
 
-void VariableNode::Compile(MemoryCompilationMap& context, NodeCompiler& nodeCompiler) const
+void VariableNode::Compile(CompilationMemoryMap& context, NodeCompiler& nodeCompiler) const
 {
     throw new std::logic_error("not yet implemented.");
 }
 
-void VariableNode::GetMemoryDimensions(MemoryCompilationMap& memoryMap) const
+void VariableNode::GetMemoryDimensions(CompilationMemoryMap& memoryMap) const
 {
     throw new std::logic_error("not yet implemented.");
 }

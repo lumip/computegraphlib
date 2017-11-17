@@ -10,7 +10,7 @@
 #include "NodeCompiler.hpp"
 #include "types.hpp"
 
-class MemoryCompilationMap;
+class CompilationMemoryMap;
 
 class Node
 {
@@ -29,8 +29,8 @@ public:
     virtual ~Node();
     ConstNodeList GetSubscribers() const;
     virtual ConstNodeList GetInputs() const = 0;
-    virtual void Compile(MemoryCompilationMap& context, NodeCompiler& compiler) const = 0;
-    virtual void GetMemoryDimensions(MemoryCompilationMap& memoryMap) const = 0;
+    virtual void Compile(CompilationMemoryMap& context, NodeCompiler& compiler) const = 0;
+    virtual void GetMemoryDimensions(CompilationMemoryMap& memoryMap) const = 0;
     virtual std::string ToString() const = 0;
     virtual bool IsInitialized() const = 0;
 private:

@@ -1,7 +1,7 @@
 #include <sstream>
 
 #include "nodes/MatrixMultNode.hpp"
-#include "GraphCompilationContext.hpp"
+#include "CompilationMemoryMap.hpp"
 
 MatrixMultNode::MatrixMultNode(NodePtr a, NodePtr b)
     : _a(a)
@@ -29,13 +29,12 @@ bool MatrixMultNode::IsInitialized() const
     return false;
 }
 
-void MatrixMultNode::Compile(MemoryCompilationMap& context, NodeCompiler& nodeCompiler) const
+void MatrixMultNode::Compile(CompilationMemoryMap& context, NodeCompiler& nodeCompiler) const
 {
     nodeCompiler.CompileMatrixMultNode(_a, _b, this);
-    //context.EnqueueKernel(nodeCompiler.CompileMatrixMultNode(memDescA, memDescB, memDesc));
 }
 
-void MatrixMultNode::GetMemoryDimensions(MemoryCompilationMap& memoryMap) const
+void MatrixMultNode::GetMemoryDimensions(CompilationMemoryMap& memoryMap) const
 {
     const MemoryDimensions dimA = memoryMap.GetNodeMemoryDimensions(_a);
     const MemoryDimensions dimB = memoryMap.GetNodeMemoryDimensions(_b);

@@ -1,8 +1,7 @@
 #include "ImplementationStrategyFactory.hpp"
-#include "GraphCompilationCPUStrategy.hpp"
-#include "NodeCompilerCPU.hpp"
+#include "GraphCompilationCPUPlatform.hpp"
 
-std::unique_ptr<GraphCompilationPlatform> ImplementationStrategyFactory::CreateGraphCompilationTargetStrategy(MemoryCompilationMap& memoryCompilationMap) const
+std::unique_ptr<GraphCompilationPlatform> ImplementationStrategyFactory::CreateGraphCompilationTargetStrategy(CompilationMemoryMap& CompilationMemoryMap) const
 {
-    return std::unique_ptr<GraphCompilationPlatform>(new GraphCompilationCPUStrategy(memoryCompilationMap));
+    return std::unique_ptr<GraphCompilationPlatform>(new GraphCompilationCPUPlatform(CompilationMemoryMap));
 }

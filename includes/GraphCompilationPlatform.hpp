@@ -18,6 +18,8 @@ public:
      * platform specific implementations could then really focus on just providing the platform
      * dependent code without duplicating the code looking up memory sizes etc
      */
+
+    /* todo: remove all graph-specific compilation state from out of this class. make it truly just a "platform" which can be reused */
 };
 
 #endif

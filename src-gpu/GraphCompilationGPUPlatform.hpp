@@ -3,15 +3,15 @@
 
 #include <CL/cl.h>
 
-#include "GraphCompilationContext.hpp"
+#include "CompilationMemoryMap.hpp"
 
-class MemoryCompilationMap;
+class CompilationMemoryMap;
 
-class GraphCompilationGPUStrategy : public GraphCompilationPlatform
+class GraphCompilationGPUPlatform : public GraphCompilationPlatform
 {
 private:
     typedef cl_mem MemoryHandle;
-    const MemoryCompilationMap& _dimensionsMap;
+    const CompilationMemoryMap& _dimensionsMap;
     const cl_context _clContext;
     const cl_device_id _clDevice;
     const cl_command_queue _clMemoryQueue;
@@ -26,8 +26,8 @@ public:
     static void CheckCLError(cl_int status);
     static void CheckCLError(cl_int status, const std::string& methodName);
 public:
-    GraphCompilationGPUStrategy(const MemoryCompilationMap& memoryCompilationMap, cl_context context);
-    ~GraphCompilationGPUStrategy();
+    GraphCompilationGPUPlatform(const CompilationMemoryMap& CompilationMemoryMap, cl_context context);
+    ~GraphCompilationGPUPlatform();
     void AllocateMemory(const ConstNodePtr node);
     void CopyOutputData(const ConstNodePtr outputNode, DataBuffer& outputBuffer) const;
     void CopyInputData(const ConstNodePtr inputNode, InputDataBuffer& inputBuffer);

@@ -1,7 +1,7 @@
 #include <sstream>
 
 #include "nodes/VectorAddNode.hpp"
-#include "GraphCompilationContext.hpp"
+#include "CompilationMemoryMap.hpp"
 
 VectorAddNode::VectorAddNode(NodePtr a, NodePtr b)
     : Node(), 
@@ -31,13 +31,12 @@ bool VectorAddNode::IsInitialized() const
     return false;
 }
 
-void VectorAddNode::Compile(MemoryCompilationMap& context, NodeCompiler& nodeCompiler) const
+void VectorAddNode::Compile(CompilationMemoryMap& context, NodeCompiler& nodeCompiler) const
 {
     nodeCompiler.CompileVectorAddNode(_summandA, _summandB, this);
-    //context.EnqueueKernel(nodeCompiler.CompileVectorAddNode(memDescA, memDescB, memDesc));
 }
 
-void VectorAddNode::GetMemoryDimensions(MemoryCompilationMap& memoryMap) const
+void VectorAddNode::GetMemoryDimensions(CompilationMemoryMap& memoryMap) const
 {
     const MemoryDimensions dimA = memoryMap.GetNodeMemoryDimensions(_summandA);
     const MemoryDimensions dimB = memoryMap.GetNodeMemoryDimensions(_summandB);

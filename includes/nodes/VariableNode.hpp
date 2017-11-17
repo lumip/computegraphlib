@@ -15,8 +15,8 @@ public:
     virtual ~VariableNode();
     void SetInput(const NodePtr inputNode);
     ConstNodeList GetInputs() const;
-    void Compile(MemoryCompilationMap& context, NodeCompiler& nodeCompiler) const;
-    void GetMemoryDimensions(MemoryCompilationMap& memoryMap) const;
+    void Compile(CompilationMemoryMap& context, NodeCompiler& nodeCompiler) const;
+    void GetMemoryDimensions(CompilationMemoryMap& memoryMap) const;
     std::string ToString() const;
     bool IsInitialized() const;
 };

@@ -1,10 +1,10 @@
 #include "CompiledGraph.hpp"
 #include "GraphCompilationPlatform.hpp"
-#include "GraphCompilationContext.hpp"
+#include "CompilationMemoryMap.hpp"
 
-CompiledGraph::CompiledGraph(std::unique_ptr<GraphCompilationPlatform>&& platform, std::unique_ptr<MemoryCompilationMap>&& memoryCompilationMap)
+CompiledGraph::CompiledGraph(std::unique_ptr<GraphCompilationPlatform>&& platform, std::unique_ptr<CompilationMemoryMap>&& CompilationMemoryMap)
     : _platform(std::move(platform))
-    , _memoryCompilationMap(std::move(memoryCompilationMap))
+    , _compilationMemoryMap(std::move(CompilationMemoryMap))
 {
 
 }
@@ -15,7 +15,7 @@ void CompiledGraph::Evaluate(const InputDataMap& inputData)
 {
     for (auto input : inputData)
     {
-        ConstNodePtr inputNode = _memoryCompilationMap->GetInputNode(input.first);
+        ConstNodePtr inputNode = _compilationMemoryMap->GetInputNode(input.first);
         SetNodeData(inputNode, input.second);
     }
     _platform->Evaluate();
@@ -23,7 +23,7 @@ void CompiledGraph::Evaluate(const InputDataMap& inputData)
 
 void CompiledGraph::GetOutputData(std::string outputName, DataBuffer& outputBuffer) const
 {
-    ConstNodePtr outputNode = _memoryCompilationMap->GetOutputNode(outputName);
+    ConstNodePtr outputNode = _compilationMemoryMap->GetOutputNode(outputName);
     GetNodeData(outputNode, outputBuffer);
 }
 
