@@ -16,7 +16,7 @@ void GraphCompilationGPUPlatform::CompileInputNode(const InputNode* const node) 
 class MatrixMultNodeGPUKernel : public Kernel
 {
 private:
-    const cl_kernel _kernel;
+    const OCLWrappers::Kernel _kernel;
     const cl_command_queue _queue;
     const cl_mem _inputABuffer;
     const cl_mem _inputBBuffer;
@@ -25,21 +25,22 @@ private:
     const size_t _n;
     const size_t _d;
 public:
-    MatrixMultNodeGPUKernel(const cl_kernel kernel, const cl_command_queue queue, cl_mem inputABuffer, cl_mem inputBBuffer, cl_mem resultBuffer, size_t m, size_t n, size_t d)
-        : _kernel(kernel), _queue(queue), _inputABuffer(inputABuffer), _inputBBuffer(inputBBuffer), _resultBuffer(resultBuffer), _m(m), _n(n), _d(d)
+    MatrixMultNodeGPUKernel(OCLWrappers::Kernel&& kernel, const cl_command_queue queue, cl_mem inputABuffer, cl_mem inputBBuffer, cl_mem resultBuffer, size_t m, size_t n, size_t d)
+        : _kernel(std::move(kernel))
+        , _queue(queue), _inputABuffer(inputABuffer), _inputBBuffer(inputBBuffer), _resultBuffer(resultBuffer), _m(m), _n(n), _d(d)
     {
 
     }
     ~MatrixMultNodeGPUKernel() { }
     void Run()
     {
-        clSetKernelArg(_kernel, 0, sizeof(cl_mem), &_inputABuffer);
-        clSetKernelArg(_kernel, 1, sizeof(cl_mem), &_inputBBuffer);
-        clSetKernelArg(_kernel, 2, sizeof(cl_mem), &_resultBuffer);
-        clSetKernelArg(_kernel, 3, sizeof(cl_uint), &_d);
+        clSetKernelArg(_kernel.get(), 0, sizeof(cl_mem), &_inputABuffer);
+        clSetKernelArg(_kernel.get(), 1, sizeof(cl_mem), &_inputBBuffer);
+        clSetKernelArg(_kernel.get(), 2, sizeof(cl_mem), &_resultBuffer);
+        clSetKernelArg(_kernel.get(), 3, sizeof(cl_uint), &_d);
         size_t globalWorkSize[2] = { _m, _n };
-        GraphCompilationGPUPlatform::CheckCLError(
-                    clEnqueueNDRangeKernel(_queue, _kernel, 2, nullptr, globalWorkSize, nullptr, 0, nullptr, nullptr)
+        OCLWrappers::CheckCLError(
+                    clEnqueueNDRangeKernel(_queue, _kernel.get(), 2, nullptr, globalWorkSize, nullptr, 0, nullptr, nullptr)
         , "clEnqueueNDRangeKernel");
     }
 };
@@ -49,16 +50,16 @@ void GraphCompilationGPUPlatform::CompileMatrixMultNode(const ConstNodePtr input
     const MemoryDimensions inputADims = _dimensionsMap.GetNodeMemoryDimensions(inputANode);
     const MemoryDimensions inputBDims = _dimensionsMap.GetNodeMemoryDimensions(inputBNode);
     const MemoryDimensions resultDims = _dimensionsMap.GetNodeMemoryDimensions(node);
-    const MemoryHandle inputABuffer = _bufferMap.at(inputANode);
-    const MemoryHandle inputBBuffer = _bufferMap.at(inputBNode);
-    const MemoryHandle resultBuffer = _bufferMap.at(node);
+    const MemoryHandle inputABuffer = _bufferMap.at(inputANode).get();
+    const MemoryHandle inputBBuffer = _bufferMap.at(inputBNode).get();
+    const MemoryHandle resultBuffer = _bufferMap.at(node).get();
     auto m = inputADims.yDim;
     auto n = inputBDims.xDim;
     auto d = inputADims.xDim;
-    cl_kernel kernel = CompileKernel(MatrixMultSource);
+    OCLWrappers::Kernel kernel = CompileKernel(MatrixMultSource);
     _kernels.emplace_back(
-           std::unique_ptr<Kernel>(new MatrixMultNodeGPUKernel(kernel,
-                                                               _clExecutionQueue,
+           std::unique_ptr<Kernel>(new MatrixMultNodeGPUKernel(std::move(kernel),
+                                                               _clExecutionQueue.get(),
                                                                inputABuffer,
                                                                inputBBuffer,
                                                                resultBuffer,
@@ -71,36 +72,38 @@ void GraphCompilationGPUPlatform::CompileVariableNode(const VariableNode* const 
 class VectorAddNodeGPUKernel : public Kernel
 {
 private:
-    const cl_kernel _kernel;
+    const OCLWrappers::Kernel _kernel;
     const cl_command_queue _queue;
     const cl_mem _inputABuffer;
     const cl_mem _inputBBuffer;
     const cl_mem _resultBuffer;
     const size_t _size;
 public:
-    VectorAddNodeGPUKernel(const cl_kernel kernel, const cl_command_queue queue, cl_mem inputABuffer, cl_mem inputBBuffer, cl_mem resultBuffer, size_t size)
-        : _kernel(kernel), _queue(queue), _inputABuffer(inputABuffer), _inputBBuffer(inputBBuffer), _resultBuffer(resultBuffer), _size(size) { }
+    VectorAddNodeGPUKernel(OCLWrappers::Kernel&& kernel, const cl_command_queue queue, cl_mem inputABuffer, cl_mem inputBBuffer, cl_mem resultBuffer, size_t size)
+        : _kernel(std::move(kernel)), _queue(queue), _inputABuffer(inputABuffer), _inputBBuffer(inputBBuffer), _resultBuffer(resultBuffer), _size(size) { }
     ~VectorAddNodeGPUKernel() { }
     void Run()
     {
-        clSetKernelArg(_kernel, 0, sizeof(cl_mem), &_inputABuffer);
-        clSetKernelArg(_kernel, 1, sizeof(cl_mem), &_inputBBuffer);
-        clSetKernelArg(_kernel, 2, sizeof(cl_mem), &_resultBuffer);
+        clSetKernelArg(_kernel.get(), 0, sizeof(cl_mem), &_inputABuffer);
+        clSetKernelArg(_kernel.get(), 1, sizeof(cl_mem), &_inputBBuffer);
+        clSetKernelArg(_kernel.get(), 2, sizeof(cl_mem), &_resultBuffer);
         size_t globalWorkSize[1] = { _size };
-        clEnqueueNDRangeKernel(_queue, _kernel, 1, nullptr, globalWorkSize, nullptr, 0, nullptr, nullptr);
+        OCLWrappers::CheckCLError(
+            clEnqueueNDRangeKernel(_queue, _kernel.get(), 1, nullptr, globalWorkSize, nullptr, 0, nullptr, nullptr)
+        , "clEnqueueNDRangeKernel");
     }
 };
 
 void GraphCompilationGPUPlatform::CompileVectorAddNode(const ConstNodePtr inputANode, const ConstNodePtr inputBNode, const VectorAddNode* const node)
 {
-    cl_kernel kernel = CompileKernel(VectorAddKernelSource);
+    OCLWrappers::Kernel kernel = CompileKernel(VectorAddKernelSource);
     const MemoryDimensions resultDims = _dimensionsMap.GetNodeMemoryDimensions(node);
-    const MemoryHandle inputABuffer = _bufferMap.at(inputANode);
-    const MemoryHandle inputBBuffer = _bufferMap.at(inputBNode);
-    const MemoryHandle resultBuffer = _bufferMap.at(node);
+    const MemoryHandle inputABuffer = _bufferMap.at(inputANode).get();
+    const MemoryHandle inputBBuffer = _bufferMap.at(inputBNode).get();
+    const MemoryHandle resultBuffer = _bufferMap.at(node).get();
     _kernels.emplace_back(
-           std::unique_ptr<Kernel>(new VectorAddNodeGPUKernel(kernel,
-                                                              _clExecutionQueue,
+           std::unique_ptr<Kernel>(new VectorAddNodeGPUKernel(std::move(kernel),
+                                                              _clExecutionQueue.get(),
                                                               inputABuffer,
                                                               inputBBuffer,
                                                               resultBuffer,

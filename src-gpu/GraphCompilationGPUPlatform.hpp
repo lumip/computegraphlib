@@ -4,6 +4,7 @@
 #include <CL/cl.h>
 
 #include "CompilationMemoryMap.hpp"
+#include "OCLWrappers.hpp"
 
 class CompilationMemoryMap;
 
@@ -12,21 +13,19 @@ class GraphCompilationGPUPlatform : public GraphCompilationPlatform
 private:
     typedef cl_mem MemoryHandle;
     const CompilationMemoryMap& _dimensionsMap;
-    const cl_context _clContext;
-    const cl_device_id _clDevice;
-    const cl_command_queue _clMemoryQueue;
-    const cl_command_queue _clExecutionQueue;
+    const OCLWrappers::Context _clContext;
+    const cl_device_id _clDevice; // we do not allocate the device so we do not have a wrapper keeping care of releasing it
+    const OCLWrappers::Queue _clMemoryQueue;
+    const OCLWrappers::Queue _clExecutionQueue;
     std::vector<std::unique_ptr<Kernel>> _kernels;
-    std::map<ConstNodePtr, MemoryHandle> _bufferMap;
+    std::map<ConstNodePtr, OCLWrappers::Memory> _bufferMap;
+    std::vector<OCLWrappers::Program> _programs;
 private:
     cl_device_id SelectDevice();
-    cl_command_queue CreateCommandQueue();
-    cl_kernel CompileKernel(const std::string& kernelSource);
+    OCLWrappers::Queue CreateCommandQueue();
+    OCLWrappers::Kernel CompileKernel(const std::string& kernelSource);
 public:
-    static void CheckCLError(cl_int status);
-    static void CheckCLError(cl_int status, const std::string& methodName);
-public:
-    GraphCompilationGPUPlatform(const CompilationMemoryMap& CompilationMemoryMap, cl_context context);
+    GraphCompilationGPUPlatform(const CompilationMemoryMap& CompilationMemoryMap, OCLWrappers::Context&& context);
     ~GraphCompilationGPUPlatform();
     void AllocateMemory(const ConstNodePtr node);
     void CopyOutputData(const ConstNodePtr outputNode, DataBuffer& outputBuffer) const;

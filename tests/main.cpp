@@ -14,6 +14,7 @@
 #include "ImplementationStrategyFactory.hpp"
 
 #include "Kernel.hpp"
+#include "../src-gpu/OCLWrappers.hpp"
 
 #ifdef GPU
 /**
@@ -88,8 +89,8 @@ public:
 int main(int argc, const char* argv[])
 {
 #ifdef GPU
-    auto device = SelectDevice();
-    PrintDeviceName(device);
+    OCLWrappers::Device device = SelectDevice();
+    PrintDeviceName(*device);
 #endif
     TestForwardNode f("f", {});
     TestForwardNode e("e", {&f});
