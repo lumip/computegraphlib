@@ -4,8 +4,6 @@
 #include <memory>
 
 #include "types.hpp"
-#include "Kernel.hpp"
-#include "GraphCompilationPlatform.hpp"
 
 class CompilationMemoryMap
 {

@@ -1,7 +1,9 @@
+#include "nodes/VectorAddNode.hpp"
+
 #include <sstream>
 
-#include "nodes/VectorAddNode.hpp"
 #include "CompilationMemoryMap.hpp"
+#include "GraphCompilationPlatform.hpp"
 
 VectorAddNode::VectorAddNode(NodePtr a, NodePtr b)
     : Node(), 

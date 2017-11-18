@@ -1,5 +1,7 @@
 #include "GraphCompilationCPUPlatform.hpp"
+
 #include "CompilationMemoryMap.hpp"
+#include "Kernel.hpp"
 
 GraphCompilationCPUPlatform::GraphCompilationCPUPlatform(const CompilationMemoryMap& CompilationMemoryMap)
     : _kernels()

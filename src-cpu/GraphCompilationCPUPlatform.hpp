@@ -4,9 +4,9 @@
 #include <memory>
 
 #include "GraphCompilationPlatform.hpp"
-#include "Kernel.hpp"
 
 class CompilationMemoryMap;
+class Kernel;
 
 class GraphCompilationCPUPlatform : public GraphCompilationPlatform
 {

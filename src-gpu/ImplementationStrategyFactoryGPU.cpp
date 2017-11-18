@@ -1,7 +1,9 @@
+#include "GraphCompilationGPUPlatform.hpp"
+
 #include <CL/cl.h>
 
 #include "ImplementationStrategyFactory.hpp"
-#include "GraphCompilationGPUPlatform.hpp"
+
 #include "OCLWrappers.hpp"
 
 std::unique_ptr<GraphCompilationPlatform> ImplementationStrategyFactory::CreateGraphCompilationTargetStrategy(CompilationMemoryMap& CompilationMemoryMap) const

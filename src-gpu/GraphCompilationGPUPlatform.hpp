@@ -1,12 +1,17 @@
 #ifndef _GRAPH_COMPILATION_GPU_STRATEGY_HPP_
 #define _GRAPH_COMPILATION_GPU_STRATEGY_HPP_
 
+#include <memory>
+
 #include <CL/cl.h>
 
-#include "CompilationMemoryMap.hpp"
+#include "types.hpp"
+#include "GraphCompilationPlatform.hpp"
+
 #include "OCLWrappers.hpp"
 
 class CompilationMemoryMap;
+class Kernel;
 
 class GraphCompilationGPUPlatform : public GraphCompilationPlatform
 {

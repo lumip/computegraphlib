@@ -1,6 +1,7 @@
 #include "CompiledGraph.hpp"
-#include "GraphCompilationPlatform.hpp"
+
 #include "CompilationMemoryMap.hpp"
+#include "GraphCompilationPlatform.hpp"
 
 CompiledGraph::CompiledGraph(std::unique_ptr<GraphCompilationPlatform>&& platform, std::unique_ptr<CompilationMemoryMap>&& CompilationMemoryMap)
     : _platform(std::move(platform))

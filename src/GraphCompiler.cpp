@@ -1,6 +1,10 @@
 #include "GraphCompiler.hpp"
+
 #include "nodes/Node.hpp"
+#include "CompilationMemoryMap.hpp"
 #include "CompiledGraph.hpp"
+#include "GraphCompilationPlatform.hpp"
+#include "ImplementationStrategyFactory.hpp"
 
 GraphCompiler::GraphCompiler(std::unique_ptr<const ImplementationStrategyFactory>&& strategyFactory)
     : _strategyFactory(std::move(strategyFactory))

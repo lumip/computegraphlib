@@ -1,5 +1,9 @@
 #include "GraphCompilationGPUPlatform.hpp"
+
 #include <sstream>
+
+#include "CompilationMemoryMap.hpp"
+#include "Kernel.hpp"
 
 GraphCompilationGPUPlatform::GraphCompilationGPUPlatform(const CompilationMemoryMap& CompilationMemoryMap, OCLWrappers::Context&& context)
     : _dimensionsMap(CompilationMemoryMap)

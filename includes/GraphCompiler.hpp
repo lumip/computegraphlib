@@ -3,11 +3,13 @@
 
 #include <vector>
 #include <memory>
+#include <set>
 
-#include "nodes/Node.hpp"
-#include "CompilationMemoryMap.hpp"
-#include "CompiledGraph.hpp"
-#include "ImplementationStrategyFactory.hpp"
+#include <types.hpp>
+
+class ImplementationStrategyFactory;
+class CompiledGraph;
+class CompilationMemoryMap;
 
 class GraphCompiler
 {

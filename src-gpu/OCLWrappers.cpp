@@ -1,8 +1,8 @@
+#include "OCLWrappers.hpp"
+
 #include <string>
 #include <sstream>
 #include <stdexcept>
-
-#include "OCLWrappers.hpp"
 
 namespace OCLWrappers
 {

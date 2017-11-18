@@ -1,7 +1,9 @@
+#include "nodes/MatrixMultNode.hpp"
+
 #include <sstream>
 
-#include "nodes/MatrixMultNode.hpp"
 #include "CompilationMemoryMap.hpp"
+#include "GraphCompilationPlatform.hpp"
 
 MatrixMultNode::MatrixMultNode(NodePtr a, NodePtr b)
     : _a(a)

@@ -4,6 +4,7 @@
 #include "nodes/VectorAddNode.hpp"
 #include "nodes/InputNode.hpp"
 #include "CompilationMemoryMap.hpp"
+#include "GraphCompilationPlatform.hpp"
 #include "ImplementationStrategyFactory.hpp"
 
 int main(int argc, const char * const argv[])

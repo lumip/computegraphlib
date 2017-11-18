@@ -10,6 +10,7 @@
 #include "nodes/VariableNode.hpp"
 #include "CompilationMemoryMap.hpp"
 #include "GraphCompiler.hpp"
+#include "CompiledGraph.hpp"
 
 #include "ImplementationStrategyFactory.hpp"
 

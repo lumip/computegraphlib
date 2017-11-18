@@ -1,4 +1,5 @@
 #include "nodes/InputNode.hpp"
+
 #include "CompilationMemoryMap.hpp"
 
 InputNode::InputNode(std::string name, size_t dim)

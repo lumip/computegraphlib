@@ -1,8 +1,10 @@
 #ifndef _OCL_WRAPPERS_HPP_
 #define _OCL_WRAPPERS_HPP_
 
-#include <CL/cl.h>
 #include <iostream>
+
+#include <CL/cl.h>
+
 namespace OCLWrappers
 {
 

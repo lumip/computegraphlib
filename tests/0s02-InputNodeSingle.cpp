@@ -3,6 +3,7 @@
 #include "types.hpp"
 #include "nodes/InputNode.hpp"
 #include "CompilationMemoryMap.hpp"
+#include "GraphCompilationPlatform.hpp"
 #include "ImplementationStrategyFactory.hpp"
 
 int main(const int argc, const char * const argv[])

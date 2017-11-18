@@ -7,10 +7,10 @@
 #include <set>
 
 #include "Kernel.hpp"
-#include "GraphCompilationPlatform.hpp"
 #include "types.hpp"
 
 class CompilationMemoryMap;
+class GraphCompilationPlatform;
 
 class Node
 {

@@ -1,6 +1,8 @@
+#include "GraphCompilationGPUPlatform.hpp"
+
 #include <CL/cl.h>
 
-#include "GraphCompilationGPUPlatform.hpp"
+#include "CompilationMemoryMap.hpp"
 #include "Kernel.hpp"
 
 #include "nodes/InputNode.hpp"

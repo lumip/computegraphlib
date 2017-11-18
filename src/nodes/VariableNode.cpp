@@ -1,4 +1,5 @@
 #include "nodes/VariableNode.hpp"
+
 #include "CompilationMemoryMap.hpp"
 
 VariableNode::VariableNode(std::string name, size_t xDim, size_t yDim)
