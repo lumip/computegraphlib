@@ -6,8 +6,10 @@
 class Kernel
 {
 public:
-    Kernel() { } // todo: disable copy constructor and copy assignment, enable move constructor and move assignment
+    Kernel() { }
     virtual ~Kernel() { }
+    Kernel(const Kernel&) = delete;
+    void operator=(const Kernel&) = delete;
     virtual void Run() = 0;
 };
 
