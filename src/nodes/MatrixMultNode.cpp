@@ -29,9 +29,9 @@ bool MatrixMultNode::IsInitialized() const
     return false;
 }
 
-void MatrixMultNode::Compile(CompilationMemoryMap& context, NodeCompiler& nodeCompiler) const
+void MatrixMultNode::Compile(GraphCompilationPlatform& platform) const
 {
-    nodeCompiler.CompileMatrixMultNode(_a, _b, this);
+    platform.CompileMatrixMultNode(_a, _b, this);
 }
 
 void MatrixMultNode::GetMemoryDimensions(CompilationMemoryMap& memoryMap) const

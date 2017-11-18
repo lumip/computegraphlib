@@ -43,7 +43,7 @@ bool VariableNode::IsInitialized() const
     return true;
 }
 
-void VariableNode::Compile(CompilationMemoryMap& context, NodeCompiler& nodeCompiler) const
+void VariableNode::Compile(GraphCompilationPlatform& platform) const
 {
     throw new std::logic_error("not yet implemented.");
 }

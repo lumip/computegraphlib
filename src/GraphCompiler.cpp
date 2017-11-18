@@ -1,6 +1,5 @@
 #include "GraphCompiler.hpp"
 #include "nodes/Node.hpp"
-#include "NodeCompiler.hpp"
 #include "CompiledGraph.hpp"
 
 GraphCompiler::GraphCompiler(std::unique_ptr<const ImplementationStrategyFactory>&& strategyFactory)
@@ -52,7 +51,7 @@ std::unique_ptr<CompiledGraph> GraphCompiler::Compile(const ConstNodePtr outputN
     // todo: figure out how to check output and input size of variable node for consistency.
     for (size_t i = 0; i < nodeTopology.size(); ++i)
     {
-        nodeTopology[i]->Compile(*context, *strategy);
+        nodeTopology[i]->Compile(*strategy);
     }
     return std::unique_ptr<CompiledGraph>(new CompiledGraph(std::move(strategy), std::move(context)));
 }

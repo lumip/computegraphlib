@@ -31,9 +31,9 @@ bool VectorAddNode::IsInitialized() const
     return false;
 }
 
-void VectorAddNode::Compile(CompilationMemoryMap& context, NodeCompiler& nodeCompiler) const
+void VectorAddNode::Compile(GraphCompilationPlatform& platform) const
 {
-    nodeCompiler.CompileVectorAddNode(_summandA, _summandB, this);
+    platform.CompileVectorAddNode(_summandA, _summandB, this);
 }
 
 void VectorAddNode::GetMemoryDimensions(CompilationMemoryMap& memoryMap) const

@@ -32,7 +32,7 @@ int main(const int argc, const char * const argv[])
     platform->AllocateMemory(&testInputNode);
 
     // compile kernel for InputNode object
-    testInputNode.Compile(CompilationMemoryMap, *platform);
+    testInputNode.Compile(*platform);
 
     platform->CopyInputData(&testInputNode, input1);
 

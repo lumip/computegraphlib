@@ -80,7 +80,7 @@ public:
     TestForwardNode(const std::string name, const std::vector<ConstNodePtr>& children) : _name(name), _children(children) {}
     ~TestForwardNode() {}
     ConstNodeList GetInputs() const { return ConstNodeList(_children); }
-    void Compile(CompilationMemoryMap& context, NodeCompiler& nodeCompiler) const { /*context.EnqueueKernel(std::unique_ptr<Kernel>(new TestKernel(_name)));*/ }
+    void Compile(GraphCompilationPlatform& platform) const { /*context.EnqueueKernel(std::unique_ptr<Kernel>(new TestKernel(_name)));*/ }
     void GetMemoryDimensions(CompilationMemoryMap& memoryMap) const { memoryMap.RegisterNodeMemory(this, MemoryDimensions({0, 0})); }
     std::string ToString() const { return _name; }
     bool IsInitialized() const { return _children.empty(); }

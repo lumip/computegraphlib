@@ -45,7 +45,7 @@ int main(int argc, const char * const argv[])
     platform->AllocateMemory(&testMultNode);
 
     // compile kernel for VectorAddNode object
-    testMultNode.Compile(CompilationMemoryMap, *platform);
+    testMultNode.Compile(*platform);
 
     // copy input data into node working memory (will usually be done by compiled kernels for InputNode if whole graph is run; testing only single node here)
     platform->CopyInputData(&i1, input1);

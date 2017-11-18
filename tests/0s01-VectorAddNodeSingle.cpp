@@ -4,7 +4,6 @@
 #include "nodes/VectorAddNode.hpp"
 #include "nodes/InputNode.hpp"
 #include "CompilationMemoryMap.hpp"
-#include "NodeCompiler.hpp"
 #include "ImplementationStrategyFactory.hpp"
 
 int main(int argc, const char * const argv[])
@@ -43,7 +42,7 @@ int main(int argc, const char * const argv[])
     platform->AllocateMemory(&testAddNode);
 
     // compile kernel for VectorAddNode object
-    testAddNode.Compile(CompilationMemoryMap, *platform);
+    testAddNode.Compile(*platform);
 
     // copy input data into node working memory (will usually be done by compiled kernels for InputNode if whole graph is run; testing only single node here)
     platform->CopyInputData(&i1, input1);

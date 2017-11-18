@@ -2,9 +2,13 @@
 #define _GRAPH_COMPILATION_PLATFORM_HPP_
 
 #include "types.hpp"
-#include "NodeCompiler.hpp"
 
-class GraphCompilationPlatform : public NodeCompiler
+class InputNode;
+class MatrixMultNode;
+class VariableNode;
+class VectorAddNode;
+
+class GraphCompilationPlatform
 {
 public:
     GraphCompilationPlatform() { }
@@ -20,6 +24,11 @@ public:
      */
 
     /* todo: remove all graph-specific compilation state from out of this class. make it truly just a "platform" which can be reused */
+
+    virtual void CompileInputNode(const InputNode* const node) = 0;
+    virtual void CompileMatrixMultNode(const ConstNodePtr inputANode, const ConstNodePtr inputBNode, const MatrixMultNode* const node) = 0;
+    virtual void CompileVariableNode(const VariableNode* const node) = 0;
+    virtual void CompileVectorAddNode(const ConstNodePtr inputANode, const ConstNodePtr inputBNode, const VectorAddNode* const node) = 0;
 };
 
 #endif

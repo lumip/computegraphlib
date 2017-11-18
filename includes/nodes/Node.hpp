@@ -7,7 +7,7 @@
 #include <set>
 
 #include "Kernel.hpp"
-#include "NodeCompiler.hpp"
+#include "GraphCompilationPlatform.hpp"
 #include "types.hpp"
 
 class CompilationMemoryMap;
@@ -35,7 +35,7 @@ public:
 
     ConstNodeList GetSubscribers() const;
     virtual ConstNodeList GetInputs() const = 0;
-    virtual void Compile(CompilationMemoryMap& context, NodeCompiler& compiler) const = 0;
+    virtual void Compile(GraphCompilationPlatform& platform) const = 0;
     virtual void GetMemoryDimensions(CompilationMemoryMap& memoryMap) const = 0;
     virtual std::string ToString() const = 0;
     virtual bool IsInitialized() const = 0;

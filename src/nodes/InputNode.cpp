@@ -24,7 +24,7 @@ bool InputNode::IsInitialized() const
     return true;
 }
 
-void InputNode::Compile(CompilationMemoryMap &context, NodeCompiler& nodeCompiler) const
+void InputNode::Compile(GraphCompilationPlatform& platform) const
 {
 }
 
