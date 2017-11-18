@@ -27,6 +27,12 @@ private:
 public:
     Node();
     virtual ~Node();
+
+    Node(const Node&) = delete;
+    Node(Node&&) = delete;
+    Node& operator=(const Node&) = delete;
+    Node& operator=(Node&&) = delete;
+
     ConstNodeList GetSubscribers() const;
     virtual ConstNodeList GetInputs() const = 0;
     virtual void Compile(CompilationMemoryMap& context, NodeCompiler& compiler) const = 0;
