@@ -22,9 +22,9 @@ namespace OCLWrappers
         Wrapper(const T value);
         ~Wrapper();
         Wrapper(Wrapper const &) = delete;
-        void operator=(Wrapper const &) = delete;
+        Wrapper& operator=(Wrapper const &) = delete;
         Wrapper(Wrapper && moved);
-        void operator=(Wrapper &&);
+        Wrapper& operator=(Wrapper &&);
         T get() const;
         T operator*() const;
     };

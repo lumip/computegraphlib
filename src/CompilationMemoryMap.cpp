@@ -1,7 +1,7 @@
 #include "CompilationMemoryMap.hpp"
 
-CompilationMemoryMap::CompilationMemoryMap(const InputDimensionsMap& inputDimensions)
-    : _inputDimensions(inputDimensions)
+CompilationMemoryMap::CompilationMemoryMap(const InputDimensionsMap inputDimensions)
+    : _inputDimensions(std::move(inputDimensions))
     , _memoryMap()
     , _inputMemoryMap()
     , _outputMemoryMap()
@@ -9,6 +9,34 @@ CompilationMemoryMap::CompilationMemoryMap(const InputDimensionsMap& inputDimens
 }
 
 CompilationMemoryMap::~CompilationMemoryMap() { }
+
+CompilationMemoryMap::CompilationMemoryMap(const CompilationMemoryMap& other)
+    : _inputDimensions(other._inputDimensions)
+    , _memoryMap(other._memoryMap)
+    , _inputMemoryMap(other._inputMemoryMap)
+    , _outputMemoryMap(other._outputMemoryMap)
+{
+}
+
+CompilationMemoryMap::CompilationMemoryMap(CompilationMemoryMap&& other)
+    : _inputDimensions(), _memoryMap(), _inputMemoryMap(), _outputMemoryMap()
+{
+    swap(*this, other);
+}
+
+void CompilationMemoryMap::swap(CompilationMemoryMap& a, CompilationMemoryMap& b)
+{
+    std::swap(a._inputDimensions, b._inputDimensions);
+    std::swap(a._memoryMap, b._memoryMap);
+    std::swap(a._inputMemoryMap, b._inputMemoryMap);
+    std::swap(a._outputMemoryMap, b._outputMemoryMap);
+}
+
+CompilationMemoryMap& CompilationMemoryMap::operator=(CompilationMemoryMap other)
+{
+    swap(*this, other);
+    return *this;
+}
 
 void CompilationMemoryMap::RegisterNodeMemory(const ConstNodePtr node, const MemoryDimensions memoryDimensions)
 {

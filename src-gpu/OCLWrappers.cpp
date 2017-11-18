@@ -96,10 +96,11 @@ namespace OCLWrappers
     }
 
     template<typename T, cl_int(*releaseFct)(T)>
-    void Wrapper<T, releaseFct>::operator=(Wrapper && moved)
+    Wrapper<T, releaseFct>& Wrapper<T, releaseFct>::operator=(Wrapper && moved)
     {
         std::swap(_value, moved._value);
         std::swap(_owning, moved._owning);
+        return *this;
     }
 
     template<typename T, cl_int(*releaseFct)(T)>

@@ -11,12 +11,18 @@ class CompilationMemoryMap
 {
 private:
     std::map<ConstNodePtr, MemoryDimensions> _memoryMap;
-    const InputDimensionsMap _inputDimensions;
+    InputDimensionsMap _inputDimensions;
     std::map<std::string, ConstNodePtr> _inputMemoryMap;
     std::map<std::string, ConstNodePtr> _outputMemoryMap;
 public:
-    CompilationMemoryMap(const InputDimensionsMap& inputDimensions);
+    CompilationMemoryMap();
+    CompilationMemoryMap(const InputDimensionsMap inputDimensions);
     virtual ~CompilationMemoryMap();
+    CompilationMemoryMap(const CompilationMemoryMap& other);
+    CompilationMemoryMap(CompilationMemoryMap&& other);
+    CompilationMemoryMap& operator=(CompilationMemoryMap other);
+    void swap(CompilationMemoryMap& a, CompilationMemoryMap& b);
+
     void RegisterNodeMemory(const ConstNodePtr node, const MemoryDimensions MemoryDimensions); // todo: add readonly flag
     MemoryDimensions GetNodeMemoryDimensions(const ConstNodePtr node) const;
     MemoryDimensions GetInputDimensions(std::string inputName) const;
