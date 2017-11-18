@@ -24,12 +24,7 @@ private:
     }
 public:
     MatrixMultNodeCPUKernel(const float* const memA, const float* const memB, float* const memRes, const size_t m, const size_t n, const size_t d)
-        : _memA(memA)
-        , _memB(memB)
-        , _memRes(memRes)
-        , _m(m)
-        , _n(n)
-        , _d(d)
+        : _memA(memA), _memB(memB), _memRes(memRes), _m(m), _n(n), _d(d)
     { }
 
     virtual ~MatrixMultNodeCPUKernel() { }
@@ -97,13 +92,11 @@ private:
     const size_t _size;
 public:
     VectorAddNodeCPUKernel(const float* const memoryA, const float* const memoryB, float* const memoryResult, size_t size)
-        : _memoryA(memoryA)
-        , _memoryB(memoryB)
-        , _memoryResult(memoryResult)
-        , _size(size)
-    {
-    }
+        : _memoryA(memoryA), _memoryB(memoryB), _memoryResult(memoryResult), _size(size)
+    { }
+
     virtual ~VectorAddNodeCPUKernel() { }
+
     void Run()
     {
         for (size_t i = 0; i < _size; ++i)

@@ -26,12 +26,11 @@ private:
     const size_t _d;
 public:
     MatrixMultNodeGPUKernel(OCLWrappers::Kernel&& kernel, const cl_command_queue queue, cl_mem inputABuffer, cl_mem inputBBuffer, cl_mem resultBuffer, size_t m, size_t n, size_t d)
-        : _kernel(std::move(kernel))
-        , _queue(queue), _inputABuffer(inputABuffer), _inputBBuffer(inputBBuffer), _resultBuffer(resultBuffer), _m(m), _n(n), _d(d)
-    {
+        : _kernel(std::move(kernel)), _queue(queue), _inputABuffer(inputABuffer), _inputBBuffer(inputBBuffer), _resultBuffer(resultBuffer), _m(m), _n(n), _d(d)
+    { }
 
-    }
     ~MatrixMultNodeGPUKernel() { }
+
     void Run()
     {
         clSetKernelArg(_kernel.get(), 0, sizeof(cl_mem), &_inputABuffer);
@@ -80,8 +79,11 @@ private:
     const size_t _size;
 public:
     VectorAddNodeGPUKernel(OCLWrappers::Kernel&& kernel, const cl_command_queue queue, cl_mem inputABuffer, cl_mem inputBBuffer, cl_mem resultBuffer, size_t size)
-        : _kernel(std::move(kernel)), _queue(queue), _inputABuffer(inputABuffer), _inputBBuffer(inputBBuffer), _resultBuffer(resultBuffer), _size(size) { }
+        : _kernel(std::move(kernel)), _queue(queue), _inputABuffer(inputABuffer), _inputBBuffer(inputBBuffer), _resultBuffer(resultBuffer), _size(size)
+    { }
+
     ~VectorAddNodeGPUKernel() { }
+
     void Run()
     {
         clSetKernelArg(_kernel.get(), 0, sizeof(cl_mem), &_inputABuffer);
