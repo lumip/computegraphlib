@@ -75,8 +75,8 @@ public:
 class TestForwardNode : public Node
 {
 private:
-    std::vector<ConstNodePtr> _children;
     std::string _name;
+    std::vector<ConstNodePtr> _children;
 public:
     TestForwardNode(const std::string name, const std::vector<ConstNodePtr>& children) : _name(name), _children(children) {}
     ~TestForwardNode() {}

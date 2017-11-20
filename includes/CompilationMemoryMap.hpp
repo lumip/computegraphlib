@@ -8,8 +8,8 @@
 class CompilationMemoryMap
 {
 private:
-    std::map<ConstNodePtr, MemoryDimensions> _memoryMap;
     InputDimensionsMap _inputDimensions;
+    std::map<ConstNodePtr, MemoryDimensions> _memoryMap;
     std::map<std::string, ConstNodePtr> _inputMemoryMap;
     std::map<std::string, ConstNodePtr> _outputMemoryMap;
 public:

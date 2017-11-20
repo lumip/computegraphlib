@@ -41,7 +41,6 @@ int main(int argc, const char * const argv[])
 
     MemoryDimensions dims1 {m, n};
     MemoryDimensions dims2 {n, m};
-    MemoryDimensions dimsR {m, m};
 
     // provide input data dimensions
     InputDimensionsMap inputDimensions;

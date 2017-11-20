@@ -67,7 +67,6 @@ void GraphCompilationCPUPlatform::CompileMatrixMultNode(const ConstNodePtr input
 {
     MemoryDimensions inputADims = _dimensionsMap.GetNodeMemoryDimensions(inputANode);
     MemoryDimensions inputBDims = _dimensionsMap.GetNodeMemoryDimensions(inputBNode);
-    MemoryDimensions resultDims = _dimensionsMap.GetNodeMemoryDimensions(node);
     const MemoryHandle inputABuffer = _bufferMap.at(inputANode).get();
     const MemoryHandle inputBBuffer = _bufferMap.at(inputBNode).get();
     const MemoryHandle resultBuffer = _bufferMap.at(node).get();
