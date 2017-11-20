@@ -9,12 +9,12 @@
 
 int main(int argc, const char * const argv[])
 {
-    size_t dim = 4;
-    size_t n = 5;
-    size_t size = dim * n;
+    size_t m = 5;
+    size_t n = 4;
+    size_t size = m * n;
 
-    InputNode i1("x", 4);
-    InputNode i2("y", 5);
+    InputNode i1("x", n);
+    InputNode i2("y", m);
     MatrixMultNode testMultNode(&i1, &i2);
 
     // define input and expected output data
@@ -22,9 +22,9 @@ int main(int argc, const char * const argv[])
     InputDataBuffer input2 { 4,3,2,1,2, -2,2,-2,1,2, 3,4,-1,0,1, 0,3,5,7,-3 }; // 4 x 5
     ConstDataBuffer expected { 9,31,15,31,-3, 10,24,8,18,4, 0,0,0,0,0, 1,-1,3,1,1, -13,-50,-26,-53,8 };
 
-    MemoryDimensions dims1 {n, dim};
-    MemoryDimensions dims2 {dim, n};
-    MemoryDimensions dimsR {n, n};
+    MemoryDimensions dims1 {m, n};
+    MemoryDimensions dims2 {n, m};
+    MemoryDimensions dimsR {m, m};
 
     // provide input data dimensions
     InputDimensionsMap inputDimensions;
