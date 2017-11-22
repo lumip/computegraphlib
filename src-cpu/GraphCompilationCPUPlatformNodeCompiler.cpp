@@ -19,7 +19,7 @@ private:
     const size_t _n;
     const size_t _d;
 private:
-    inline size_t GetIndex(size_t i, size_t j, size_t stride) const // row-major; todo: does it really inline?
+    inline size_t GetIndex(size_t i, size_t j, size_t stride) const
     {
         return i * stride + j;
     }
@@ -32,7 +32,7 @@ public:
 
     void Run()
     {
-        for (size_t i = 0; i < _m; ++i)
+        /*for (size_t i = 0; i < _m; ++i)
         {
             for (size_t j = 0; j < _n; ++j)
             {
@@ -43,23 +43,22 @@ public:
                 }
                 _memRes[GetIndex(i, j, _n)] = r_ij;
             }
-        }
-        // todo: the above is probably the most inefficient thing (that poor cache :/ )
-        // the below is probably better: benchmark
-        /*
-        std::fill_n(_memoryResult, _m * _n, 0.0f);
+        }*/
+        // the above is probably the most inefficient thing (that poor cache :/ )
+        // the below is faster by a factor of ~8 (tested)
+        std::fill_n(_memRes, _m * _n, 0.0f);
         for (size_t i = 0; i < _m; ++i)
         {
             for (size_t k = 0; k < _d; ++k)
             {
-                float a_ik = _memoryA[GetIndex(i, k, _d)]; // linear access
+                float a_ik = _memA[GetIndex(i, k, _d)]; // linear access
                 for (size_t j = 0; j < _n; ++j)
                 {
-                    // todo: GetIndex(i, j, _n) = i * _n + j -> size_t base = i * _n; and ++base in every iteration; is that faster?
-                    _memoryResult[GetIndex(i, j, _n)] += a_ik * _memoryB[GetIndex(k, j, _n)]; // linear access to both
+                    // GetIndex(i, j, _n) = i * _n + j -> size_t base = i * _n; and ++base in every iteration; however, that's not faster (tested) and like it is now it's more readable
+                    _memRes[GetIndex(i, j, _n)] += a_ik * _memB[GetIndex(k, j, _n)]; // linear access to both
                 }
             }
-        }*/
+        }
     }
 };
 
