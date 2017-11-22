@@ -34,7 +34,8 @@ cl_device_id GraphCompilationGPUPlatform::SelectDevice()
 OCLWrappers::Queue GraphCompilationGPUPlatform::CreateCommandQueue()
 {
     cl_int status = CL_SUCCESS;
-    OCLWrappers::Queue queue = clCreateCommandQueue(_clContext.get(), _clDevice, 0/*CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE*/, &status);
+    // todo: set cl_queue_properties
+    OCLWrappers::Queue queue = clCreateCommandQueueWithProperties(_clContext.get(), _clDevice, nullptr, &status);
     OCLWrappers::CheckCLError(status, "clCreateCommandQueue");
     return queue;
 }
