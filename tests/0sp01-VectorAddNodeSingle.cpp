@@ -29,6 +29,7 @@ int main(int argc, const char * const argv[])
     VectorAddNode testAddNode(&i1, &i2);
 
     // generate input data
+    std::cout << "generating input data..." << std::endl;
     DataBuffer input1(size);
     DataBuffer input2(size);
 
@@ -38,7 +39,9 @@ int main(int argc, const char * const argv[])
 
     std::generate(std::begin(input1), std::end(input1), [&dist, &gen]()->float {return dist(gen);});
     std::generate(std::begin(input2), std::end(input2), [&dist, &gen]()->float {return dist(gen);});
+    std::cout << "done generating input data" << std::endl;
 
+    std::cout << "compiling graph and setting up runtime..." << std::endl;
     // provide input data dimensions
     MemoryDimensions dims({n, dim});
     InputDimensionsMap inputDimensions;
@@ -62,6 +65,12 @@ int main(int argc, const char * const argv[])
     // compile kernel for VectorAddNode object
     testAddNode.Compile(*platform);
 
+    std::cout << "done setting up" << std::endl;
+
+    std::cout << "copying data and running computation" << std::endl;
+
+    long long time_copy_start = PAPI_get_real_nsec();
+
     // copy input data into node working memory (will usually be done by compiled kernels for InputNode if whole graph is run; testing only single node here)
     platform->CopyInputData(&i1, input1);
     platform->CopyInputData(&i2, input2);
@@ -75,6 +84,6 @@ int main(int argc, const char * const argv[])
     long long cycs_stop = PAPI_get_real_cyc();
     long long time_stop = PAPI_get_real_nsec();
 
-    std::cout << "Computation on " << size << " elements took " << cycs_stop - cycs_start << " cycles in "<< time_stop - time_start << " ns" << std::endl;
+    std::cout << "Computation on " << size << " elements took " << cycs_stop - cycs_start << " cycles in "<< time_stop - time_start << " ns and " << time_start - time_copy_start << " ns to copy input data" << std::endl;
     return -0;
 }
