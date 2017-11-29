@@ -43,7 +43,13 @@ void VectorAddNode::GetMemoryDimensions(CompilationMemoryMap& memoryMap) const
     const MemoryDimensions dimB = memoryMap.GetNodeMemoryDimensions(_summandB);
     if (dimA != dimB)
     {
-        throw std::runtime_error("Inputs to VectorAddNode have different dimensions.");
+        // allow one one input to be a multiple of the other in exactly one dimension (broadcast operation)
+        if (!((dimA.xDim == dimB.xDim && (dimA.yDim % dimB.yDim == 0 || dimB.yDim % dimA.yDim == 0)) ||
+              (dimA.yDim == dimA.yDim && (dimA.xDim % dimB.xDim == 0 || dimB.xDim % dimA.xDim == 0))))
+        {
+            throw std::runtime_error("Inputs to VectorAddNode have unmatching dimensions.");
+        }
     }
-    memoryMap.RegisterNodeMemory(this, dimA);
+    MemoryDimensions dim { std::max(dimA.yDim, dimB.yDim), std::max(dimA.xDim, dimB.xDim) };
+    memoryMap.RegisterNodeMemory(this, dim);
 }

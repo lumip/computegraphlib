@@ -6,12 +6,18 @@
 class VectorAddNodeCPUKernel : public Kernel
 {
 private:
-    const float* const _memoryA;
+    const float* const _memoryA; // invariant: _memoryA will always have output size (it is the unbroadcasted operand)
     const float* const _memoryB;
     float* const _memoryResult;
-    const size_t _size;
+    const MemoryDimensions _dimA;
+    const MemoryDimensions _dimB;
+private:
+    inline size_t GetIndex(size_t i, size_t j, size_t stride) const
+    {
+        return i * stride + j;
+    }
 public:
-    VectorAddNodeCPUKernel(const float* const memoryA, const float* const memoryB, float* const memoryResult, size_t size);
+    VectorAddNodeCPUKernel(const float* const memoryA, const float* const memoryB, float* const memoryResult, MemoryDimensions dimA, MemoryDimensions dimB);
     virtual ~VectorAddNodeCPUKernel();
     void Run();
 };

@@ -186,15 +186,33 @@ void GraphCompilationCPUPlatform::CompileVariableNode(const VariableNode* const 
 void GraphCompilationCPUPlatform::CompileVectorAddNode(const VectorAddNode* const node)
 {
     Node::ConstNodeList inputs = node->GetInputs();
+    MemoryDimensions inputADims = _dimensionsMap.GetNodeMemoryDimensions(inputs[0]);
+    MemoryDimensions inputBDims = _dimensionsMap.GetNodeMemoryDimensions(inputs[1]);
     MemoryDimensions resultDims = _dimensionsMap.GetNodeMemoryDimensions(node);
-    const MemoryHandle inputABuffer = _bufferMap.at(inputs[0]).get();
-    const MemoryHandle inputBBuffer = _bufferMap.at(inputs[1]).get();
+    MemoryHandle inputABuffer = _bufferMap.at(inputs[0]).get();
+    MemoryHandle inputBBuffer = _bufferMap.at(inputs[1]).get();
     const MemoryHandle resultBuffer = _bufferMap.at(node).get();
+    if (inputADims != inputBDims)
+    {
+        if (((inputADims.yDim == inputBDims.yDim) && (inputBDims.xDim % inputADims.xDim == 0)) ||
+            ((inputADims.xDim == inputBDims.xDim) && (inputBDims.yDim % inputADims.yDim == 0)))
+        {
+            std::swap(inputADims, inputBDims);
+            std::swap(inputABuffer, inputBBuffer);
+        }
+        else if (!(((inputADims.yDim == inputBDims.yDim) && (inputADims.xDim % inputBDims.xDim == 0)) ||
+                   ((inputADims.xDim == inputBDims.xDim) && (inputADims.yDim % inputBDims.yDim == 0))))
+        {
+            throw std::runtime_error("CompileVectorAddNode: The dimensions of the inputs do not match.");
+        }
+    }
+    assert(resultDims == inputADims);
     _kernels.emplace_back(
-           std::unique_ptr<Kernel>(new VectorAddNodeCPUKernel(inputABuffer,
-                                                              inputBBuffer,
-                                                              resultBuffer,
-                                                              resultDims.size()))
+           new VectorAddNodeCPUKernel(inputABuffer,
+                                      inputBBuffer,
+                                      resultBuffer,
+                                      inputADims,
+                                      inputBDims)
     );
 }
 
