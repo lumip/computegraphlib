@@ -16,6 +16,8 @@ public:
     void GetMemoryDimensions(CompilationMemoryMap& memoryMap) const;
     std::string ToString() const;
     bool IsInitialized() const;
+
+    size_t GetAxis() const;
 };
 
 #endif

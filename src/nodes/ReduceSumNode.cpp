@@ -42,3 +42,8 @@ void ReduceSumNode::GetMemoryDimensions(CompilationMemoryMap& memoryMap) const
     dim.dims[_axis] = 1;
     memoryMap.RegisterNodeMemory(this, MemoryDimensions(dim));
 }
+
+size_t ReduceSumNode::GetAxis() const
+{
+    return _axis;
+}

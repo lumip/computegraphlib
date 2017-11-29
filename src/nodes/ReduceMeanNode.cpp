@@ -42,3 +42,8 @@ void ReduceMeanNode::GetMemoryDimensions(CompilationMemoryMap& memoryMap) const
     dim.dims[_axis] = 1;
     memoryMap.RegisterNodeMemory(this, MemoryDimensions(dim));
 }
+
+size_t ReduceMeanNode::GetAxis() const
+{
+    return _axis;
+}

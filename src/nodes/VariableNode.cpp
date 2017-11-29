@@ -53,14 +53,15 @@ void VariableNode::Compile(GraphCompilationPlatform& platform) const
 void VariableNode::GetMemoryDimensions(CompilationMemoryMap& memoryMap) const
 {
     const MemoryDimensions initDim = memoryMap.GetInputDimensions(_name);
-    if (_input != nullptr)
+    // todo: what if input node didn't yet register its memory dimensions?
+    /*if (_input != nullptr)
     {
-        const MemoryDimensions inputNodeDim = memoryMap.GetNodeMemoryDimensions(_input); // todo: what if input node didn't yet register its memory dimensions?
+        const MemoryDimensions inputNodeDim = memoryMap.GetNodeMemoryDimensions(_input);
         if (initDim != inputNodeDim)
         {
             throw std::runtime_error("The dimensions of initialization data and input node data are different for this VariableNode.");
         }
-    }
+    }*/
     memoryMap.RegisterNodeMemory(this, initDim);
     memoryMap.RegisterInputMemory(_name, this);
 }

@@ -43,3 +43,13 @@ void SliceNode::GetMemoryDimensions(CompilationMemoryMap& memoryMap) const
     dim.dims[_axis] = 1;
     memoryMap.RegisterNodeMemory(this, MemoryDimensions(dim));
 }
+
+size_t SliceNode::GetSliceId() const
+{
+    return _slice_id;
+}
+
+size_t SliceNode::GetAxis() const
+{
+    return _axis;
+}

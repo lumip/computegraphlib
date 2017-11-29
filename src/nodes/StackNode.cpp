@@ -42,6 +42,15 @@ void StackNode::Compile(GraphCompilationPlatform& platform) const
 void StackNode::GetMemoryDimensions(CompilationMemoryMap& memoryMap) const
 {
     MemoryDimensions dim = memoryMap.GetNodeMemoryDimensions(_components[0]);
+    if (dim.xDim != 1 && dim.yDim != 1)
+    {
+        throw std::invalid_argument("StackNode: One of the input dimensions must have size 1.");
+    }
     dim.dims[_axis] *= _components.size();
     memoryMap.RegisterNodeMemory(this, MemoryDimensions(dim));
+}
+
+size_t StackNode::GetAxis() const
+{
+    return _axis;
 }
