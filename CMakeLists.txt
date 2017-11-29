@@ -13,7 +13,7 @@ set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -Wall -Wer
 # Collect source files
 file(GLOB_RECURSE Includes "includes/*hpp")
 file(GLOB_RECURSE Sources "src/*.cpp")
-file(GLOB_RECURSE CPUSources "src-cpu/*.cpp")
+file(GLOB_RECURSE CPUSources "src-cpu/*.cpp" "src-cpu/*.hpp")
 file(GLOB_RECURSE GPUSources "src-gpu/*.cpp")
 file(GLOB_RECURSE OCLKernels "src-opencl-kernels/*.c")
 file(GLOB_RECURSE OCLKernelSources "src-opencl-kernels/*.cpp")
