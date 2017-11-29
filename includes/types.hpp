@@ -12,8 +12,13 @@ typedef ConstDataBuffer InputDataBuffer;
 typedef std::map<std::string, std::reference_wrapper<InputDataBuffer>> InputDataMap;
 struct MemoryDimensions
 {
-    size_t yDim;
-    size_t xDim;
+    union {
+        struct {
+            size_t yDim;
+            size_t xDim;
+        };
+        size_t dims[2];
+    };
     size_t size() const
     {
         return xDim * yDim;

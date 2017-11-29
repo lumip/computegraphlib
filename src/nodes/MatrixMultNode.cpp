@@ -9,7 +9,8 @@ MatrixMultNode::MatrixMultNode(NodePtr a, NodePtr b)
     : _a(a)
     , _b(b)
 {
-
+    this->SubscribeTo(a);
+    this->SubscribeTo(b);
 }
 
 MatrixMultNode::~MatrixMultNode() { }

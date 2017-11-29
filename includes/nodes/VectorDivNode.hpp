@@ -1,16 +1,16 @@
-#ifndef _MATRIX_MULT_NODE_HPP_
-#define _MATRIX_MULT_NODE_HPP_
+#ifndef _VECTOR_DIV_NODE_HPP_
+#define _VECTOR_DIV_NODE_HPP_
 
 #include "Node.hpp"
 
-class MatrixMultNode : public Node
+class VectorDivNode : public Node
 {
 private:
-    const ConstNodePtr _a;
-    const ConstNodePtr _b;
+    const ConstNodePtr _inputA;
+    const ConstNodePtr _inputB;
 public:
-    MatrixMultNode(NodePtr a, NodePtr b);
-    virtual ~MatrixMultNode();
+    VectorDivNode(NodePtr a, NodePtr b);
+    virtual ~VectorDivNode();
     ConstNodeList GetInputs() const;
     void Compile(GraphCompilationPlatform& platform) const;
     void GetMemoryDimensions(CompilationMemoryMap& memoryMap) const;

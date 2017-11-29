@@ -1,16 +1,15 @@
-#ifndef _MATRIX_MULT_NODE_HPP_
-#define _MATRIX_MULT_NODE_HPP_
+#ifndef _TRANSPOSE_NODE_HPP_
+#define _TRANSPOSE_NODE_HPP_
 
-#include "Node.hpp"
+#include "nodes/Node.hpp"
 
-class MatrixMultNode : public Node
+class TransposeNode : public Node
 {
 private:
-    const ConstNodePtr _a;
-    const ConstNodePtr _b;
+    const ConstNodePtr _input;
 public:
-    MatrixMultNode(NodePtr a, NodePtr b);
-    virtual ~MatrixMultNode();
+    TransposeNode(NodePtr input);
+    virtual ~TransposeNode();
     ConstNodeList GetInputs() const;
     void Compile(GraphCompilationPlatform& platform) const;
     void GetMemoryDimensions(CompilationMemoryMap& memoryMap) const;

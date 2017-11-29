@@ -1,16 +1,15 @@
-#ifndef _MATRIX_MULT_NODE_HPP_
-#define _MATRIX_MULT_NODE_HPP_
+#ifndef _EXP_FUNC_NODE_HPP_
+#define _EXP_FUNC_NODE_HPP_
 
-#include "Node.hpp"
+#include "nodes/Node.hpp"
 
-class MatrixMultNode : public Node
+class ExpFuncNode : public Node
 {
 private:
-    const ConstNodePtr _a;
-    const ConstNodePtr _b;
+    const ConstNodePtr _input;
 public:
-    MatrixMultNode(NodePtr a, NodePtr b);
-    virtual ~MatrixMultNode();
+    ExpFuncNode(NodePtr input);
+    virtual ~ExpFuncNode();
     ConstNodeList GetInputs() const;
     void Compile(GraphCompilationPlatform& platform) const;
     void GetMemoryDimensions(CompilationMemoryMap& memoryMap) const;

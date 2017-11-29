@@ -6,9 +6,9 @@
 class VariableNode : public Node
 {
 private:
-    std::string _name;
-    size_t _xDim;
-    size_t _yDim;
+    const std::string _name;
+    const size_t _xDim;
+    const size_t _yDim;
     NodePtr _input;
 public:
     VariableNode(std::string name, size_t xDim, size_t yDim);

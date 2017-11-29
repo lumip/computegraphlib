@@ -13,8 +13,8 @@ public:
     typedef std::shared_ptr<VectorAddNode> shared_ptr;
     typedef std::unique_ptr<VectorAddNode> unique_ptr;
 private:
-    NodePtr _summandA;
-    NodePtr _summandB;
+    const ConstNodePtr _summandA;
+    const ConstNodePtr _summandB;
 public:
     VectorAddNode(NodePtr a, NodePtr b);
     virtual ~VectorAddNode();

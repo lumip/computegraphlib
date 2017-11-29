@@ -6,8 +6,8 @@
 class InputNode : public Node
 {
 private:
-    std::string _name;
-    size_t _dim;
+    const std::string _name;
+    const size_t _dim;
 public:
     InputNode(std::string name, size_t dim);
     virtual ~InputNode();

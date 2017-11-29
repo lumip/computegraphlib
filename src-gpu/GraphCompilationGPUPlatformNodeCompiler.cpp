@@ -5,15 +5,27 @@
 #include "CompilationMemoryMap.hpp"
 #include "Kernel.hpp"
 
-#include "nodes/InputNode.hpp"
-#include "nodes/MatrixMultNode.hpp"
-#include "nodes/VariableNode.hpp"
-#include "nodes/VectorAddNode.hpp"
+#include "nodes/nodes.hpp"
 
 extern std::string MatrixMultSource;
 extern std::string VectorAddKernelSource;
 
+void GraphCompilationGPUPlatform::CompileConstMultNode(const ConstMultNode* const node)
+{
+    throw std::logic_error("not yet implemented!");
+}
+
+void GraphCompilationGPUPlatform::CompileExpFuncNode(const ExpFuncNode* const node)
+{
+    throw std::logic_error("not yet implemented!");
+}
+
 void GraphCompilationGPUPlatform::CompileInputNode(const InputNode* const node) { }
+
+void GraphCompilationGPUPlatform::CompileLogFuncNode(const LogFuncNode* const node)
+{
+    throw std::logic_error("not yet implemented!");
+}
 
 class MatrixMultNodeGPUKernel : public Kernel
 {
@@ -67,7 +79,40 @@ void GraphCompilationGPUPlatform::CompileMatrixMultNode(const ConstNodePtr input
     );
 }
 
-void GraphCompilationGPUPlatform::CompileVariableNode(const VariableNode* const node) { }
+void GraphCompilationGPUPlatform::CompileNegateNode(const NegateNode* const node)
+{
+    throw std::logic_error("not yet implemented!");
+}
+
+void GraphCompilationGPUPlatform::CompileReduceMeanNode(const ReduceMeanNode* const node)
+{
+    throw std::logic_error("not yet implemented!");
+}
+
+void GraphCompilationGPUPlatform::CompileReduceSumNode(const ReduceSumNode* const node)
+{
+    throw std::logic_error("not yet implemented!");
+}
+
+void GraphCompilationGPUPlatform::CompileSliceNode(const SliceNode* const node)
+{
+    throw std::logic_error("not yet implemented!");
+}
+
+void GraphCompilationGPUPlatform::CompileStackNode(const StackNode* const node)
+{
+    throw std::logic_error("not yet implemented!");
+}
+
+void GraphCompilationGPUPlatform::CompileTransposeNode(const TransposeNode* const node)
+{
+    throw std::logic_error("not yet implemented!");
+}
+
+void GraphCompilationGPUPlatform::CompileVariableNode(const VariableNode* const node)
+{
+    throw std::logic_error("not yet implemented!");
+}
 
 class VectorAddNodeGPUKernel : public Kernel
 {
@@ -112,4 +157,14 @@ void GraphCompilationGPUPlatform::CompileVectorAddNode(const ConstNodePtr inputA
                                                               resultBuffer,
                                                               resultDims.size()))
     );
+}
+
+void GraphCompilationGPUPlatform::CompileVectorDivNode(const VectorDivNode* const node)
+{
+    throw std::logic_error("not yet implemented!");
+}
+
+void GraphCompilationGPUPlatform::CompileVectorMultNode(const VectorMultNode* const node)
+{
+    throw std::logic_error("not yet implemented!");
 }

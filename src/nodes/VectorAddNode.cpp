@@ -6,12 +6,11 @@
 #include "GraphCompilationPlatform.hpp"
 
 VectorAddNode::VectorAddNode(NodePtr a, NodePtr b)
-    : Node(), 
-    _summandA(a), 
-    _summandB(b)
+    : _summandA(a)
+    , _summandB(b)
 {
-    this->SubscribeTo(_summandA);
-    this->SubscribeTo(_summandB);
+    this->SubscribeTo(a);
+    this->SubscribeTo(b);
 }
 
 VectorAddNode::~VectorAddNode() { }

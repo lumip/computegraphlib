@@ -37,10 +37,21 @@ public:
     void CopyInputData(const ConstNodePtr inputNode, InputDataBuffer& inputBuffer);
     void Evaluate();
 
+    void CompileConstMultNode(const ConstMultNode* const node);
+    void CompileExpFuncNode(const ExpFuncNode* const node);
     void CompileInputNode(const InputNode* const node);
+    void CompileLogFuncNode(const LogFuncNode* const node);
     void CompileMatrixMultNode(const ConstNodePtr inputANode, const ConstNodePtr inputBNode, const MatrixMultNode* const node);
+    void CompileNegateNode(const NegateNode* const node);
+    void CompileReduceMeanNode(const ReduceMeanNode* const node);
+    void CompileReduceSumNode(const ReduceSumNode* const node);
+    void CompileSliceNode(const SliceNode* const node);
+    void CompileStackNode(const StackNode* const node);
+    void CompileTransposeNode(const TransposeNode* const node);
     void CompileVariableNode(const VariableNode* const node);
     void CompileVectorAddNode(const ConstNodePtr inputANode, const ConstNodePtr inputBNode, const VectorAddNode* const node);
+    void CompileVectorDivNode(const VectorDivNode* const node);
+    void CompileVectorMultNode(const VectorMultNode* const node);
 };
 
 #endif

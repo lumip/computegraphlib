@@ -1,16 +1,16 @@
-#ifndef _MATRIX_MULT_NODE_HPP_
-#define _MATRIX_MULT_NODE_HPP_
+#ifndef _REDUCE_SUM_NODE_HPP_
+#define _REDUCE_SUM_NODE_HPP_
 
-#include "Node.hpp"
+#include "nodes/Node.hpp"
 
-class MatrixMultNode : public Node
+class ReduceSumNode : public Node
 {
 private:
-    const ConstNodePtr _a;
-    const ConstNodePtr _b;
+    const ConstNodePtr _input;
+    const size_t _axis;
 public:
-    MatrixMultNode(NodePtr a, NodePtr b);
-    virtual ~MatrixMultNode();
+    ReduceSumNode(NodePtr input, size_t axis);
+    virtual ~ReduceSumNode();
     ConstNodeList GetInputs() const;
     void Compile(GraphCompilationPlatform& platform) const;
     void GetMemoryDimensions(CompilationMemoryMap& memoryMap) const;
