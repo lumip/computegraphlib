@@ -58,12 +58,13 @@ public:
     }
 };
 
-void GraphCompilationGPUPlatform::CompileMatrixMultNode(const ConstNodePtr inputANode, const ConstNodePtr inputBNode, const MatrixMultNode* const node)
+void GraphCompilationGPUPlatform::CompileMatrixMultNode(const MatrixMultNode* const node)
 {
-    const MemoryDimensions inputADims = _dimensionsMap.GetNodeMemoryDimensions(inputANode);
-    const MemoryDimensions inputBDims = _dimensionsMap.GetNodeMemoryDimensions(inputBNode);
-    const MemoryHandle inputABuffer = _bufferMap.at(inputANode).get();
-    const MemoryHandle inputBBuffer = _bufferMap.at(inputBNode).get();
+    Node::ConstNodeList inputs = node->GetInputs();
+    const MemoryDimensions inputADims = _dimensionsMap.GetNodeMemoryDimensions(inputs[0]);
+    const MemoryDimensions inputBDims = _dimensionsMap.GetNodeMemoryDimensions(inputs[1]);
+    const MemoryHandle inputABuffer = _bufferMap.at(inputs[0]).get();
+    const MemoryHandle inputBBuffer = _bufferMap.at(inputs[1]).get();
     const MemoryHandle resultBuffer = _bufferMap.at(node).get();
     auto m = inputADims.yDim;
     auto n = inputBDims.xDim;
@@ -142,12 +143,13 @@ public:
     }
 };
 
-void GraphCompilationGPUPlatform::CompileVectorAddNode(const ConstNodePtr inputANode, const ConstNodePtr inputBNode, const VectorAddNode* const node)
+void GraphCompilationGPUPlatform::CompileVectorAddNode(const VectorAddNode* const node)
 {
+    Node::ConstNodeList inputs = node->GetInputs();
     OCLWrappers::Kernel kernel = CompileKernel(VectorAddKernelSource);
     const MemoryDimensions resultDims = _dimensionsMap.GetNodeMemoryDimensions(node);
-    const MemoryHandle inputABuffer = _bufferMap.at(inputANode).get();
-    const MemoryHandle inputBBuffer = _bufferMap.at(inputBNode).get();
+    const MemoryHandle inputABuffer = _bufferMap.at(inputs[0]).get();
+    const MemoryHandle inputBBuffer = _bufferMap.at(inputs[1]).get();
     const MemoryHandle resultBuffer = _bufferMap.at(node).get();
     _kernels.emplace_back(
            std::unique_ptr<Kernel>(new VectorAddNodeGPUKernel(std::move(kernel),

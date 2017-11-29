@@ -28,7 +28,7 @@ public:
     void CompileExpFuncNode(const ExpFuncNode* const node);
     void CompileInputNode(const InputNode* const node);
     void CompileLogFuncNode(const LogFuncNode* const node);
-    void CompileMatrixMultNode(const ConstNodePtr inputANode, const ConstNodePtr inputBNode, const MatrixMultNode* const node);
+    void CompileMatrixMultNode(const MatrixMultNode* const node);
     void CompileNegateNode(const NegateNode* const node);
     void CompileReduceMeanNode(const ReduceMeanNode* const node);
     void CompileReduceSumNode(const ReduceSumNode* const node);
@@ -36,7 +36,7 @@ public:
     void CompileStackNode(const StackNode* const node);
     void CompileTransposeNode(const TransposeNode* const node);
     void CompileVariableNode(const VariableNode* const node);
-    void CompileVectorAddNode(const ConstNodePtr inputANode, const ConstNodePtr inputBNode, const VectorAddNode* const node);
+    void CompileVectorAddNode(const VectorAddNode* const node);
     void CompileVectorDivNode(const VectorDivNode* const node);
     void CompileVectorMultNode(const VectorMultNode* const node);
 };
