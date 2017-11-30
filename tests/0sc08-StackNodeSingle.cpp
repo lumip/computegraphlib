@@ -9,7 +9,7 @@
 #include "GraphCompilationPlatform.hpp"
 #include "ImplementationStrategyFactory.hpp"
 
-float testStackNode(const MemoryDimensions sliceDim, const std::vector<DataBuffer> slices, const size_t axis, ConstDataBuffer& expected, const MemoryDimensions expectedDim)
+float testStackNode(const MemoryDimensions sliceDim, const std::vector<DataBuffer> slices, const size_t axis, const MemoryDimensions expectedDim, ConstDataBuffer& expected)
 {
     const size_t sliceCount = slices.size();
 
@@ -40,7 +40,8 @@ float testStackNode(const MemoryDimensions sliceDim, const std::vector<DataBuffe
     platform->Evaluate();
 
     // get output (pointer to working memory of StackNode which holds the computation result)
-    DataBuffer result(compilationMemoryMap.GetNodeMemoryDimensions(&stackNode).size());
+    const MemoryDimensions resultDim = compilationMemoryMap.GetNodeMemoryDimensions(&stackNode);
+    DataBuffer result(resultDim.size());
     platform->CopyOutputData(&stackNode, result);
 
     // compute and return squared error
@@ -49,8 +50,8 @@ float testStackNode(const MemoryDimensions sliceDim, const std::vector<DataBuffe
     {
         error += std::pow(result[i] - expected[i], 2);
     }
-    const MemoryDimensions resultDim = compilationMemoryMap.GetNodeMemoryDimensions(&stackNode);
-    error += std::pow(resultDim.xDim - expectedDim.xDim, 2) + std::pow(resultDim.yDim - expectedDim.yDim, 2);
+    error += std::pow(static_cast<float>(resultDim.xDim) - static_cast<float>(expectedDim.xDim), 2);
+    error += std::pow(static_cast<float>(resultDim.yDim) - static_cast<float>(expectedDim.yDim), 2);
     return error;
 }
 
@@ -68,7 +69,7 @@ int main(int argc, const char * const argv[])
     sliceDim = {1, 4};
     expectedDim = {5, 4};
     expected = { 1,2,3,4, 2,3,4,5, 3,4,5,6, 4,5,6,7, 5,6,7,8 };
-    error = testStackNode(sliceDim, sliceData, 0, expected, expectedDim);
+    error = testStackNode(sliceDim, sliceData, 0, expectedDim, expected);
     std::cout << "Stacking row vector along y-axis | Error: " << error << std::endl;
     totalError += error;
 
@@ -76,7 +77,7 @@ int main(int argc, const char * const argv[])
     sliceDim = {1, 4};
     expectedDim = {1, 20};
     expected = { 1,2,3,4, 2,3,4,5, 3,4,5,6, 4,5,6,7, 5,6,7,8 };
-    error = testStackNode(sliceDim, sliceData, 1, expected, expectedDim);
+    error = testStackNode(sliceDim, sliceData, 1, expectedDim, expected);
     std::cout << "Stacking row vector along x-axis | Error: " << error << std::endl;
     totalError += error;
 
@@ -84,7 +85,7 @@ int main(int argc, const char * const argv[])
     sliceDim = {4, 1};
     expectedDim = {20, 1};
     expected = { 1,2,3,4, 2,3,4,5, 3,4,5,6, 4,5,6,7, 5,6,7,8 };
-    error = testStackNode(sliceDim, sliceData, 0, expected, expectedDim);
+    error = testStackNode(sliceDim, sliceData, 0, expectedDim, expected);
     std::cout << "Stacking column vector along y-axis | Error: " << error << std::endl;
     totalError += error;
 
@@ -92,7 +93,7 @@ int main(int argc, const char * const argv[])
     sliceDim = {4, 1};
     expectedDim = {4, 5};
     expected = { 1,2,3,4,5, 2,3,4,5,6, 3,4,5,6,7, 4,5,6,7,8 };
-    error = testStackNode(sliceDim, sliceData, 1, expected, expectedDim);
+    error = testStackNode(sliceDim, sliceData, 1, expectedDim, expected);
     std::cout << "Stacking column vector along x-axis | Error: " << error << std::endl;
     totalError += error;
 

@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cmath>
 
 #include "types.hpp"
 #include "nodes/InputNode.hpp"
@@ -7,7 +8,7 @@
 #include "GraphCompilationPlatform.hpp"
 #include "ImplementationStrategyFactory.hpp"
 
-float testSliceNode(const MemoryDimensions input1Dim, const InputDataBuffer& input1, const size_t sliceId, const size_t axis, ConstDataBuffer& expected)
+float testSliceNode(const MemoryDimensions input1Dim, const InputDataBuffer& input1, const size_t sliceId, const size_t axis, const MemoryDimensions expectedDim, ConstDataBuffer& expected)
 {
     InputNode i1("x", input1Dim.xDim);
     SliceNode sliceNode(&i1, sliceId, axis);
@@ -38,15 +39,18 @@ float testSliceNode(const MemoryDimensions input1Dim, const InputDataBuffer& inp
     platform->Evaluate();
 
     // get output (pointer to working memory of SliceNode which holds the computation result)
-    DataBuffer result(compilationMemoryMap.GetNodeMemoryDimensions(&sliceNode).size());
+    const MemoryDimensions resultDim = compilationMemoryMap.GetNodeMemoryDimensions(&sliceNode);
+    DataBuffer result(resultDim.size());
     platform->CopyOutputData(&sliceNode, result);
 
     // compute and return squared error
     float error = 0.0f;
     for (size_t i = 0; i < result.size(); ++i)
     {
-        error += (result[i] - expected[i]) * (result[i] - expected[i]);
+        error += std::pow(result[i] - expected[i], 2);
     }
+    error += std::pow(static_cast<float>(resultDim.xDim) - static_cast<float>(expectedDim.xDim), 2);
+    error += std::pow(static_cast<float>(resultDim.yDim) - static_cast<float>(expectedDim.yDim), 2);
     return error;
 }
 
@@ -55,6 +59,7 @@ int main(int argc, const char * const argv[])
     size_t m = 5;
     size_t n = 4;
     const MemoryDimensions dim {m, n};
+    MemoryDimensions sliceDim;
 
     float totalError = 0.0f;
     float error = 0.0f;
@@ -64,30 +69,32 @@ int main(int argc, const char * const argv[])
 
     // x-axis (axis == 1)
     error = 0.0f;
+    sliceDim = { m, 1 };
     expected = { input1[0], input1[4], input1[8], input1[12], input1[16] };
-    error += testSliceNode(dim, input1, 0, 1, expected);
+    error += testSliceNode(dim, input1, 0, 1, sliceDim, expected);
     expected = { input1[1], input1[5], input1[9], input1[13], input1[17] };
-    error += testSliceNode(dim, input1, 1, 1, expected);
+    error += testSliceNode(dim, input1, 1, 1, sliceDim, expected);
     expected = { input1[2], input1[6], input1[10], input1[14], input1[18] };
-    error += testSliceNode(dim, input1, 2, 1, expected);
+    error += testSliceNode(dim, input1, 2, 1, sliceDim, expected);
     expected = { input1[3], input1[7], input1[11], input1[15], input1[19] };
-    error += testSliceNode(dim, input1, 3, 1, expected);
+    error += testSliceNode(dim, input1, 3, 1, sliceDim, expected);
 
     std::cout << "Slicing along x-axis (get columns) | Error: " << error << std::endl;
     totalError += error;
 
     // y-axis (axis == 0)
     error = 0.0f;
+    sliceDim = { 1, n };
     expected = { input1[0], input1[1], input1[2], input1[3] };
-    error += testSliceNode(dim, input1, 0, 0, expected);
+    error += testSliceNode(dim, input1, 0, 0, sliceDim, expected);
     expected = { input1[4], input1[5], input1[6], input1[7] };
-    error += testSliceNode(dim, input1, 1, 0, expected);
+    error += testSliceNode(dim, input1, 1, 0, sliceDim, expected);
     expected = { input1[8], input1[9], input1[10], input1[11] };
-    error += testSliceNode(dim, input1, 2, 0, expected);
+    error += testSliceNode(dim, input1, 2, 0, sliceDim, expected);
     expected = { input1[12], input1[13], input1[14], input1[15] };
-    error += testSliceNode(dim, input1, 3, 0, expected);
+    error += testSliceNode(dim, input1, 3, 0, sliceDim, expected);
     expected = { input1[16], input1[17], input1[18], input1[19] };
-    error += testSliceNode(dim, input1, 4, 0, expected);
+    error += testSliceNode(dim, input1, 4, 0, sliceDim, expected);
 
     std::cout << "Slicing along y-axis (get rows) | Error: " << error << std::endl;
     totalError += error;

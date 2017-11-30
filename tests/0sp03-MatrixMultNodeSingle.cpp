@@ -64,7 +64,7 @@ int main(int argc, const char * const argv[])
     platform->AllocateMemory(&i2);
     platform->AllocateMemory(&testMultNode);
 
-    // compile kernel for VectorAddNode object
+    // compile kernel for MatrixMultNode object
     testMultNode.Compile(*platform);
 
     std::cout << "done setting up" << std::endl;

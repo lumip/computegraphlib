@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cmath>
 
 #include "types.hpp"
 #include "nodes/InputNode.hpp"
@@ -8,11 +9,10 @@
 
 int main(const int argc, const char * const argv[])
 {
-    size_t dim = 4;
-    size_t n = 5;
-    size_t size = dim * n;
+    const MemoryDimensions dim = { 5, 4 };
+    const MemoryDimensions& expectedDim(dim);
 
-    InputNode testInputNode("x", dim);
+    InputNode testInputNode("x", dim.xDim);
 
     // define input data
     InputDataBuffer input1 { 1,2,3,4, 2,2,2,2, 0,0,0,0, 1,0,-1,0, -1,-3,-5,-7 };
@@ -20,15 +20,15 @@ int main(const int argc, const char * const argv[])
 
     // provide input data dimensions
     InputDimensionsMap inputDimensions;
-    inputDimensions.emplace("x", MemoryDimensions({n, dim}));
+    inputDimensions.emplace("x", dim);
 
     // set up graph compilation context and platform
     ImplementationStrategyFactory fact;
-    CompilationMemoryMap CompilationMemoryMap(inputDimensions);
-    std::unique_ptr<GraphCompilationPlatform> platform = fact.CreateGraphCompilationTargetStrategy(CompilationMemoryMap);
+    CompilationMemoryMap compilationMemoryMap(inputDimensions);
+    std::unique_ptr<GraphCompilationPlatform> platform = fact.CreateGraphCompilationTargetStrategy(compilationMemoryMap);
 
     // set up working memory for input nodes (will usually be done during compilation if whole graph is compiled; testing only single node here)
-    testInputNode.GetMemoryDimensions(CompilationMemoryMap);
+    testInputNode.GetMemoryDimensions(compilationMemoryMap);
 
     platform->AllocateMemory(&testInputNode);
 
@@ -44,17 +44,19 @@ int main(const int argc, const char * const argv[])
     // run compiled kernel
     platform->Evaluate(); // todo: currently InputNodes do nothing, not even copying the data.. should probably change
 
-    // get output (pointer to working memory of VectorAddNode which holds the computation result)
-    DataBuffer result(size);
+    // get output (pointer to working memory of InputNode which holds the computation result)
+    const MemoryDimensions resultDim = compilationMemoryMap.GetNodeMemoryDimensions(&testInputNode);
+    DataBuffer result(resultDim.size());
     platform->CopyOutputData(&testInputNode, result);
-    //context.GetNodeData(&testInputNode, result);
 
     // compute and output squared error
     float error = 0.0f;
-    for (size_t i = 0; i < size; ++i)
+    for (size_t i = 0; i < result.size(); ++i)
     {
-        error += (result[i] - expected[i]) * (result[i] - expected[i]);
+        error += std::pow(result[i] - expected[i], 2);
     }
+    error += std::pow(static_cast<float>(resultDim.xDim) - static_cast<float>(expectedDim.xDim), 2);
+    error += std::pow(static_cast<float>(resultDim.yDim) - static_cast<float>(expectedDim.yDim), 2);
     std::cout << "Error: " << error << std::endl;
 
     // return 0 if error below threshold, -1 otherwise

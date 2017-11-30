@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cmath>
 
 #include "types.hpp"
 #include "nodes/InputNode.hpp"
@@ -7,7 +8,7 @@
 #include "GraphCompilationPlatform.hpp"
 #include "ImplementationStrategyFactory.hpp"
 
-float testReduceMeanNode(const MemoryDimensions input1Dim, const InputDataBuffer& input1, const size_t axis, ConstDataBuffer& expected)
+float testReduceMeanNode(const MemoryDimensions input1Dim, const InputDataBuffer& input1, const size_t axis, const MemoryDimensions expectedDim, ConstDataBuffer& expected)
 {
     InputNode i1("x", input1Dim.xDim);
     ReduceMeanNode reduceMeanNode(&i1, axis);
@@ -38,15 +39,18 @@ float testReduceMeanNode(const MemoryDimensions input1Dim, const InputDataBuffer
     platform->Evaluate();
 
     // get output (pointer to working memory of ReduceMeanNode which holds the computation result)
-    DataBuffer result(compilationMemoryMap.GetNodeMemoryDimensions(&reduceMeanNode).size());
+    const MemoryDimensions resultDim = compilationMemoryMap.GetNodeMemoryDimensions(&reduceMeanNode);
+    DataBuffer result(resultDim.size());
     platform->CopyOutputData(&reduceMeanNode, result);
 
     // compute and return squared error
     float error = 0.0f;
     for (size_t i = 0; i < result.size(); ++i)
     {
-        error += (result[i] - expected[i]) * (result[i] - expected[i]);
+        error += std::pow(result[i] - expected[i], 2);
     }
+    error += std::pow(static_cast<float>(resultDim.xDim) - static_cast<float>(expectedDim.xDim), 2);
+    error += std::pow(static_cast<float>(resultDim.yDim) - static_cast<float>(expectedDim.yDim), 2);
     return error;
 }
 
@@ -66,7 +70,7 @@ int main(int argc, const char * const argv[])
                           (input1[2]+input1[6]+input1[10]+input1[14]+input1[18])/5.0f,
                           (input1[3]+input1[7]+input1[11]+input1[15]+input1[19])/5.0f };
 
-    error = testReduceMeanNode(MemoryDimensions({m, n}), input1, 0, expected);
+    error = testReduceMeanNode(MemoryDimensions({m, n}), input1, 0, MemoryDimensions({1, n}), expected);
     std::cout << "Reduce along y-axis | Error: " << error << std::endl;
     totalError += error;
 
@@ -77,7 +81,7 @@ int main(int argc, const char * const argv[])
                  (input1[12]+input1[13]+input1[14]+input1[15])/4.0f,
                  (input1[16]+input1[17]+input1[18]+input1[19])/4.0f };
 
-    error = testReduceMeanNode(MemoryDimensions({m, n}), input1, 1, expected);
+    error = testReduceMeanNode(MemoryDimensions({m, n}), input1, 1, MemoryDimensions({m, 1}), expected);
     std::cout << "Reduce along x-axis | Error: " << error << std::endl;
     totalError += error;
 

@@ -56,7 +56,8 @@ int main(int argc, const char * const argv[])
     {
         error += std::pow(result[i] - expected[i], 2);
     }
-    error += std::pow(resultDim.xDim - expectedDim.xDim, 2) + std::pow(resultDim.yDim - expectedDim.yDim, 2);
+    error += std::pow(static_cast<float>(resultDim.xDim) - static_cast<float>(expectedDim.xDim), 2);
+    error += std::pow(static_cast<float>(resultDim.yDim) - static_cast<float>(expectedDim.yDim), 2);
 
     std::cout << "Error: " << error << std::endl;
 

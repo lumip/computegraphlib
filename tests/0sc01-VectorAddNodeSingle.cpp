@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cmath>
 
 #include "types.hpp"
 #include "nodes/VectorAddNode.hpp"
@@ -7,7 +8,7 @@
 #include "GraphCompilationPlatform.hpp"
 #include "ImplementationStrategyFactory.hpp"
 
-float testVectorAddNode(MemoryDimensions input1Dim, InputDataBuffer& input1, MemoryDimensions input2Dim, InputDataBuffer& input2, ConstDataBuffer& expected)
+float testVectorAddNode(const MemoryDimensions input1Dim, InputDataBuffer& input1, const MemoryDimensions input2Dim, InputDataBuffer& input2, const MemoryDimensions& expectedDim, ConstDataBuffer& expected)
 {
     InputNode i1("x", input1Dim.xDim);
     InputNode i2("y", input2Dim.xDim);
@@ -43,15 +44,18 @@ float testVectorAddNode(MemoryDimensions input1Dim, InputDataBuffer& input1, Mem
     platform->Evaluate();
 
     // get output (pointer to working memory of VectorAddNode which holds the computation result)
-    DataBuffer result(compilationMemoryMap.GetNodeMemoryDimensions(&testAddNode).size());
+    const MemoryDimensions resultDim = compilationMemoryMap.GetNodeMemoryDimensions(&testAddNode);
+    DataBuffer result(resultDim.size());
     platform->CopyOutputData(&testAddNode, result);
 
     // compute and return squared error
     float error = 0.0f;
     for (size_t i = 0; i < result.size(); ++i)
     {
-        error += (result[i] - expected[i]) * (result[i] - expected[i]);
+        error += std::pow(result[i] - expected[i], 2);
     }
+    error += std::pow(static_cast<float>(resultDim.xDim) - static_cast<float>(expectedDim.xDim), 2);
+    error += std::pow(static_cast<float>(resultDim.yDim) - static_cast<float>(expectedDim.yDim), 2);
     return error;
 }
 
@@ -73,7 +77,7 @@ int main(int argc, const char * const argv[])
                           input1[12]+input2[12], input1[13]+input2[13], input1[14]+input2[14], input1[15]+input2[15],
                           input1[16]+input2[16], input1[17]+input2[17], input1[18]+input2[18], input1[19]+input2[19] };
 
-    error = testVectorAddNode(MemoryDimensions({m, n}), input1, MemoryDimensions({m, n}), input2, expected);
+    error = testVectorAddNode(MemoryDimensions({m, n}), input1, MemoryDimensions({m, n}), input2, MemoryDimensions({m, n}), expected);
     std::cout << "Same-size data | Error: " << error << std::endl;
     totalError += error;
 
@@ -85,11 +89,11 @@ int main(int argc, const char * const argv[])
                  input1[12]+input2[0], input1[13]+input2[1], input1[14]+input2[2], input1[15]+input2[3],
                  input1[16]+input2[0], input1[17]+input2[1], input1[18]+input2[2], input1[19]+input2[3] };
 
-    error = testVectorAddNode(MemoryDimensions({m, n}), input1, MemoryDimensions({1, n}), input2, expected);
+    error = testVectorAddNode(MemoryDimensions({m, n}), input1, MemoryDimensions({1, n}), input2, MemoryDimensions({m, n}), expected);
     std::cout << "Row broadcasting (B) | Error: " << error << std::endl;
     totalError += error;
 
-    error = testVectorAddNode(MemoryDimensions({1, n}), input2, MemoryDimensions({m, n}), input1, expected);
+    error = testVectorAddNode(MemoryDimensions({1, n}), input2, MemoryDimensions({m, n}), input1, MemoryDimensions({m, n}), expected);
     std::cout << "Row broadcasting (A) | Error: " << error << std::endl;
     totalError += error;
 
@@ -101,11 +105,11 @@ int main(int argc, const char * const argv[])
                  input1[12]+input2[3], input1[13]+input2[3], input1[14]+input2[3], input1[15]+input2[3],
                  input1[16]+input2[4], input1[17]+input2[4], input1[18]+input2[4], input1[19]+input2[4] };
 
-    error = testVectorAddNode(MemoryDimensions({m, n}), input1, MemoryDimensions({m, 1}), input2, expected);
+    error = testVectorAddNode(MemoryDimensions({m, n}), input1, MemoryDimensions({m, 1}), input2, MemoryDimensions({m, n}), expected);
     std::cout << "Column broadcasting (B) | Error: " << error << std::endl;
     totalError += error;
 
-    error = testVectorAddNode(MemoryDimensions({m, 1}), input2, MemoryDimensions({m, n}), input1, expected);
+    error = testVectorAddNode(MemoryDimensions({m, 1}), input2, MemoryDimensions({m, n}), input1, MemoryDimensions({m, n}), expected);
     std::cout << "Column broadcasting (B) | Error: " << error << std::endl;
     totalError += error;
 
