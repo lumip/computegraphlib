@@ -32,7 +32,7 @@ bool LogFuncNode::IsInitialized() const
 
 void LogFuncNode::Compile(GraphCompilationPlatform& platform) const
 {
-    throw new std::logic_error("not yet implemented.");
+    platform.CompileLogFuncNode(this);
 }
 
 void LogFuncNode::GetMemoryDimensions(CompilationMemoryMap& memoryMap) const
