@@ -28,7 +28,7 @@ int main(int argc, const char * const argv[])
 
     // weighting inputs and applying bias
     MatrixMultNode weightedInputs(&inputBatch, &weights); // BatchSize x OutputDim
-    VectorAddNode weightedBiasedInputs(&weightedInputs, &bias); // todo: modifiy so that it works with matrix + vector input (tricks with mod); potentially add scalar factor to multiply to second arg
+    VectorAddNode weightedBiasedInputs(&weightedInputs, &bias);
 
     // apply softmax
     ExpFuncNode expF(&weightedBiasedInputs); // BatchSize x OutputDim
@@ -46,6 +46,7 @@ int main(int argc, const char * const argv[])
     ReduceMeanNode loss(&crossEntropy, 0); // 1x1, mean cross entropy over batch
 
     // build backpropagation/derivation graph (todo: it would be nice if we could automate this later on)
+    // todo: this entire part is currently ignored by the GraphCompiler, fix!
     NegateNode negCorrectClasses(&correctClasses); // BatchSize x OutputDim
     VectorAddNode gradFactors(&softmax, &negCorrectClasses); // BatchSize x OutputDim
     ReduceMeanNode biasGrad(&gradFactors, 0); // 1 x OutputDim
@@ -72,21 +73,19 @@ int main(int argc, const char * const argv[])
     weights.SetInput(&weightsUpdated);
 
     // load inputs and initialize variables
-    DataBuffer weightsData(BatchSize * OutputDim);
+    DataBuffer weightsData(InputDim * OutputDim);
     DataBuffer biasData(OutputDim);
 
-    std::random_device rd;
-    std::mt19937 gen(rd());
+    /*std::random_device rd;
+    std::mt19937 gen(rd());*/
+    std::mt19937 gen; // with default seed, reproducible results
     std::uniform_real_distribution<float> dist(-1.f, 1.f);
 
     std::generate(std::begin(weightsData), std::end(weightsData), [&dist, &gen]()->float {return dist(gen);});
     std::generate(std::begin(biasData), std::end(biasData), [&dist, &gen]()->float {return dist(gen);});
-    std::cout << "done generating input data" << std::endl;
 
     const std::string dataLocation(MNIST_DATA_DIR);
-    mnist::MNIST_dataset<std::vector, DataBuffer, float> dataset = mnist::read_dataset_direct<std::vector, DataBuffer, float>(dataLocation, 0, 0);
-    InputDataBuffer& buff(dataset.training_images[0]);
-    std::cout << buff.size() << std::endl;
+    mnist::MNIST_dataset<std::vector, DataBuffer, uint8_t> dataset = mnist::read_dataset_direct<std::vector, DataBuffer, uint8_t>(dataLocation, 0, 0);
 
     InputDimensionsMap inputDimensions;
     inputDimensions.emplace("ImgBatch", MemoryDimensions({BatchSize, InputDim}));
@@ -96,7 +95,37 @@ int main(int argc, const char * const argv[])
 
     GraphCompiler compiler(std::unique_ptr<const ImplementationStrategyFactory>(new ImplementationStrategyFactory));
     const std::unique_ptr<CompiledGraph> graph = compiler.Compile(&loss, inputDimensions);
-    graph->Evaluate(InputDataMap());
+
+    DataBuffer imgInputData(BatchSize * InputDim);
+    DataBuffer classesInputData(BatchSize * OutputDim);
+    std::fill(std::begin(classesInputData), std::begin(classesInputData), 0.0f);
+    {
+        DataBuffer::iterator it = std::begin(imgInputData);
+        for (size_t i = 0; i < BatchSize; ++i)
+        {
+            InputDataBuffer& sampleImageBuffer = dataset.training_images[i];
+            it = std::copy(std::begin(sampleImageBuffer), std::end(sampleImageBuffer), it);
+            uint8_t sampleLabel = dataset.training_labels[i];
+            classesInputData[i * OutputDim + sampleLabel] = 1.0f;
+        }
+        for (size_t i = 0; i < imgInputData.size(); ++i)
+        {
+            imgInputData[i] /= 255.0f;
+        }
+    }
+
+    InputDataMap inputDataMap;
+    inputDataMap.emplace("ImgBatch", imgInputData);
+    inputDataMap.emplace("Classes", classesInputData);
+    inputDataMap.emplace("Weights", weightsData);
+    inputDataMap.emplace("Bias", biasData);
+
+    graph->Evaluate(inputDataMap);
+
+    DataBuffer lossOutput(1);
+    graph->GetNodeData(&loss, lossOutput);
+    std::cout << lossOutput.size() << std::endl;
+    std::cout << "Loss: " << lossOutput[0] << std::endl;
 
     return 0;
 }
