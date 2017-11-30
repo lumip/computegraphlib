@@ -8,6 +8,8 @@ CompilationMemoryMap::CompilationMemoryMap(const InputDimensionsMap inputDimensi
 {
 }
 
+CompilationMemoryMap::CompilationMemoryMap() : CompilationMemoryMap(InputDimensionsMap()) { }
+
 CompilationMemoryMap::~CompilationMemoryMap() { }
 
 CompilationMemoryMap::CompilationMemoryMap(const CompilationMemoryMap& other)
