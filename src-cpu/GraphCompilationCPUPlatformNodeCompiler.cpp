@@ -174,7 +174,7 @@ void GraphCompilationCPUPlatform::CompileTransposeNode(const TransposeNode* cons
                                   resultBuffer + i,
                                   inputDims.xDim,
                                   1,
-                                  inputDims.xDim)
+                                  inputDims.yDim)
         );
     }
 }
