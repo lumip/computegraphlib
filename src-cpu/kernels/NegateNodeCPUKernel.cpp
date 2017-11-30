@@ -1,8 +1,13 @@
 #include "NegateNodeCPUKernel.hpp"
 
+#include <assert.h>
+
 NegateNodeCPUKernel::NegateNodeCPUKernel(const float* const memIn, float* const memOut, size_t size)
     : _memIn(memIn), _memOut(memOut), _size(size)
-{ }
+{
+    assert(_memIn != nullptr);
+    assert(_memOut != nullptr);
+}
 
 NegateNodeCPUKernel::~NegateNodeCPUKernel() { }
 

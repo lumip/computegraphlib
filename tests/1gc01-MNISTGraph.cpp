@@ -7,21 +7,9 @@
 #include "types.hpp"
 #include "nodes/nodes.hpp"
 #include "CompilationMemoryMap.hpp"
-#include "GraphCompilationPlatform.hpp"
+#include "GraphCompiler.hpp"
+#include "CompiledGraph.hpp"
 #include "ImplementationStrategyFactory.hpp"
-
-/* todo: implement
- * ExpFuncNode
- * VectorDivNode
- * LogFunNode
- * VectorMultNode
- * ReduceSumNode
- * ReduceMeanNode
- * NegateNode
- * SliceNode
- * StackNode
- * ConstMultNode
- */
 
 std::vector<std::unique_ptr<Node>> nodes;
 
@@ -50,7 +38,7 @@ int main(int argc, const char * const argv[])
     // add loss function graph part for training
     // compute loss (cross-entropy)
     InputNode correctClasses("Classes", OutputDim); // BatchSize x OutputDim, input for correct results (represented as one-hot vector (correct class indicated by 1 in that dimension))
-    LogFuncNode logSoftmax(&softmax);
+    LogFuncNode logSoftmax(&softmax); // BatchSize x OutputDim
     VectorMultNode vm(&correctClasses, &logSoftmax); // BatchSize x OutputDim
     ReduceSumNode negCrossEntropy(&vm, 1); // BatchSize x 1
     NegateNode crossEntropy(&negCrossEntropy); // cross entropy per input
@@ -99,6 +87,16 @@ int main(int argc, const char * const argv[])
     mnist::MNIST_dataset<std::vector, DataBuffer, float> dataset = mnist::read_dataset_direct<std::vector, DataBuffer, float>(dataLocation, 0, 0);
     InputDataBuffer& buff(dataset.training_images[0]);
     std::cout << buff.size() << std::endl;
+
+    InputDimensionsMap inputDimensions;
+    inputDimensions.emplace("ImgBatch", MemoryDimensions({BatchSize, InputDim}));
+    inputDimensions.emplace("Weights", MemoryDimensions({InputDim, OutputDim}));
+    inputDimensions.emplace("Bias", MemoryDimensions({1, OutputDim}));
+    inputDimensions.emplace("Classes", MemoryDimensions({BatchSize, OutputDim}));
+
+    GraphCompiler compiler(std::unique_ptr<const ImplementationStrategyFactory>(new ImplementationStrategyFactory));
+    const std::unique_ptr<CompiledGraph> graph = compiler.Compile(&loss, inputDimensions);
+    graph->Evaluate(InputDataMap());
 
     return 0;
 }

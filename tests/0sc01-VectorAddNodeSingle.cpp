@@ -67,7 +67,11 @@ int main(int argc, const char * const argv[])
     // similar sized data
     DataBuffer input1 { 1,2,3,4, 2,2,2,2, 0,0,0,0, 1,0,-1,0, -1,-3,-5,-7 };
     DataBuffer input2 { 4,3,2,1, 2,-2,2,-2, 1,2,3,4, -1,0,1,0, 3,5,7,-3 };
-    DataBuffer expected { 5,5,5,5, 4,0,4,0, 1,2,3,4, 0,0,0,0, 2,2,2,-10 };
+    DataBuffer expected { input1[0]+input2[0], input1[1]+input2[1], input1[2]+input2[2], input1[3]+input2[3],
+                          input1[4]+input2[4], input1[5]+input2[5], input1[6]+input2[6], input1[7]+input2[7],
+                          input1[8]+input2[8], input1[9]+input2[9], input1[10]+input2[10], input1[11]+input2[11],
+                          input1[12]+input2[12], input1[13]+input2[13], input1[14]+input2[14], input1[15]+input2[15],
+                          input1[16]+input2[16], input1[17]+input2[17], input1[18]+input2[18], input1[19]+input2[19] };
 
     error = testVectorAddNode(MemoryDimensions({m, n}), input1, MemoryDimensions({m, n}), input2, expected);
     std::cout << "Same-size data | Error: " << error << std::endl;
@@ -75,7 +79,11 @@ int main(int argc, const char * const argv[])
 
     // row broadcasting
     input2 = { 1,2,3,4 };
-    expected = { 2,4,6,8, 3,4,5,6, 1,2,3,4, 2,2,2,4, 0,-1,-2,-3 };
+    expected = { input1[0]+input2[0], input1[1]+input2[1], input1[2]+input2[2], input1[3]+input2[3],
+                 input1[4]+input2[0], input1[5]+input2[1], input1[6]+input2[2], input1[7]+input2[3],
+                 input1[8]+input2[0], input1[9]+input2[1], input1[10]+input2[2], input1[11]+input2[3],
+                 input1[12]+input2[0], input1[13]+input2[1], input1[14]+input2[2], input1[15]+input2[3],
+                 input1[16]+input2[0], input1[17]+input2[1], input1[18]+input2[2], input1[19]+input2[3] };
 
     error = testVectorAddNode(MemoryDimensions({m, n}), input1, MemoryDimensions({1, n}), input2, expected);
     std::cout << "Row broadcasting (B) | Error: " << error << std::endl;
@@ -87,7 +95,11 @@ int main(int argc, const char * const argv[])
 
     // column broadcasting
     input2 = { 1, 2, 3, 4, 5 };
-    expected = { 2,3,4,5, 4,4,4,4, 3,3,3,3, 5,4,3,4, 4,2,0,-2 };
+    expected = { input1[0]+input2[0], input1[1]+input2[0], input1[2]+input2[0], input1[3]+input2[0],
+                 input1[4]+input2[1], input1[5]+input2[1], input1[6]+input2[1], input1[7]+input2[1],
+                 input1[8]+input2[2], input1[9]+input2[2], input1[10]+input2[2], input1[11]+input2[2],
+                 input1[12]+input2[3], input1[13]+input2[3], input1[14]+input2[3], input1[15]+input2[3],
+                 input1[16]+input2[4], input1[17]+input2[4], input1[18]+input2[4], input1[19]+input2[4] };
 
     error = testVectorAddNode(MemoryDimensions({m, n}), input1, MemoryDimensions({m, 1}), input2, expected);
     std::cout << "Column broadcasting (B) | Error: " << error << std::endl;

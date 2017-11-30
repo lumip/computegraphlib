@@ -1,9 +1,14 @@
 #include "MatrixMultNodeCPUKernel.hpp"
 
+#include <assert.h>
 
 MatrixMultNodeCPUKernel::MatrixMultNodeCPUKernel(const float* const memA, const float* const memB, float* const memRes, const size_t m, const size_t n, const size_t d)
     : _memA(memA), _memB(memB), _memRes(memRes), _m(m), _n(n), _d(d)
-{ }
+{
+    assert(_memA != nullptr);
+    assert(_memB != nullptr);
+    assert(_memRes != nullptr);
+}
 
 MatrixMultNodeCPUKernel::~MatrixMultNodeCPUKernel() { }
 

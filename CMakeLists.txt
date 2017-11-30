@@ -76,6 +76,12 @@ target_link_libraries(0sc02c_InputNodeSingle cgLibCPU)
 add_executable(0sc03c_MatrixMultNodeSingle "tests/0sc03-MatrixMultNodeSingle.cpp")
 target_compile_definitions(0sc03c_MatrixMultNodeSingle PRIVATE -DCPU)
 target_link_libraries(0sc03c_MatrixMultNodeSingle cgLibCPU)
+add_executable(0sc04c_VectorDivNodeSingle "tests/0sc04-VectorDivNodeSingle.cpp")
+target_compile_definitions(0sc04c_VectorDivNodeSingle PRIVATE -DCPU)
+target_link_libraries(0sc04c_VectorDivNodeSingle cgLibCPU)
+add_executable(0sc05c_VectorMultNodeSingle "tests/0sc05-VectorMultNodeSingle.cpp")
+target_compile_definitions(0sc05c_VectorMultNodeSingle PRIVATE -DCPU)
+target_link_libraries(0sc05c_VectorMultNodeSingle cgLibCPU)
 
 ###### Performance tests on CPU
 add_executable(0sp01c_VectorAddNodeSingle "tests/0sp01-VectorAddNodeSingle.cpp")
@@ -100,6 +106,14 @@ add_executable(0sc03g_MatrixMultNodeSingle "tests/0sc03-MatrixMultNodeSingle.cpp
 target_compile_definitions(0sc03g_MatrixMultNodeSingle PRIVATE -DGPU)
 target_include_directories(0sc03g_MatrixMultNodeSingle PRIVATE ${OpenCL_INCLUDE_DIRS})
 target_link_libraries(0sc03g_MatrixMultNodeSingle ${OpenCL_LIBRARY} cgLibGPU)
+add_executable(0sc04g_VectorDivNodeSingle "tests/0sc04-VectorDivNodeSingle.cpp")
+target_compile_definitions(0sc04g_VectorDivNodeSingle PRIVATE -DGPU)
+target_include_directories(0sc04g_VectorDivNodeSingle PRIVATE ${OpenCL_INCLUDE_DIRS})
+target_link_libraries(0sc04g_VectorDivNodeSingle ${OpenCL_LIBRARY} cgLibGPU)
+add_executable(0sc05g_VectorMultNodeSingle "tests/0sc05-VectorMultNodeSingle.cpp")
+target_compile_definitions(0sc05g_VectorMultNodeSingle PRIVATE -DGPU)
+target_include_directories(0sc05g_VectorMultNodeSingle PRIVATE ${OpenCL_INCLUDE_DIRS})
+target_link_libraries(0sc05g_VectorMultNodeSingle ${OpenCL_LIBRARY} cgLibGPU)
 
 ###### Performance tests on GPU
 add_executable(0sp01g_VectorAddNodeSingle "tests/0sp01-VectorAddNodeSingle.cpp")

@@ -6,9 +6,9 @@
 class VectorAddNodeCPUKernel : public Kernel
 {
 private:
-    const float* const _memoryA; // invariant: _memoryA will always have output size (it is the unbroadcasted operand)
-    const float* const _memoryB;
-    float* const _memoryResult;
+    const float* const _memA; // invariant: _memA will always have output size (it is the unbroadcasted operand)
+    const float* const _memB; // _memB may be a column or row vector that will be broadcasted over _memA
+    float* const _memRes;
     const MemoryDimensions _dimA;
     const MemoryDimensions _dimB;
 private:
@@ -17,7 +17,7 @@ private:
         return i * stride + j;
     }
 public:
-    VectorAddNodeCPUKernel(const float* const memoryA, const float* const memoryB, float* const memoryResult, MemoryDimensions dimA, MemoryDimensions dimB);
+    VectorAddNodeCPUKernel(const float* const memA, const float* const memB, float* const memRes, MemoryDimensions dimA, MemoryDimensions dimB);
     virtual ~VectorAddNodeCPUKernel();
     void Run();
 };

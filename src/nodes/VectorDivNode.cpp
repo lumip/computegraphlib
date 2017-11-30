@@ -43,7 +43,11 @@ void VectorDivNode::GetMemoryDimensions(CompilationMemoryMap& memoryMap) const
     const MemoryDimensions dimB = memoryMap.GetNodeMemoryDimensions(_inputB);
     if (dimA != dimB)
     {
-        throw std::runtime_error("Inputs to VectorDivNode have different dimensions.");
+        if (!(((dimA.yDim == dimB.yDim) && (dimA.xDim % dimB.xDim == 0)) ||
+              ((dimA.xDim == dimB.xDim) && (dimA.yDim % dimB.yDim == 0))))
+        {
+            throw std::runtime_error("Inputs to VectorDivNode have unmatching dimensions.");
+        }
     }
     memoryMap.RegisterNodeMemory(this, dimA);
 }

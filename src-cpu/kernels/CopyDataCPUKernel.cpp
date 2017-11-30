@@ -1,8 +1,13 @@
 #include "CopyDataCPUKernel.hpp"
 
+#include <assert.h>
+
 CopyDataCPUKernel::CopyDataCPUKernel(const float* const memIn, float* const memOut, size_t count, size_t strideIn, size_t strideOut)
     : _memIn(memIn), _memOut(memOut), _count(count), _strideIn(strideIn), _strideOut(strideOut)
-{ }
+{
+    assert(_memIn != nullptr);
+    assert(_memOut != nullptr);
+}
 
 CopyDataCPUKernel::~CopyDataCPUKernel() { }
 

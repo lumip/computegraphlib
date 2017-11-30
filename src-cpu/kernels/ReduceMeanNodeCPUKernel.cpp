@@ -4,7 +4,9 @@
 
 ReduceMeanNodeCPUKernel::ReduceMeanNodeCPUKernel(const float* const memIn, float* const memOut, MemoryDimensions dimIn, size_t axis)
     : _memOut(memOut), _sumKernel(memIn, memOut, dimIn, axis), _outSize(dimIn.dims[1-axis]), _reducedDimSize(static_cast<float>(dimIn.dims[axis]))
-{ }
+{
+    assert(_memOut != nullptr);
+}
 
 ReduceMeanNodeCPUKernel::~ReduceMeanNodeCPUKernel() { }
 
