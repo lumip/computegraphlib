@@ -45,40 +45,13 @@ int main(int argc, const char * const argv[])
 
     ReduceMeanNode loss(&crossEntropy, 0); // 1x1, mean cross entropy over batch
 
-    // build backpropagation/derivation graph (todo: it would be nice if we could automate this later on)
-    // todo: this entire part is currently ignored by the GraphCompiler, fix!
-    NegateNode negCorrectClasses(&correctClasses); // BatchSize x OutputDim
-    VectorAddNode gradFactors(&softmax, &negCorrectClasses); // BatchSize x OutputDim
-    ReduceMeanNode biasGrad(&gradFactors, 0); // 1 x OutputDim
-    std::vector<NodePtr> weightGradComponents(OutputDim);
-    for (size_t i = 0; i < OutputDim; ++i)
-    {
-        NodePtr slice = new SliceNode(&gradFactors, i, 1); // slice i from dim 1, BatchSize x 1
-        NodePtr tmp = new VectorMultNode(slice, &inputBatch); // BatchSize x InputDim
-        NodePtr reduced = new ReduceMeanNode(tmp, 0); // 1 x InputDim
-        nodes.emplace_back(slice); // keep track of nodes so that they are disposed correctly
-        nodes.emplace_back(tmp);
-        nodes.emplace_back(reduced);
-        weightGradComponents[i] = reduced;
-    }
-    StackNode weightGradTransp(weightGradComponents, 0); // OutputDim x InputDim
-    TransposeNode weightGrad(&weightGradTransp); // InputDim x OutputDim
-
-    const float LearningRate = 0.5f;
-    ConstMultNode biasUpdateDelta(&biasGrad, LearningRate); // 1 x OutputDim
-    VectorAddNode biasUpdated(&bias, &biasUpdateDelta); // 1 x OutputDim
-    bias.SetInput(&biasUpdated);
-    ConstMultNode weightsUpdateDelta(&weightGrad, LearningRate); // InputDim x OutputDim
-    VectorAddNode weightsUpdated(&weights, &weightsUpdateDelta); // InputDim x OutputDim
-    weights.SetInput(&weightsUpdated);
-
     // load inputs and initialize variables
     DataBuffer weightsData(InputDim * OutputDim);
     DataBuffer biasData(OutputDim);
 
     /*std::random_device rd;
     std::mt19937 gen(rd());*/
-    std::mt19937 gen; // with default seed, reproducible results
+    std::mt19937 gen(22); // with fixed seed, reproducible results
     std::uniform_real_distribution<float> dist(-1.f, 1.f);
 
     std::generate(std::begin(weightsData), std::end(weightsData), [&dist, &gen]()->float {return dist(gen);});
