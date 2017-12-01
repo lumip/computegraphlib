@@ -171,11 +171,11 @@ target_link_libraries(1gc01c_Graph cgLibCPU)
 
 ###### Performance tests on CPU
 add_executable(1gp02c_MNISTGraphForwardOnly "tests/1gp02-MNISTGraphForwardOnly.cpp")
-target_compile_definitions(1gp02c_MNISTGraphForwardOnly PRIVATE -DCPU -DMNIST_DATA_DIR="${MNIST_DATA_DIR}") #todo: do not use a define to pass the data location
+target_compile_definitions(1gp02c_MNISTGraphForwardOnly PRIVATE -DCPU)
 target_include_directories(1gp02c_MNISTGraphForwardOnly PRIVATE ${PAPI_INCLUDE_DIRS} ${MNIST_INCLUDE_DIR})
 target_link_libraries(1gp02c_MNISTGraphForwardOnly cgLibCPU ${PAPI_LIBRARIES})
 add_executable(1gp03c_MNISTGraph "tests/1gp03-MNISTGraph.cpp")
-target_compile_definitions(1gp03c_MNISTGraph PRIVATE -DCPU -DMNIST_DATA_DIR="${MNIST_DATA_DIR}") #todo: do not use a define to pass the data location
+target_compile_definitions(1gp03c_MNISTGraph PRIVATE -DCPU)
 target_include_directories(1gp03c_MNISTGraph PRIVATE ${PAPI_INCLUDE_DIRS} ${MNIST_INCLUDE_DIR})
 target_link_libraries(1gp03c_MNISTGraph cgLibCPU ${PAPI_LIBRARIES})
 
@@ -187,20 +187,20 @@ target_link_libraries(1gc01g_Graph ${OpenCL_LIBRARY} cgLibGPU)
 
 ###### Performance tests on GPU
 add_executable(1gp02g_MNISTGraphFordwardOnly "tests/1gp02-MNISTGraphForwardOnly.cpp")
-target_compile_definitions(1gp02g_MNISTGraphFordwardOnly PRIVATE -DGPU -DMNIST_DATA_DIR="${MNIST_DATA_DIR}")
+target_compile_definitions(1gp02g_MNISTGraphFordwardOnly PRIVATE -DGPU)
 target_include_directories(1gp02g_MNISTGraphFordwardOnly PRIVATE ${OpenCL_INCLUDE_DIRS} ${PAPI_INCLUDE_DIRS} ${MNIST_INCLUDE_DIR})
 target_link_libraries(1gp02g_MNISTGraphFordwardOnly ${OpenCL_LIBRARY} cgLibGPU ${PAPI_LIBRARIES})
 add_executable(1gp03g_MNISTGraph "tests/1gp03-MNISTGraph.cpp")
-target_compile_definitions(1gp03g_MNISTGraph PRIVATE -DGPU -DMNIST_DATA_DIR="${MNIST_DATA_DIR}")
+target_compile_definitions(1gp03g_MNISTGraph PRIVATE -DGPU)
 target_include_directories(1gp03g_MNISTGraph PRIVATE ${OpenCL_INCLUDE_DIRS} ${PAPI_INCLUDE_DIRS} ${MNIST_INCLUDE_DIR})
 target_link_libraries(1gp03g_MNISTGraph ${OpenCL_LIBRARY} cgLibGPU ${PAPI_LIBRARIES})
 
 ###### MNIST tasks baseline/benchmark non-abstracted CPU implementation
 add_executable(1gp02b_MNISTGraphForwardOnlyBaseline "tests/1gp02b-MNISTGraphForwardOnlyBaseline.cpp")
-target_compile_definitions(1gp02b_MNISTGraphForwardOnlyBaseline PRIVATE -DMNIST_DATA_DIR="${MNIST_DATA_DIR}")
+target_compile_definitions(1gp02b_MNISTGraphForwardOnlyBaseline PRIVATE)
 target_include_directories(1gp02b_MNISTGraphForwardOnlyBaseline PRIVATE ${PAPI_INCLUDE_DIRS} ${MNIST_INCLUDE_DIR})
 target_link_libraries(1gp02b_MNISTGraphForwardOnlyBaseline ${PAPI_LIBRARIES})
 add_executable(1gp03b_MNISTGraphBaseline "tests/1gp03b-MNISTGraphBaseline.cpp")
-target_compile_definitions(1gp03b_MNISTGraphBaseline PRIVATE -DMNIST_DATA_DIR="${MNIST_DATA_DIR}")
+target_compile_definitions(1gp03b_MNISTGraphBaseline PRIVATE)
 target_include_directories(1gp03b_MNISTGraphBaseline PRIVATE ${PAPI_INCLUDE_DIRS} ${MNIST_INCLUDE_DIR})
 target_link_libraries(1gp03b_MNISTGraphBaseline ${PAPI_LIBRARIES})

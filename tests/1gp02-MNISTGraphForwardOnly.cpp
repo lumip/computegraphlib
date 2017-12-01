@@ -15,6 +15,14 @@ std::vector<std::unique_ptr<Node>> nodes;
 
 int main(int argc, const char * const argv[])
 {
+    // Check command line arguments
+    if (argc < 2)
+    {
+        std::cout << "Usage: " << argv[0] << " <path to MNIST dataset>";
+        return -1;
+    }
+    const std::string mnistDataDir(argv[1]);
+
     const size_t InputDim = 784;
     const size_t BatchSize = 500;
     const size_t OutputDim = 10;
@@ -57,8 +65,7 @@ int main(int argc, const char * const argv[])
     std::generate(std::begin(weightsData), std::end(weightsData), [&dist, &gen]()->float {return dist(gen);});
     std::generate(std::begin(biasData), std::end(biasData), [&dist, &gen]()->float {return dist(gen);});
 
-    const std::string dataLocation(MNIST_DATA_DIR);
-    mnist::MNIST_dataset<std::vector, DataBuffer, uint8_t> dataset = mnist::read_dataset_direct<std::vector, DataBuffer, uint8_t>(dataLocation, 0, 0);
+    mnist::MNIST_dataset<std::vector, DataBuffer, uint8_t> dataset = mnist::read_dataset_direct<std::vector, DataBuffer, uint8_t>(mnistDataDir, 0, 0);
 
     InputDimensionsMap inputDimensions;
     inputDimensions.emplace("ImgBatch", MemoryDimensions({BatchSize, InputDim}));
