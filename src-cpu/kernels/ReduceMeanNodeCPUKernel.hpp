@@ -2,6 +2,7 @@
 #define _REDUCE_MEAN_NODE_CPU_KERNEL_HPP_
 
 #include "Kernel.hpp"
+
 #include "ReduceSumNodeCPUKernel.hpp"
 
 class ReduceMeanNodeCPUKernel : public Kernel

@@ -1,62 +1,58 @@
 #include "GraphCompilationGPUPlatform.hpp"
 
+#include <assert.h>
 #include <CL/cl.h>
 
 #include "CompilationMemoryMap.hpp"
 #include "Kernel.hpp"
-
 #include "nodes/nodes.hpp"
 
-extern std::string MatrixMultSource;
-extern std::string VectorAddKernelSource;
+#include "kernels/kernels.hpp"
 
 void GraphCompilationGPUPlatform::CompileConstMultNode(const ConstMultNode* const node)
 {
-    throw std::logic_error("not yet implemented!");
+    const MemoryDimensions dims = _dimensionsMap.GetNodeMemoryDimensions(node);
+    const MemoryHandle inputBuffer = _bufferMap.at(node->GetInputs()[0]).get();
+    const MemoryHandle resultBuffer = _bufferMap.at(node).get();
+    _kernels.emplace_back(
+        new ConstMultNodeGPUKernel(*this,
+                                   _clExecutionQueue.get(),
+                                   inputBuffer,
+                                   resultBuffer,
+                                   node->GetFactor(),
+                                   dims.size())
+    );
 }
 
 void GraphCompilationGPUPlatform::CompileExpFuncNode(const ExpFuncNode* const node)
 {
-    throw std::logic_error("not yet implemented!");
+    const MemoryDimensions dims = _dimensionsMap.GetNodeMemoryDimensions(node);
+    const MemoryHandle inputBuffer = _bufferMap.at(node->GetInputs()[0]).get();
+    const MemoryHandle resultBuffer = _bufferMap.at(node).get();
+    _kernels.emplace_back(
+        new ExpFuncNodeGPUKernel(*this,
+                                 _clExecutionQueue.get(),
+                                 inputBuffer,
+                                 resultBuffer,
+                                 dims.size())
+    );
 }
 
 void GraphCompilationGPUPlatform::CompileInputNode(const InputNode* const node) { }
 
 void GraphCompilationGPUPlatform::CompileLogFuncNode(const LogFuncNode* const node)
 {
-    throw std::logic_error("not yet implemented!");
+    const MemoryDimensions dims = _dimensionsMap.GetNodeMemoryDimensions(node);
+    const MemoryHandle inputBuffer = _bufferMap.at(node->GetInputs()[0]).get();
+    const MemoryHandle resultBuffer = _bufferMap.at(node).get();
+    _kernels.emplace_back(
+        new LogFuncNodeGPUKernel(*this,
+                                 _clExecutionQueue.get(),
+                                 inputBuffer,
+                                 resultBuffer,
+                                 dims.size())
+    );
 }
-
-class MatrixMultNodeGPUKernel : public Kernel
-{
-private:
-    const OCLWrappers::Kernel _kernel;
-    const cl_command_queue _queue;
-    const cl_mem _inputABuffer;
-    const cl_mem _inputBBuffer;
-    const cl_mem _resultBuffer;
-    const size_t _m;
-    const size_t _n;
-    const size_t _d;
-public:
-    MatrixMultNodeGPUKernel(OCLWrappers::Kernel&& kernel, const cl_command_queue queue, cl_mem inputABuffer, cl_mem inputBBuffer, cl_mem resultBuffer, size_t m, size_t n, size_t d)
-        : _kernel(std::move(kernel)), _queue(queue), _inputABuffer(inputABuffer), _inputBBuffer(inputBBuffer), _resultBuffer(resultBuffer), _m(m), _n(n), _d(d)
-    { }
-
-    ~MatrixMultNodeGPUKernel() { }
-
-    void Run()
-    {
-        clSetKernelArg(_kernel.get(), 0, sizeof(cl_mem), &_inputABuffer);
-        clSetKernelArg(_kernel.get(), 1, sizeof(cl_mem), &_inputBBuffer);
-        clSetKernelArg(_kernel.get(), 2, sizeof(cl_mem), &_resultBuffer);
-        clSetKernelArg(_kernel.get(), 3, sizeof(cl_uint), &_d);
-        size_t globalWorkSize[2] = { _m, _n };
-        OCLWrappers::CheckCLError(
-                    clEnqueueNDRangeKernel(_queue, _kernel.get(), 2, nullptr, globalWorkSize, nullptr, 0, nullptr, nullptr)
-        , "clEnqueueNDRangeKernel");
-    }
-};
 
 void GraphCompilationGPUPlatform::CompileMatrixMultNode(const MatrixMultNode* const node)
 {
@@ -69,104 +65,238 @@ void GraphCompilationGPUPlatform::CompileMatrixMultNode(const MatrixMultNode* co
     auto m = inputADims.yDim;
     auto n = inputBDims.xDim;
     auto d = inputADims.xDim;
-    OCLWrappers::Kernel kernel = CompileKernel(MatrixMultSource);
     _kernels.emplace_back(
-           std::unique_ptr<Kernel>(new MatrixMultNodeGPUKernel(std::move(kernel),
-                                                               _clExecutionQueue.get(),
-                                                               inputABuffer,
-                                                               inputBBuffer,
-                                                               resultBuffer,
-                                                               m, n, d))
+           new MatrixMultNodeGPUKernel(*this,
+                                       _clExecutionQueue.get(),
+                                       inputABuffer,
+                                       inputBBuffer,
+                                       resultBuffer,
+                                       m, n, d)
     );
 }
 
 void GraphCompilationGPUPlatform::CompileNegateNode(const NegateNode* const node)
 {
-    throw std::logic_error("not yet implemented!");
+    const MemoryDimensions dims = _dimensionsMap.GetNodeMemoryDimensions(node);
+    const MemoryHandle inputBuffer = _bufferMap.at(node->GetInputs()[0]).get();
+    const MemoryHandle resultBuffer = _bufferMap.at(node).get();
+    _kernels.emplace_back(
+        new NegateNodeGPUKernel(*this,
+                                _clExecutionQueue.get(),
+                                inputBuffer,
+                                resultBuffer,
+                                dims.size())
+    );
 }
 
 void GraphCompilationGPUPlatform::CompileReduceMeanNode(const ReduceMeanNode* const node)
 {
-    throw std::logic_error("not yet implemented!");
+    ConstNodePtr inputNode = node->GetInputs()[0];
+    const MemoryDimensions inputDims = _dimensionsMap.GetNodeMemoryDimensions(inputNode);
+    const MemoryHandle inputBuffer = _bufferMap.at(inputNode).get();
+    const MemoryHandle resultBuffer = _bufferMap.at(node).get();
+    _kernels.emplace_back(
+        new ReduceMeanNodeGPUKernel(*this,
+                                    _clExecutionQueue.get(),
+                                    inputBuffer,
+                                    resultBuffer,
+                                    inputDims,
+                                    node->GetAxis())
+    );
 }
 
 void GraphCompilationGPUPlatform::CompileReduceSumNode(const ReduceSumNode* const node)
 {
-    throw std::logic_error("not yet implemented!");
+    ConstNodePtr inputNode = node->GetInputs()[0];
+    const MemoryDimensions inputDims = _dimensionsMap.GetNodeMemoryDimensions(inputNode);
+    const MemoryHandle inputBuffer = _bufferMap.at(inputNode).get();
+    const MemoryHandle resultBuffer = _bufferMap.at(node).get();
+    _kernels.emplace_back(
+        new ReduceSumNodeGPUKernel(*this,
+                                   _clExecutionQueue.get(),
+                                   inputBuffer,
+                                   resultBuffer,
+                                   inputDims,
+                                   node->GetAxis())
+    );
 }
 
 void GraphCompilationGPUPlatform::CompileSliceNode(const SliceNode* const node)
 {
-    throw std::logic_error("not yet implemented!");
+    ConstNodePtr inputNode = node->GetInputs()[0];
+    const MemoryDimensions inputDims = _dimensionsMap.GetNodeMemoryDimensions(inputNode);
+    const MemoryHandle inputBuffer = _bufferMap.at(inputNode).get();
+    const MemoryHandle resultBuffer = _bufferMap.at(node).get();
+    const size_t axis = node->GetAxis();
+    const size_t sliceId = node->GetSliceId();
+    size_t inputStride = 1;
+    if (axis == 1)
+    {
+        inputStride = inputDims.xDim;
+    }
+    size_t offset = sliceId;
+    if (axis == 0)
+    {
+        offset *= inputDims.xDim;
+    }
+    _kernels.emplace_back(
+        new CopyDataGPUKernel(*this,
+                              _clExecutionQueue.get(),
+                              inputBuffer,
+                              resultBuffer,
+                              inputDims.dims[1-axis],   // count
+                              offset, 0,                // offset
+                              inputStride, 1)           // strides
+    );
 }
 
 void GraphCompilationGPUPlatform::CompileStackNode(const StackNode* const node)
 {
-    throw std::logic_error("not yet implemented!");
+    Node::ConstNodeList inputs = node->GetInputs();
+    const MemoryDimensions inputDims = _dimensionsMap.GetNodeMemoryDimensions(inputs[0]);
+    assert(inputDims.xDim == 1 || inputDims.yDim == 1);
+    const MemoryDimensions resultDims = _dimensionsMap.GetNodeMemoryDimensions(node);
+    const MemoryHandle resultBuffer = _bufferMap.at(node).get();
+    const size_t axis = node->GetAxis();
+
+    size_t outputStride = 1;
+    if (inputDims.xDim == 1)
+    {
+        outputStride = resultDims.xDim;
+    }
+
+    size_t offsetStride = inputDims.size();
+    if (axis == 1)
+    {
+        offsetStride = inputDims.xDim;
+    }
+
+    for (size_t i = 0; i < inputs.size(); ++i)
+    {
+        const MemoryHandle inputBuffer = _bufferMap.at(inputs[i]).get();
+        _kernels.emplace_back(
+            new CopyDataGPUKernel(*this,            // todo: this will result in compiling and storing i copies of the kernel. should this be avoided?
+                                  _clExecutionQueue.get(),
+                                  inputBuffer,
+                                  resultBuffer,
+                                  inputDims.size(),     // count
+                                  0, i * offsetStride,  // offset
+                                  1, outputStride)      // strides
+        );
+    }
 }
 
 void GraphCompilationGPUPlatform::CompileTransposeNode(const TransposeNode* const node)
 {
-    throw std::logic_error("not yet implemented!");
-}
-
-void GraphCompilationGPUPlatform::CompileVariableNode(const VariableNode* const node)
-{
-    throw std::logic_error("not yet implemented!");
-}
-
-class VectorAddNodeGPUKernel : public Kernel
-{
-private:
-    const OCLWrappers::Kernel _kernel;
-    const cl_command_queue _queue;
-    const cl_mem _inputABuffer;
-    const cl_mem _inputBBuffer;
-    const cl_mem _resultBuffer;
-    const size_t _size;
-public:
-    VectorAddNodeGPUKernel(OCLWrappers::Kernel&& kernel, const cl_command_queue queue, cl_mem inputABuffer, cl_mem inputBBuffer, cl_mem resultBuffer, size_t size)
-        : _kernel(std::move(kernel)), _queue(queue), _inputABuffer(inputABuffer), _inputBBuffer(inputBBuffer), _resultBuffer(resultBuffer), _size(size)
-    { }
-
-    ~VectorAddNodeGPUKernel() { }
-
-    void Run()
+    ConstNodePtr inputNode = node->GetInputs()[0];
+    const MemoryDimensions inputDims = _dimensionsMap.GetNodeMemoryDimensions(inputNode);
+    const MemoryHandle inputBuffer = _bufferMap.at(inputNode).get();
+    const MemoryHandle resultBuffer = _bufferMap.at(node).get();
+    for (size_t i = 0; i < inputDims.yDim; ++i)
     {
-        clSetKernelArg(_kernel.get(), 0, sizeof(cl_mem), &_inputABuffer);
-        clSetKernelArg(_kernel.get(), 1, sizeof(cl_mem), &_inputBBuffer);
-        clSetKernelArg(_kernel.get(), 2, sizeof(cl_mem), &_resultBuffer);
-        size_t globalWorkSize[1] = { _size };
-        OCLWrappers::CheckCLError(
-            clEnqueueNDRangeKernel(_queue, _kernel.get(), 1, nullptr, globalWorkSize, nullptr, 0, nullptr, nullptr)
-        , "clEnqueueNDRangeKernel");
+        _kernels.emplace_back(
+            new CopyDataGPUKernel(*this,            // todo: this will result in compiling and storing i copies of the kernel. should this be avoided?
+                                  _clExecutionQueue.get(),
+                                  inputBuffer,
+                                  resultBuffer,
+                                  inputDims.xDim,           // count
+                                  i * inputDims.xDim, i,    // offset
+                                  1, inputDims.yDim)        // strides
+        );
     }
-};
+}
+
+void GraphCompilationGPUPlatform::CompileVariableNode(const VariableNode* const node) { }
 
 void GraphCompilationGPUPlatform::CompileVectorAddNode(const VectorAddNode* const node)
 {
     Node::ConstNodeList inputs = node->GetInputs();
-    OCLWrappers::Kernel kernel = CompileKernel(VectorAddKernelSource);
+    MemoryDimensions inputADims = _dimensionsMap.GetNodeMemoryDimensions(inputs[0]);
+    MemoryDimensions inputBDims = _dimensionsMap.GetNodeMemoryDimensions(inputs[1]);
     const MemoryDimensions resultDims = _dimensionsMap.GetNodeMemoryDimensions(node);
-    const MemoryHandle inputABuffer = _bufferMap.at(inputs[0]).get();
-    const MemoryHandle inputBBuffer = _bufferMap.at(inputs[1]).get();
+    MemoryHandle inputABuffer = _bufferMap.at(inputs[0]).get();
+    MemoryHandle inputBBuffer = _bufferMap.at(inputs[1]).get();
     const MemoryHandle resultBuffer = _bufferMap.at(node).get();
+    if (inputADims != inputBDims)
+    {
+        if (((inputADims.yDim == inputBDims.yDim) && (inputBDims.xDim % inputADims.xDim == 0)) ||
+            ((inputADims.xDim == inputBDims.xDim) && (inputBDims.yDim % inputADims.yDim == 0)))
+        {
+            std::swap(inputADims, inputBDims);
+            std::swap(inputABuffer, inputBBuffer);
+        }
+        else if (!(((inputADims.yDim == inputBDims.yDim) && (inputADims.xDim % inputBDims.xDim == 0)) ||
+                   ((inputADims.xDim == inputBDims.xDim) && (inputADims.yDim % inputBDims.yDim == 0))))
+        {
+            throw std::runtime_error("CompileVectorAddNode: The dimensions of the inputs do not match.");
+        }
+    }
+    assert(resultDims == inputADims);
     _kernels.emplace_back(
-           std::unique_ptr<Kernel>(new VectorAddNodeGPUKernel(std::move(kernel),
-                                                              _clExecutionQueue.get(),
-                                                              inputABuffer,
-                                                              inputBBuffer,
-                                                              resultBuffer,
-                                                              resultDims.size()))
+           new VectorAddNodeGPUKernel(*this,
+                                      _clExecutionQueue.get(),
+                                      inputABuffer,
+                                      inputBBuffer,
+                                      resultBuffer,
+                                      inputADims,
+                                      inputBDims)
     );
 }
 
 void GraphCompilationGPUPlatform::CompileVectorDivNode(const VectorDivNode* const node)
 {
-    throw std::logic_error("not yet implemented!");
+    Node::ConstNodeList inputs = node->GetInputs();
+    MemoryDimensions inputADims = _dimensionsMap.GetNodeMemoryDimensions(inputs[0]);
+    MemoryDimensions inputBDims = _dimensionsMap.GetNodeMemoryDimensions(inputs[1]);
+    MemoryDimensions resultDims = _dimensionsMap.GetNodeMemoryDimensions(node);
+    const MemoryHandle inputABuffer = _bufferMap.at(inputs[0]).get();
+    const MemoryHandle inputBBuffer = _bufferMap.at(inputs[1]).get();
+    const MemoryHandle resultBuffer = _bufferMap.at(node).get();
+    assert(((inputADims.yDim == inputBDims.yDim) && (inputADims.xDim % inputBDims.xDim == 0)) ||
+           ((inputADims.xDim == inputBDims.xDim) && (inputADims.yDim % inputBDims.yDim == 0)));
+    assert(resultDims == inputADims);
+    _kernels.emplace_back(
+        new VectorDivNodeGPUKernel(*this,
+                                   _clExecutionQueue.get(),
+                                   inputABuffer,
+                                   inputBBuffer,
+                                   resultBuffer,
+                                   inputADims,
+                                   inputBDims)
+    );
 }
 
 void GraphCompilationGPUPlatform::CompileVectorMultNode(const VectorMultNode* const node)
 {
-    throw std::logic_error("not yet implemented!");
+    Node::ConstNodeList inputs = node->GetInputs();
+    MemoryDimensions inputADims = _dimensionsMap.GetNodeMemoryDimensions(inputs[0]);
+    MemoryDimensions inputBDims = _dimensionsMap.GetNodeMemoryDimensions(inputs[1]);
+    const MemoryDimensions resultDims = _dimensionsMap.GetNodeMemoryDimensions(node);
+    MemoryHandle inputABuffer = _bufferMap.at(inputs[0]).get();
+    MemoryHandle inputBBuffer = _bufferMap.at(inputs[1]).get();
+    const MemoryHandle resultBuffer = _bufferMap.at(node).get();
+    if (inputADims != inputBDims)
+    {
+        if (((inputADims.yDim == inputBDims.yDim) && (inputBDims.xDim % inputADims.xDim == 0)) ||
+            ((inputADims.xDim == inputBDims.xDim) && (inputBDims.yDim % inputADims.yDim == 0)))
+        {
+            std::swap(inputADims, inputBDims);
+            std::swap(inputABuffer, inputBBuffer);
+        }
+        else if (!(((inputADims.yDim == inputBDims.yDim) && (inputADims.xDim % inputBDims.xDim == 0)) ||
+                   ((inputADims.xDim == inputBDims.xDim) && (inputADims.yDim % inputBDims.yDim == 0))))
+        {
+            throw std::runtime_error("CompileVectorAddNode: The dimensions of the inputs do not match.");
+        }
+    }
+    assert(resultDims == inputADims);
+    _kernels.emplace_back(
+           new VectorMultNodeGPUKernel(*this,
+                                       _clExecutionQueue.get(),
+                                       inputABuffer,
+                                       inputBBuffer,
+                                       resultBuffer,
+                                       inputADims,
+                                       inputBDims)
+    );
 }

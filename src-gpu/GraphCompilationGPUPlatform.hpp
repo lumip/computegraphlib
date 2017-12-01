@@ -8,12 +8,13 @@
 #include "types.hpp"
 #include "GraphCompilationPlatform.hpp"
 
+#include "kernels/OpenCLCompiler.hpp"
 #include "OCLWrappers.hpp"
 
 class CompilationMemoryMap;
 class Kernel;
 
-class GraphCompilationGPUPlatform : public GraphCompilationPlatform
+class GraphCompilationGPUPlatform : public GraphCompilationPlatform, public OpenCLCompiler
 {
 private:
     typedef cl_mem MemoryHandle;
@@ -28,7 +29,6 @@ private:
 private:
     cl_device_id SelectDevice();
     OCLWrappers::Queue CreateCommandQueue();
-    OCLWrappers::Kernel CompileKernel(const std::string& kernelSource);
 public:
     GraphCompilationGPUPlatform(const CompilationMemoryMap& CompilationMemoryMap, OCLWrappers::Context&& context);
     ~GraphCompilationGPUPlatform();
@@ -36,6 +36,7 @@ public:
     void CopyOutputData(const ConstNodePtr outputNode, DataBuffer& outputBuffer) const;
     void CopyInputData(const ConstNodePtr inputNode, InputDataBuffer& inputBuffer);
     void Evaluate();
+    OCLWrappers::Kernel CompileKernel(const std::string& kernelSource);
 
     void CompileConstMultNode(const ConstMultNode* const node);
     void CompileExpFuncNode(const ExpFuncNode* const node);

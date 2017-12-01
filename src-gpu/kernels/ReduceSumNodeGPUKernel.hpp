@@ -3,20 +3,23 @@
 
 #include "Kernel.hpp"
 
+#include "../OCLWrappers.hpp"
+
+class OpenCLCompiler;
+
 class ReduceSumNodeGPUKernel : public Kernel
 {
 private:
-    const float* const _memIn;
-    float* const _memOut;
+    static const std::string KernelSource;
+private:
+    const OCLWrappers::Kernel _kernel;
+    const cl_command_queue _queue;
+    const cl_mem _memIn;
+    const cl_mem _memOut;
     const MemoryDimensions _dimIn;
     const size_t _axis;
-private:
-    inline size_t GetIndex(size_t i, size_t j, size_t stride) const
-    {
-        return i * stride + j;
-    }
 public:
-    ReduceSumNodeGPUKernel(const float* const memIn, float* const memOut, MemoryDimensions dimIn, size_t axis);
+    ReduceSumNodeGPUKernel(OpenCLCompiler& compiler, cl_command_queue queue, cl_mem memIn, cl_mem memOut, const MemoryDimensions dimIn, size_t axis);
     virtual ~ReduceSumNodeGPUKernel();
     void Run();
 };

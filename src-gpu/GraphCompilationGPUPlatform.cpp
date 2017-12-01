@@ -72,7 +72,7 @@ void GraphCompilationGPUPlatform::CopyInputData(const ConstNodePtr inputNode, In
     clFinish(_clExecutionQueue.get());
     OCLWrappers::CheckCLError(
         clEnqueueWriteBuffer(_clMemoryQueue.get(), nodeMemBuffer, CL_FALSE, 0, dims.size() * sizeof(float), inputBuffer.data(), 0, nullptr, nullptr) // todo: handle events?
-    );
+    , "clEnqueueWriteBuffer (for CopyInputData)");
 }
 
 void GraphCompilationGPUPlatform::Evaluate()

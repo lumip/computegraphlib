@@ -2,43 +2,38 @@
 
 #include <assert.h>
 
-MatrixMultNodeGPUKernel::MatrixMultNodeGPUKernel(const float* const memA, const float* const memB, float* const memRes, const size_t m, const size_t n, const size_t d)
-    : _memA(memA), _memB(memB), _memRes(memRes), _m(m), _n(n), _d(d)
+#include "OpenCLCompiler.hpp"
+
+const std::string MatrixMultNodeGPUKernel::KernelSource = R"==kernel==(
+__kernel void main(__global float* matA, __global float* matB, __global float* matResult, uint dim)
 {
-    assert(_memA != nullptr);
-    assert(_memB != nullptr);
-    assert(_memRes != nullptr);
+    uint i = get_global_id(0);
+    uint j = get_global_id(1);
+    uint m = get_global_size(0);
+    uint n = get_global_size(1);
+    float val = 0.0f;
+    for (uint k = 0; k < dim; ++k)
+    {
+        val += matA[i * dim + k] * matB[k * n + j];
+    }
+    matResult[i * n + j] = val;
 }
+)==kernel==";
+
+MatrixMultNodeGPUKernel::MatrixMultNodeGPUKernel(OpenCLCompiler& compiler, const cl_command_queue queue, cl_mem memA, cl_mem memB, cl_mem memRes, size_t m, size_t n, size_t d)
+    : _kernel(compiler.CompileKernel(KernelSource)), _queue(queue), _memA(memA), _memB(memB), _memRes(memRes), _m(m), _n(n), _d(d)
+{ }
 
 MatrixMultNodeGPUKernel::~MatrixMultNodeGPUKernel() { }
 
 void MatrixMultNodeGPUKernel::Run()
 {
-    /*for (size_t i = 0; i < _m; ++i)
-    {
-        for (size_t j = 0; j < _n; ++j)
-        {
-            float r_ij = 0.0f;
-            for (size_t k = 0; k < _d; ++k)
-            {
-                r_ij += _memA[GetIndex(i, k, _d)] * _memB[GetIndex(k, j, _n)];
-            }
-            _memRes[GetIndex(i, j, _n)] = r_ij;
-        }
-    }*/
-    // the above is probably the most inefficient thing (that poor cache :/ )
-    // the below is faster by a factor of ~8 (tested)
-    std::fill_n(_memRes, _m * _n, 0.0f);
-    for (size_t i = 0; i < _m; ++i)
-    {
-        for (size_t k = 0; k < _d; ++k)
-        {
-            float a_ik = _memA[GetIndex(i, k, _d)]; // linear access
-            for (size_t j = 0; j < _n; ++j)
-            {
-                // GetIndex(i, j, _n) = i * _n + j -> size_t base = i * _n; and ++base in every iteration; however, that's not faster (tested) and like it is now it's more readable
-                _memRes[GetIndex(i, j, _n)] += a_ik * _memB[GetIndex(k, j, _n)]; // linear access to both
-            }
-        }
-    }
+    clSetKernelArg(_kernel.get(), 0, sizeof(cl_mem), &_memA);
+    clSetKernelArg(_kernel.get(), 1, sizeof(cl_mem), &_memB);
+    clSetKernelArg(_kernel.get(), 2, sizeof(cl_mem), &_memRes);
+    clSetKernelArg(_kernel.get(), 3, sizeof(cl_uint), &_d);
+    size_t globalWorkSize[2] = { _m, _n };
+    OCLWrappers::CheckCLError(
+        clEnqueueNDRangeKernel(_queue, _kernel.get(), 2, nullptr, globalWorkSize, nullptr, 0, nullptr, nullptr)
+    , "clEnqueueNDRangeKernel (for MatrixMultNodeGPUKernel)");
 }

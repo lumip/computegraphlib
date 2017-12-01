@@ -3,15 +3,23 @@
 
 #include "Kernel.hpp"
 
+#include "../OCLWrappers.hpp"
+
+class OpenCLCompiler;
+
 class ConstMultNodeGPUKernel : public Kernel
 {
 private:
-    const float* const _memIn;
-    float* const _memOut;
+    static const std::string KernelSource;
+private:
+    OCLWrappers::Kernel _kernel;
+    const cl_command_queue _queue;
+    const cl_mem _memIn;
+    const cl_mem _memOut;
     const float _factor;
     const size_t _size;
 public:
-    ConstMultNodeGPUKernel(const float* const memIn, float* const memOut, float factor, size_t size);
+    ConstMultNodeGPUKernel(OpenCLCompiler& compiler, cl_command_queue queue, cl_mem memIn, cl_mem memOut, float factor, size_t size);
     virtual ~ConstMultNodeGPUKernel();
     void Run();
 };
