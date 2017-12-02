@@ -59,7 +59,7 @@ void initializeData(const std::string& mnistDataDir, DataBuffer& inputs, DataBuf
     std::generate_n(bias, OutputDim, [&dist, &gen]()->float {return dist(gen);}); // we write the bias values into an additional row of inputs
 }
 
-void multiplyInputAndWeights(const DataBuffer matA, DataBuffer matB, DataBuffer matRes)
+inline void multiplyInputAndWeights(const DataBuffer matA, DataBuffer matB, DataBuffer matRes)
 {
     assert(OutputDimMem % 8 == 0); // :(
     std::fill_n(matRes, BatchSizeMem * OutputDimMem, 0.0f);
@@ -88,7 +88,7 @@ inline __m256 sumHorizontally(__m256 xVec)
     return xVec;
 }
 
-void addBiasAndComputeSoftmax(const DataBuffer& matIn, const DataBuffer& vec, DataBuffer& matRes)
+inline void addBiasAndComputeSoftmax(const DataBuffer& matIn, const DataBuffer& vec, DataBuffer& matRes)
 {
     assert(OutputDimMem % 8 == 0);
     for (size_t i = 0; i < BatchSize; ++i)
@@ -125,7 +125,7 @@ void addBiasAndComputeSoftmax(const DataBuffer& matIn, const DataBuffer& vec, Da
     }
 }
 
-float computeLoss(DataBuffer& softmax, const DataBuffer& classes)
+inline float computeLoss(DataBuffer& softmax, const DataBuffer& classes)
 {
     assert(OutputDimMem % 8 == 0);
     __m256 invBatchSizeVec = _mm256_set1_ps(1/static_cast<float>(BatchSize));
