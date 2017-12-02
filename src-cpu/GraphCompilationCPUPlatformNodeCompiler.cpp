@@ -188,7 +188,6 @@ void GraphCompilationCPUPlatform::CompileVectorAddNode(const VectorAddNode* cons
     Node::ConstNodeList inputs = node->GetInputs();
     MemoryDimensions inputADims = _dimensionsMap.GetNodeMemoryDimensions(inputs[0]);
     MemoryDimensions inputBDims = _dimensionsMap.GetNodeMemoryDimensions(inputs[1]);
-    MemoryDimensions resultDims = _dimensionsMap.GetNodeMemoryDimensions(node);
     MemoryHandle inputABuffer = _bufferMap.at(inputs[0]).get();
     MemoryHandle inputBBuffer = _bufferMap.at(inputs[1]).get();
     const MemoryHandle resultBuffer = _bufferMap.at(node).get();
@@ -206,7 +205,7 @@ void GraphCompilationCPUPlatform::CompileVectorAddNode(const VectorAddNode* cons
             throw std::runtime_error("CompileVectorAddNode: The dimensions of the inputs do not match.");
         }
     }
-    assert(resultDims == inputADims);
+    assert(_dimensionsMap.GetNodeMemoryDimensions(node) == inputADims);
     _kernels.emplace_back(
            new VectorAddNodeCPUKernel(inputABuffer,
                                       inputBBuffer,
@@ -221,13 +220,12 @@ void GraphCompilationCPUPlatform::CompileVectorDivNode(const VectorDivNode* cons
     Node::ConstNodeList inputs = node->GetInputs();
     MemoryDimensions inputADims = _dimensionsMap.GetNodeMemoryDimensions(inputs[0]);
     MemoryDimensions inputBDims = _dimensionsMap.GetNodeMemoryDimensions(inputs[1]);
-    MemoryDimensions resultDims = _dimensionsMap.GetNodeMemoryDimensions(node);
     const MemoryHandle inputABuffer = _bufferMap.at(inputs[0]).get();
     const MemoryHandle inputBBuffer = _bufferMap.at(inputs[1]).get();
     const MemoryHandle resultBuffer = _bufferMap.at(node).get();
     assert(((inputADims.yDim == inputBDims.yDim) && (inputADims.xDim % inputBDims.xDim == 0)) ||
            ((inputADims.xDim == inputBDims.xDim) && (inputADims.yDim % inputBDims.yDim == 0)));
-    assert(resultDims == inputADims);
+    assert(_dimensionsMap.GetNodeMemoryDimensions(node) == inputADims);
     _kernels.emplace_back(
         new VectorDivNodeCPUKernel(inputABuffer,
                                    inputBBuffer,
@@ -242,7 +240,6 @@ void GraphCompilationCPUPlatform::CompileVectorMultNode(const VectorMultNode* co
     Node::ConstNodeList inputs = node->GetInputs();
     MemoryDimensions inputADims = _dimensionsMap.GetNodeMemoryDimensions(inputs[0]);
     MemoryDimensions inputBDims = _dimensionsMap.GetNodeMemoryDimensions(inputs[1]);
-    MemoryDimensions resultDims = _dimensionsMap.GetNodeMemoryDimensions(node);
     MemoryHandle inputABuffer = _bufferMap.at(inputs[0]).get();
     MemoryHandle inputBBuffer = _bufferMap.at(inputs[1]).get();
     const MemoryHandle resultBuffer = _bufferMap.at(node).get();
@@ -260,7 +257,7 @@ void GraphCompilationCPUPlatform::CompileVectorMultNode(const VectorMultNode* co
             throw std::runtime_error("CompileVectorMultNode: The dimensions of the inputs do not match.");
         }
     }
-    assert(resultDims == inputADims);
+    assert(_dimensionsMap.GetNodeMemoryDimensions(node) == inputADims);
     _kernels.emplace_back(
            new VectorMultNodeCPUKernel(inputABuffer,
                                       inputBBuffer,
