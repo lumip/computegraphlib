@@ -4,7 +4,6 @@ CompilationMemoryMap::CompilationMemoryMap(const InputDimensionsMap inputDimensi
     : _inputDimensions(std::move(inputDimensions))
     , _memoryMap()
     , _inputMemoryMap()
-    , _outputMemoryMap()
 {
 }
 
@@ -16,12 +15,11 @@ CompilationMemoryMap::CompilationMemoryMap(const CompilationMemoryMap& other)
     : _inputDimensions(other._inputDimensions)
     , _memoryMap(other._memoryMap)
     , _inputMemoryMap(other._inputMemoryMap)
-    , _outputMemoryMap(other._outputMemoryMap)
 {
 }
 
 CompilationMemoryMap::CompilationMemoryMap(CompilationMemoryMap&& other)
-    : _inputDimensions(), _memoryMap(), _inputMemoryMap(), _outputMemoryMap()
+    : _inputDimensions(), _memoryMap(), _inputMemoryMap()
 {
     swap(*this, other);
 }
@@ -31,7 +29,6 @@ void CompilationMemoryMap::swap(CompilationMemoryMap& a, CompilationMemoryMap& b
     std::swap(a._inputDimensions, b._inputDimensions);
     std::swap(a._memoryMap, b._memoryMap);
     std::swap(a._inputMemoryMap, b._inputMemoryMap);
-    std::swap(a._outputMemoryMap, b._outputMemoryMap);
 }
 
 CompilationMemoryMap& CompilationMemoryMap::operator=(CompilationMemoryMap other)
@@ -60,17 +57,7 @@ void CompilationMemoryMap::RegisterInputMemory(const std::string inputName, cons
     this->_inputMemoryMap.emplace(inputName, node);
 }
 
-void CompilationMemoryMap::RegisterOutputMemory(const std::string outputName, const ConstNodePtr node)
-{
-    this->_outputMemoryMap.emplace(outputName, node);
-}
-
 ConstNodePtr CompilationMemoryMap::GetInputNode(const std::string inputName) const
 {
     return this->_inputMemoryMap.at(inputName);
-}
-
-ConstNodePtr CompilationMemoryMap::GetOutputNode(const std::string outputName) const
-{
-    return this->_outputMemoryMap.at(outputName);
 }

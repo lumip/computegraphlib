@@ -22,12 +22,6 @@ void CompiledGraph::Evaluate(const InputDataMap& inputData)
     _platform->Evaluate();
 }
 
-void CompiledGraph::GetOutputData(std::string outputName, DataBuffer& outputBuffer) const
-{
-    ConstNodePtr outputNode = _compilationMemoryMap->GetOutputNode(outputName);
-    GetNodeData(outputNode, outputBuffer);
-}
-
 void CompiledGraph::GetNodeData(const ConstNodePtr node, DataBuffer& outputBuffer) const
 {
     _platform->CopyOutputData(node, outputBuffer);
