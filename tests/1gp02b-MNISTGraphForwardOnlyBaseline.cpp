@@ -4,6 +4,7 @@
 #include <cmath>
 
 #include <mnist/mnist_reader.hpp>
+#include <papi.h>
 
 // global definitions for data dimensions
 const size_t InputDim = 784;
@@ -117,11 +118,16 @@ int main(int argc, const char * const argv[])
 
     DataBuffer buffer(BatchSize * OutputDim);
 
+    long long time_start = PAPI_get_real_nsec();
+    long long cycs_start = PAPI_get_real_cyc();
     multiplyInputAndWeights(inputs, weights, buffer, BatchSize, OutputDim, InputDim);
     addBiasAndComputeSoftmax(buffer, bias, buffer, BatchSize, OutputDim);
     float loss = computeLoss(buffer, classes, BatchSize, OutputDim);
+    long long time_stop = PAPI_get_real_nsec();
+    long long cycs_stop = PAPI_get_real_cyc();
 
     std::cout << "Loss: " << loss << std::endl;
+    std::cout << "Computation on " << BatchSize << " samples took " << cycs_stop - cycs_start << " cycles in "<< time_stop - time_start << " ns and " << 0 << " ns to copy input data" << std::endl;
 
     return 0;
 }
