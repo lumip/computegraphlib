@@ -1,5 +1,7 @@
 #include "GraphCompiler.hpp"
 
+#include <queue>
+
 #include "nodes/Node.hpp"
 #include "CompilationMemoryMap.hpp"
 #include "CompiledGraph.hpp"
@@ -14,7 +16,7 @@ GraphCompiler::GraphCompiler(std::unique_ptr<const ImplementationStrategyFactory
 
 GraphCompiler::~GraphCompiler() { }
 
-void GraphCompiler::VisitNode(const ConstNodePtr node, std::vector<ConstNodePtr>& nodeTopology, std::set<ConstNodePtr>& visitedNodes) const
+void GraphCompiler::VisitNode(const ConstNodePtr node, std::vector<ConstNodePtr>& nodeTopology, std::set<ConstNodePtr>& visitedNodes, std::queue<ConstNodePtr>& seedNodes) const
 {
     if (visitedNodes.find(node) == visitedNodes.end())
     {
@@ -23,7 +25,14 @@ void GraphCompiler::VisitNode(const ConstNodePtr node, std::vector<ConstNodePtr>
         {
             for (ConstNodePtr childNode : node->GetInputs())
             {
-                VisitNode(childNode, nodeTopology, visitedNodes);
+                VisitNode(childNode, nodeTopology, visitedNodes, seedNodes);
+            }
+        }
+        else
+        {
+            for (ConstNodePtr childNode : node ->GetInputs())
+            {
+                seedNodes.push(childNode);
             }
         }
         nodeTopology.push_back(node);
@@ -32,9 +41,16 @@ void GraphCompiler::VisitNode(const ConstNodePtr node, std::vector<ConstNodePtr>
 
 std::vector<ConstNodePtr> GraphCompiler::DetermineNodeOrder(const ConstNodePtr outputNode) const
 {
+    std::queue<ConstNodePtr> seedNodes;
+    seedNodes.push(outputNode);
     std::vector<ConstNodePtr> nodeTopology;
     std::set<ConstNodePtr> visitedNodes;
-    VisitNode(outputNode, nodeTopology, visitedNodes);
+    while (!seedNodes.empty())
+    {
+        ConstNodePtr node = seedNodes.front();
+        seedNodes.pop();
+        VisitNode(node, nodeTopology, visitedNodes, seedNodes);
+    }
     return nodeTopology;
 }
 

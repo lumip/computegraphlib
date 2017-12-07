@@ -4,6 +4,7 @@
 #include <vector>
 #include <memory>
 #include <set>
+#include <queue>
 
 #include <types.hpp>
 
@@ -16,7 +17,7 @@ class GraphCompiler
 private:
     const std::unique_ptr<const ImplementationStrategyFactory> _strategyFactory;
 private:
-    void VisitNode(const ConstNodePtr node, std::vector<ConstNodePtr>& nodeTopology, std::set<ConstNodePtr>& visitedNodes) const;
+    void VisitNode(const ConstNodePtr node, std::vector<ConstNodePtr>& nodeTopology, std::set<ConstNodePtr>& visitedNodes, std::queue<ConstNodePtr>& seedNodes) const;
     std::vector<ConstNodePtr> DetermineNodeOrder(const ConstNodePtr outputNode) const;
 public:
     GraphCompiler(std::unique_ptr<const ImplementationStrategyFactory>&& strategyFactory);

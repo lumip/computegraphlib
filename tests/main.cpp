@@ -76,15 +76,17 @@ class TestForwardNode : public Node
 {
 private:
     std::string _name;
+    bool _isInitialized;
     std::vector<ConstNodePtr> _children;
 public:
-    TestForwardNode(const std::string name, const std::vector<ConstNodePtr>& children) : _name(name), _children(children) {}
+    TestForwardNode(const std::string name, bool isInitialized, const std::vector<ConstNodePtr>& children) : _name(name), _isInitialized(isInitialized), _children(children) {}
     ~TestForwardNode() {}
     ConstNodeList GetInputs() const { return ConstNodeList(_children); }
-    void Compile(GraphCompilationPlatform& platform) const { /*context.EnqueueKernel(std::unique_ptr<Kernel>(new TestKernel(_name)));*/ }
+    void SetInputs(std::vector<ConstNodePtr> inputs) { _children = inputs; }
+    void Compile(GraphCompilationPlatform& platform) const { std::cout << _name << std::endl; /*context.EnqueueKernel(std::unique_ptr<Kernel>(new TestKernel(_name)));*/ }
     void GetMemoryDimensions(CompilationMemoryMap& memoryMap) const { memoryMap.RegisterNodeMemory(this, MemoryDimensions({0, 0})); }
     std::string ToString() const { return _name; }
-    bool IsInitialized() const { return _children.empty(); }
+    bool IsInitialized() const { return _isInitialized; }
 };
 
 int main(int argc, const char* argv[])
@@ -93,14 +95,22 @@ int main(int argc, const char* argv[])
     OCLWrappers::Device device = SelectDevice();
     PrintDeviceName(*device);
 #endif
+    /*TestForwardNode h("h", {});
+    TestForwardNode g("g", {&h});
     TestForwardNode f("f", {});
     TestForwardNode e("e", {&f});
     TestForwardNode d("d", {&e});
     TestForwardNode b("b", {&d});
     TestForwardNode c("c", {&b, &d});
-    TestForwardNode h("h", {});
-    TestForwardNode g("g", {&h});
-    TestForwardNode a("a", {&e, &c, &b, &g});
+    TestForwardNode a("a", {&e, &c, &b, &g});*/
+    TestForwardNode e("e", true, {});
+    TestForwardNode v("v", false, {});
+    TestForwardNode c("c", false, {&e, &v});
+    TestForwardNode d("d", false, {&e});
+    TestForwardNode b("b", false, {&c, &d});
+    TestForwardNode a("a", false, {&b});
+    TestForwardNode f("f", false, {&f});
+    e.SetInputs({&f, &v});
 
     GraphCompiler compiler(std::unique_ptr<const ImplementationStrategyFactory>(new ImplementationStrategyFactory));
     const std::unique_ptr<CompiledGraph> graph = compiler.Compile(&a, InputDimensionsMap());
