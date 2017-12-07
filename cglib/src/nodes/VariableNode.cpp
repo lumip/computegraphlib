@@ -4,7 +4,8 @@
 #include "GraphCompilationPlatform.hpp"
 
 VariableNode::VariableNode(std::string name, size_t xDim, size_t yDim)
-    : _name(name)
+    : Node(true, true)
+    , _name(name)
     , _xDim(xDim)
     , _yDim(yDim)
     , _input(nullptr)
@@ -38,11 +39,6 @@ Node::ConstNodeList VariableNode::GetInputs() const
 std::string VariableNode::ToString() const
 {
     return "<VariableNode " + _name + ">";
-}
-
-bool VariableNode::IsInitialized() const
-{
-    return true;
 }
 
 void VariableNode::Compile(GraphCompilationPlatform& platform) const

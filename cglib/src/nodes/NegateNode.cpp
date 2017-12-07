@@ -6,7 +6,8 @@
 #include "GraphCompilationPlatform.hpp"
 
 NegateNode::NegateNode(NodePtr input)
-    : _input(input)
+    : Node(true, false)
+    , _input(input)
 {
     this->SubscribeTo(input);
 }
@@ -23,11 +24,6 @@ std::string NegateNode::ToString() const
     std::stringstream ss;
     ss << "<NegateNode " << (this) << ">";
     return ss.str();
-}
-
-bool NegateNode::IsInitialized() const
-{
-    return false;
 }
 
 void NegateNode::Compile(GraphCompilationPlatform& platform) const

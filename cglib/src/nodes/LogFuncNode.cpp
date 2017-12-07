@@ -6,7 +6,8 @@
 #include "GraphCompilationPlatform.hpp"
 
 LogFuncNode::LogFuncNode(NodePtr input)
-    : _input(input)
+    : Node(true, false)
+    , _input(input)
 {
     this->SubscribeTo(input);
 }
@@ -23,11 +24,6 @@ std::string LogFuncNode::ToString() const
     std::stringstream ss;
     ss << "<LogFuncNode " << (this) << ">";
     return ss.str();
-}
-
-bool LogFuncNode::IsInitialized() const
-{
-    return false;
 }
 
 void LogFuncNode::Compile(GraphCompilationPlatform& platform) const

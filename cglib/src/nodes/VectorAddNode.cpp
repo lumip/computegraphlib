@@ -6,7 +6,8 @@
 #include "GraphCompilationPlatform.hpp"
 
 VectorAddNode::VectorAddNode(NodePtr a, NodePtr b)
-    : _summandA(a)
+    : Node(true, false)
+    , _summandA(a)
     , _summandB(b)
 {
     this->SubscribeTo(a);
@@ -25,11 +26,6 @@ std::string VectorAddNode::ToString() const
     std::stringstream ss;
     ss << "<VectorAddNode " << (this) << ">";
     return ss.str();
-}
-
-bool VectorAddNode::IsInitialized() const
-{
-    return false;
 }
 
 void VectorAddNode::Compile(GraphCompilationPlatform& platform) const

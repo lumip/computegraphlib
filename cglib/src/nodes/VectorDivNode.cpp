@@ -6,7 +6,8 @@
 #include "GraphCompilationPlatform.hpp"
 
 VectorDivNode::VectorDivNode(NodePtr a, NodePtr b)
-    : _inputA(a)
+    : Node(true, false)
+    , _inputA(a)
     , _inputB(b)
 {
     this->SubscribeTo(a);
@@ -25,11 +26,6 @@ std::string VectorDivNode::ToString() const
     std::stringstream ss;
     ss << "<VectorDivNode " << (this) << ">";
     return ss.str();
-}
-
-bool VectorDivNode::IsInitialized() const
-{
-    return false;
 }
 
 void VectorDivNode::Compile(GraphCompilationPlatform& platform) const

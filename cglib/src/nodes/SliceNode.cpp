@@ -6,7 +6,8 @@
 #include "GraphCompilationPlatform.hpp"
 
 SliceNode::SliceNode(NodePtr input, size_t slice_id, size_t axis)
-    : _input(input)
+    : Node(true, false)
+    , _input(input)
     , _slice_id(slice_id)
     , _axis(axis)
 {
@@ -25,11 +26,6 @@ std::string SliceNode::ToString() const
     std::stringstream ss;
     ss << "<SliceNode " << (this) << ">";
     return ss.str();
-}
-
-bool SliceNode::IsInitialized() const
-{
-    return false;
 }
 
 void SliceNode::Compile(GraphCompilationPlatform& platform) const

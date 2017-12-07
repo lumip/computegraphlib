@@ -3,7 +3,8 @@
 #include "CompilationMemoryMap.hpp"
 
 InputNode::InputNode(std::string name, size_t dim)
-    : _name(name)
+    : Node(true, true)
+    , _name(name)
     , _dim(dim)
 {
 }
@@ -18,11 +19,6 @@ Node::ConstNodeList InputNode::GetInputs() const
 std::string InputNode::ToString() const
 {
     return "<InputNode " + _name + ">";
-}
-
-bool InputNode::IsInitialized() const
-{
-    return true;
 }
 
 void InputNode::Compile(GraphCompilationPlatform& platform) const

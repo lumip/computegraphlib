@@ -6,7 +6,8 @@
 #include "GraphCompilationPlatform.hpp"
 
 StackNode::StackNode(const std::vector<NodePtr>& components, size_t axis)
-    : _components(std::begin(components), std::end(components))
+    : Node(true, false)
+    , _components(std::begin(components), std::end(components))
     , _axis(axis)
 {
     for (NodePtr input : components)
@@ -27,11 +28,6 @@ std::string StackNode::ToString() const
     std::stringstream ss;
     ss << "<StackNode " << (this) << ">";
     return ss.str();
-}
-
-bool StackNode::IsInitialized() const
-{
-    return false;
 }
 
 void StackNode::Compile(GraphCompilationPlatform& platform) const

@@ -1,10 +1,16 @@
 #include "nodes/Node.hpp"
 
 Node::Node()
-    : _subscribers()
-{
+    : Node(false, false)
+{ }
 
-}
+Node::Node(bool canOperateInPlace)
+    : Node(canOperateInPlace, false)
+{ }
+
+Node::Node(bool canOperateInPlace, bool isInitialized)
+    : _canOperateInPlace(canOperateInPlace), _isInitialized(isInitialized), _subscribers()
+{ }
 
 Node::~Node() { }
 
@@ -35,4 +41,14 @@ void Node::SubscribeTo(const NodePtr node) const
 void Node::UnsubscribeFrom(const NodePtr node) const
 {
     node->InternalRemoveSubscriber(this);
+}
+
+bool Node::CanOperateInPlace() const
+{
+    return _canOperateInPlace;
+}
+
+bool Node::IsInitialized() const
+{
+    return _isInitialized;
 }

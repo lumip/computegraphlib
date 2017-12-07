@@ -23,9 +23,13 @@ public:
     typedef std::map<std::string, ConstNodePtr> ConstNodeMap;
     typedef std::vector<ConstNodePtr> ConstNodeList;
 private:
-    ConstNodeSet _subscribers;
+    const bool _canOperateInPlace;
+    const bool _isInitialized;
+    ConstNodeSet _subscribers;    
 public:
     Node();
+    Node(bool canOperateInPlace);
+    Node(bool canOperateInPlace, bool isInitialized);
     virtual ~Node();
 
     Node(const Node&) = delete;
@@ -38,7 +42,8 @@ public:
     virtual void Compile(GraphCompilationPlatform& platform) const = 0;
     virtual void GetMemoryDimensions(CompilationMemoryMap& memoryMap) const = 0;
     virtual std::string ToString() const = 0;
-    virtual bool IsInitialized() const = 0;
+    virtual bool IsInitialized() const;
+    virtual bool CanOperateInPlace() const;
 private:
     void InternalAddSubscriber(const ConstNodePtr sub);
     void InternalRemoveSubscriber(const ConstNodePtr sub);
