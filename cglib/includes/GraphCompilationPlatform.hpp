@@ -22,9 +22,12 @@ class VectorMultNode;
 class GraphCompilationPlatform
 {
 public:
+    typedef size_t AbstractMemoryHandle;
+public:
     GraphCompilationPlatform() { }
     virtual ~GraphCompilationPlatform() { }
-    virtual void AllocateMemory(const ConstNodePtr node) = 0;
+    virtual AbstractMemoryHandle AllocateMemory(const ConstNodePtr node) = 0;
+    virtual void AssignNodeMemory(const ConstNodePtr node, AbstractMemoryHandle memory) = 0;
     virtual void CopyOutputData(const ConstNodePtr outputNode, DataBuffer& outputBuffer) const = 0;
     virtual void CopyInputData(const ConstNodePtr inputNode, InputDataBuffer& inputBuffer) = 0;
     virtual void Evaluate() = 0;

@@ -12,8 +12,8 @@
 void GraphCompilationGPUPlatform::CompileConstMultNode(const ConstMultNode* const node)
 {
     const MemoryDimensions dims = _dimensionsMap.GetNodeMemoryDimensions(node);
-    const MemoryHandle inputBuffer = _bufferMap.at(node->GetInputs()[0]).get();
-    const MemoryHandle resultBuffer = _bufferMap.at(node).get();
+    const MemoryHandle inputBuffer = GetMemory(node->GetInputs()[0]);
+    const MemoryHandle resultBuffer = GetMemory(node);
     _kernels.emplace_back(
         new ConstMultNodeGPUKernel(*this,
                                    _clExecutionQueue.get(),
@@ -27,8 +27,8 @@ void GraphCompilationGPUPlatform::CompileConstMultNode(const ConstMultNode* cons
 void GraphCompilationGPUPlatform::CompileExpFuncNode(const ExpFuncNode* const node)
 {
     const MemoryDimensions dims = _dimensionsMap.GetNodeMemoryDimensions(node);
-    const MemoryHandle inputBuffer = _bufferMap.at(node->GetInputs()[0]).get();
-    const MemoryHandle resultBuffer = _bufferMap.at(node).get();
+    const MemoryHandle inputBuffer = GetMemory(node->GetInputs()[0]);
+    const MemoryHandle resultBuffer = GetMemory(node);
     _kernels.emplace_back(
         new ExpFuncNodeGPUKernel(*this,
                                  _clExecutionQueue.get(),
@@ -43,8 +43,8 @@ void GraphCompilationGPUPlatform::CompileInputNode(const InputNode* const node) 
 void GraphCompilationGPUPlatform::CompileLogFuncNode(const LogFuncNode* const node)
 {
     const MemoryDimensions dims = _dimensionsMap.GetNodeMemoryDimensions(node);
-    const MemoryHandle inputBuffer = _bufferMap.at(node->GetInputs()[0]).get();
-    const MemoryHandle resultBuffer = _bufferMap.at(node).get();
+    const MemoryHandle inputBuffer = GetMemory(node->GetInputs()[0]);
+    const MemoryHandle resultBuffer = GetMemory(node);
     _kernels.emplace_back(
         new LogFuncNodeGPUKernel(*this,
                                  _clExecutionQueue.get(),
@@ -59,9 +59,9 @@ void GraphCompilationGPUPlatform::CompileMatrixMultNode(const MatrixMultNode* co
     Node::ConstNodeList inputs = node->GetInputs();
     const MemoryDimensions inputADims = _dimensionsMap.GetNodeMemoryDimensions(inputs[0]);
     const MemoryDimensions inputBDims = _dimensionsMap.GetNodeMemoryDimensions(inputs[1]);
-    const MemoryHandle inputABuffer = _bufferMap.at(inputs[0]).get();
-    const MemoryHandle inputBBuffer = _bufferMap.at(inputs[1]).get();
-    const MemoryHandle resultBuffer = _bufferMap.at(node).get();
+    const MemoryHandle inputABuffer = GetMemory(inputs[0]);
+    const MemoryHandle inputBBuffer = GetMemory(inputs[1]);
+    const MemoryHandle resultBuffer = GetMemory(node);
     auto m = inputADims.yDim;
     auto n = inputBDims.xDim;
     auto d = inputADims.xDim;
@@ -78,8 +78,8 @@ void GraphCompilationGPUPlatform::CompileMatrixMultNode(const MatrixMultNode* co
 void GraphCompilationGPUPlatform::CompileNegateNode(const NegateNode* const node)
 {
     const MemoryDimensions dims = _dimensionsMap.GetNodeMemoryDimensions(node);
-    const MemoryHandle inputBuffer = _bufferMap.at(node->GetInputs()[0]).get();
-    const MemoryHandle resultBuffer = _bufferMap.at(node).get();
+    const MemoryHandle inputBuffer = GetMemory(node->GetInputs()[0]);
+    const MemoryHandle resultBuffer = GetMemory(node);
     _kernels.emplace_back(
         new NegateNodeGPUKernel(*this,
                                 _clExecutionQueue.get(),
@@ -93,8 +93,8 @@ void GraphCompilationGPUPlatform::CompileReduceMeanNode(const ReduceMeanNode* co
 {
     ConstNodePtr inputNode = node->GetInputs()[0];
     const MemoryDimensions inputDims = _dimensionsMap.GetNodeMemoryDimensions(inputNode);
-    const MemoryHandle inputBuffer = _bufferMap.at(inputNode).get();
-    const MemoryHandle resultBuffer = _bufferMap.at(node).get();
+    const MemoryHandle inputBuffer = GetMemory(inputNode);
+    const MemoryHandle resultBuffer = GetMemory(node);
     _kernels.emplace_back(
         new ReduceMeanNodeGPUKernel(*this,
                                     _clExecutionQueue.get(),
@@ -109,8 +109,8 @@ void GraphCompilationGPUPlatform::CompileReduceSumNode(const ReduceSumNode* cons
 {
     ConstNodePtr inputNode = node->GetInputs()[0];
     const MemoryDimensions inputDims = _dimensionsMap.GetNodeMemoryDimensions(inputNode);
-    const MemoryHandle inputBuffer = _bufferMap.at(inputNode).get();
-    const MemoryHandle resultBuffer = _bufferMap.at(node).get();
+    const MemoryHandle inputBuffer = GetMemory(inputNode);
+    const MemoryHandle resultBuffer = GetMemory(node);
     _kernels.emplace_back(
         new ReduceSumNodeGPUKernel(*this,
                                    _clExecutionQueue.get(),
@@ -125,8 +125,8 @@ void GraphCompilationGPUPlatform::CompileSliceNode(const SliceNode* const node)
 {
     ConstNodePtr inputNode = node->GetInputs()[0];
     const MemoryDimensions inputDims = _dimensionsMap.GetNodeMemoryDimensions(inputNode);
-    const MemoryHandle inputBuffer = _bufferMap.at(inputNode).get();
-    const MemoryHandle resultBuffer = _bufferMap.at(node).get();
+    const MemoryHandle inputBuffer = GetMemory(inputNode);
+    const MemoryHandle resultBuffer = GetMemory(node);
     const size_t axis = node->GetAxis();
     const size_t sliceId = node->GetSliceId();
     size_t inputStride = 1;
@@ -156,7 +156,7 @@ void GraphCompilationGPUPlatform::CompileStackNode(const StackNode* const node)
     const MemoryDimensions inputDims = _dimensionsMap.GetNodeMemoryDimensions(inputs[0]);
     assert(inputDims.xDim == 1 || inputDims.yDim == 1);
     const MemoryDimensions resultDims = _dimensionsMap.GetNodeMemoryDimensions(node);
-    const MemoryHandle resultBuffer = _bufferMap.at(node).get();
+    const MemoryHandle resultBuffer = GetMemory(node);
     const size_t axis = node->GetAxis();
 
     size_t outputStride = 1;
@@ -173,7 +173,7 @@ void GraphCompilationGPUPlatform::CompileStackNode(const StackNode* const node)
 
     for (size_t i = 0; i < inputs.size(); ++i)
     {
-        const MemoryHandle inputBuffer = _bufferMap.at(inputs[i]).get();
+        const MemoryHandle inputBuffer = GetMemory(inputs[i]);
         _kernels.emplace_back(
             new CopyDataGPUKernel(*this,            // todo: this will result in compiling and storing i copies of the kernel. should this be avoided?
                                   _clExecutionQueue.get(),
@@ -190,8 +190,8 @@ void GraphCompilationGPUPlatform::CompileTransposeNode(const TransposeNode* cons
 {
     ConstNodePtr inputNode = node->GetInputs()[0];
     const MemoryDimensions inputDims = _dimensionsMap.GetNodeMemoryDimensions(inputNode);
-    const MemoryHandle inputBuffer = _bufferMap.at(inputNode).get();
-    const MemoryHandle resultBuffer = _bufferMap.at(node).get();
+    const MemoryHandle inputBuffer = GetMemory(inputNode);
+    const MemoryHandle resultBuffer = GetMemory(node);
     for (size_t i = 0; i < inputDims.yDim; ++i)
     {
         _kernels.emplace_back(
@@ -213,9 +213,9 @@ void GraphCompilationGPUPlatform::CompileVectorAddNode(const VectorAddNode* cons
     Node::ConstNodeList inputs = node->GetInputs();
     MemoryDimensions inputADims = _dimensionsMap.GetNodeMemoryDimensions(inputs[0]);
     MemoryDimensions inputBDims = _dimensionsMap.GetNodeMemoryDimensions(inputs[1]);
-    MemoryHandle inputABuffer = _bufferMap.at(inputs[0]).get();
-    MemoryHandle inputBBuffer = _bufferMap.at(inputs[1]).get();
-    const MemoryHandle resultBuffer = _bufferMap.at(node).get();
+    MemoryHandle inputABuffer = GetMemory(inputs[0]);
+    MemoryHandle inputBBuffer = GetMemory(inputs[1]);
+    const MemoryHandle resultBuffer = GetMemory(node);
     if (inputADims != inputBDims)
     {
         if (((inputADims.yDim == inputBDims.yDim) && (inputBDims.xDim % inputADims.xDim == 0)) ||
@@ -247,9 +247,9 @@ void GraphCompilationGPUPlatform::CompileVectorDivNode(const VectorDivNode* cons
     Node::ConstNodeList inputs = node->GetInputs();
     MemoryDimensions inputADims = _dimensionsMap.GetNodeMemoryDimensions(inputs[0]);
     MemoryDimensions inputBDims = _dimensionsMap.GetNodeMemoryDimensions(inputs[1]);
-    const MemoryHandle inputABuffer = _bufferMap.at(inputs[0]).get();
-    const MemoryHandle inputBBuffer = _bufferMap.at(inputs[1]).get();
-    const MemoryHandle resultBuffer = _bufferMap.at(node).get();
+    const MemoryHandle inputABuffer = GetMemory(inputs[0]);
+    const MemoryHandle inputBBuffer = GetMemory(inputs[1]);
+    const MemoryHandle resultBuffer = GetMemory(node);
     assert(((inputADims.yDim == inputBDims.yDim) && (inputADims.xDim % inputBDims.xDim == 0)) ||
            ((inputADims.xDim == inputBDims.xDim) && (inputADims.yDim % inputBDims.yDim == 0)));
     assert(_dimensionsMap.GetNodeMemoryDimensions(node) == inputADims);
@@ -269,9 +269,9 @@ void GraphCompilationGPUPlatform::CompileVectorMultNode(const VectorMultNode* co
     Node::ConstNodeList inputs = node->GetInputs();
     MemoryDimensions inputADims = _dimensionsMap.GetNodeMemoryDimensions(inputs[0]);
     MemoryDimensions inputBDims = _dimensionsMap.GetNodeMemoryDimensions(inputs[1]);
-    MemoryHandle inputABuffer = _bufferMap.at(inputs[0]).get();
-    MemoryHandle inputBBuffer = _bufferMap.at(inputs[1]).get();
-    const MemoryHandle resultBuffer = _bufferMap.at(node).get();
+    MemoryHandle inputABuffer = GetMemory(inputs[0]);
+    MemoryHandle inputBBuffer = GetMemory(inputs[1]);
+    const MemoryHandle resultBuffer = GetMemory(node);
     if (inputADims != inputBDims)
     {
         if (((inputADims.yDim == inputBDims.yDim) && (inputBDims.xDim % inputADims.xDim == 0)) ||

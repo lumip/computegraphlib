@@ -24,15 +24,18 @@ private:
     const OCLWrappers::Queue _clMemoryQueue;
     const OCLWrappers::Queue _clExecutionQueue;
     std::vector<std::unique_ptr<Kernel>> _kernels;
-    std::map<ConstNodePtr, OCLWrappers::Memory> _bufferMap;
+    std::vector<OCLWrappers::Memory> _bufferMap;
+    std::map<ConstNodePtr, AbstractMemoryHandle> _nodeAssignments;
     std::vector<OCLWrappers::Program> _programs;
 private:
     cl_device_id SelectDevice();
     OCLWrappers::Queue CreateCommandQueue();
+    MemoryHandle GetMemory(const ConstNodePtr node) const;
 public:
     GraphCompilationGPUPlatform(const CompilationMemoryMap& CompilationMemoryMap, OCLWrappers::Context&& context);
     ~GraphCompilationGPUPlatform();
-    void AllocateMemory(const ConstNodePtr node);
+    AbstractMemoryHandle AllocateMemory(const ConstNodePtr node);
+    void AssignNodeMemory(const ConstNodePtr node, AbstractMemoryHandle memory);
     void CopyOutputData(const ConstNodePtr outputNode, DataBuffer& outputBuffer) const;
     void CopyInputData(const ConstNodePtr inputNode, InputDataBuffer& inputBuffer);
     void Evaluate();

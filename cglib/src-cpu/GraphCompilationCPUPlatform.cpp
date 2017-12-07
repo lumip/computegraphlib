@@ -6,17 +6,30 @@
 GraphCompilationCPUPlatform::GraphCompilationCPUPlatform(const CompilationMemoryMap& CompilationMemoryMap)
     : _kernels()
     , _bufferMap()
+    , _nodeAssignments()
     , _dimensionsMap(CompilationMemoryMap)
 {
 }
 
 GraphCompilationCPUPlatform::~GraphCompilationCPUPlatform() { }
 
-void GraphCompilationCPUPlatform::AllocateMemory(const ConstNodePtr node)
+GraphCompilationCPUPlatform::MemoryHandle GraphCompilationCPUPlatform::GetMemory(const ConstNodePtr node) const
 {
+    return _bufferMap[_nodeAssignments.at(node)].get();
+}
+
+GraphCompilationPlatform::AbstractMemoryHandle GraphCompilationCPUPlatform::AllocateMemory(const ConstNodePtr node)
+{
+    AbstractMemoryHandle handle = static_cast<AbstractMemoryHandle>(_bufferMap.size());
     MemoryDimensions dims = _dimensionsMap.GetNodeMemoryDimensions(node);
-    std::unique_ptr<float[]> mem(new float[dims.size()]); // consider using std::valarray instead of raw float arrays?
-    _bufferMap.emplace(node, std::move(mem));
+    _bufferMap.emplace_back(new float[dims.size()]); // consider using std::valarray instead of raw float arrays?
+    AssignNodeMemory(node, handle);
+    return handle;
+}
+
+void GraphCompilationCPUPlatform::AssignNodeMemory(const ConstNodePtr node, AbstractMemoryHandle memory)
+{
+    _nodeAssignments.emplace(node, memory);
 }
 
 /*void GraphCompilationCPUStrategy::DeallocateMemory(const NodeMemoryHandle mem)
@@ -34,14 +47,14 @@ void GraphCompilationCPUPlatform::CopyOutputData(const ConstNodePtr outputNode, 
     MemoryDimensions dims = _dimensionsMap.GetNodeMemoryDimensions(outputNode);
     size_t size = dims.size();
     outputBuffer.resize(size);
-    MemoryHandle nodeMemBuffer = _bufferMap.at(outputNode).get();
+    MemoryHandle nodeMemBuffer = _bufferMap[_nodeAssignments.at(outputNode)].get();
     std::copy(nodeMemBuffer, (nodeMemBuffer + size), std::begin(outputBuffer));
 }
 
 void GraphCompilationCPUPlatform::CopyInputData(const ConstNodePtr inputNode, InputDataBuffer& inputBuffer)
 {
     MemoryDimensions dims = _dimensionsMap.GetNodeMemoryDimensions(inputNode);
-    MemoryHandle nodeMemBuffer = _bufferMap.at(inputNode).get();
+    MemoryHandle nodeMemBuffer = _bufferMap[_nodeAssignments.at(inputNode)].get();
     std::copy(std::begin(inputBuffer), std::begin(inputBuffer) + dims.size(), nodeMemBuffer);
 }
 

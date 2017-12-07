@@ -14,12 +14,16 @@ private:
     typedef float* MemoryHandle;
 private:
     std::vector<std::unique_ptr<Kernel>> _kernels;
-    std::map<ConstNodePtr, std::unique_ptr<float[]>> _bufferMap;
+    std::vector<std::unique_ptr<float[]>> _bufferMap;
+    std::map<ConstNodePtr, AbstractMemoryHandle> _nodeAssignments;
     const CompilationMemoryMap& _dimensionsMap;
+private:
+    MemoryHandle GetMemory(const ConstNodePtr node) const;
 public:
     GraphCompilationCPUPlatform(const CompilationMemoryMap& CompilationMemoryMap);
     ~GraphCompilationCPUPlatform();
-    void AllocateMemory(const ConstNodePtr node);
+    AbstractMemoryHandle AllocateMemory(const ConstNodePtr node);
+    void AssignNodeMemory(const ConstNodePtr node, AbstractMemoryHandle memory);
     void CopyOutputData(const ConstNodePtr outputNode, DataBuffer& outputBuffer) const;
     void CopyInputData(const ConstNodePtr inputNode, InputDataBuffer& inputBuffer);
     void Evaluate();
