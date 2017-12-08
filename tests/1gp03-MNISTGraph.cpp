@@ -71,7 +71,7 @@ int main(int argc, const char * const argv[])
     StackNode weightGradTransp(weightGradComponents, 0); // OutputDim x InputDim
     TransposeNode weightGrad(&weightGradTransp); // InputDim x OutputDim
 
-    const float LearningRate = 0.5f;
+    const float LearningRate = 0.01f;
     ConstMultNode biasUpdateDelta(&biasGrad, LearningRate); // 1 x OutputDim
     NegateNode biasUpdateDeltaNeg(&biasUpdateDelta); // 1 x OutputDim
     VectorAddNode biasUpdated(&bias, &biasUpdateDeltaNeg); // 1 x OutputDim
@@ -128,12 +128,16 @@ int main(int argc, const char * const argv[])
     inputDataMap.emplace("Weights", weightsData);
     inputDataMap.emplace("Bias", biasData);
 
-    graph->Evaluate(inputDataMap);
-
     DataBuffer lossOutput(1);
-    graph->GetNodeData(&loss, lossOutput);
-    std::cout << lossOutput.size() << std::endl;
-    std::cout << "Loss: " << lossOutput[0] << std::endl;
+    for (size_t j = 0; j < 10; ++j)
+    {
+        graph->Evaluate(inputDataMap);
+        inputDataMap.erase("Weights");
+        inputDataMap.erase("Bias");
+
+        graph->GetNodeData(&loss, lossOutput);
+        std::cout << "Loss: " << lossOutput[0] << std::endl;
+    }
 
     return 0;
 }
