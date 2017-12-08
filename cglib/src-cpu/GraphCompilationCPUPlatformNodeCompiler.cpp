@@ -9,8 +9,8 @@
 void GraphCompilationCPUPlatform::CompileConstMultNode(const ConstMultNode* const node)
 {
     const MemoryDimensions dims = _dimensionsMap.GetNodeMemoryDimensions(node);
-    const MemoryHandle inputBuffer = GetMemory(node->GetInputs()[0]);
-    const MemoryHandle resultBuffer = GetMemory(node);
+    const MemoryHandle inputBuffer = GetMemoryLocation(node->GetInputs()[0]);
+    const MemoryHandle resultBuffer = GetMemoryLocation(node);
     _kernels.emplace_back(
            std::unique_ptr<Kernel>(new ConstMultNodeCPUKernel(inputBuffer,
                                                               resultBuffer,
@@ -22,8 +22,8 @@ void GraphCompilationCPUPlatform::CompileConstMultNode(const ConstMultNode* cons
 void GraphCompilationCPUPlatform::CompileExpFuncNode(const ExpFuncNode* const node)
 {
     const MemoryDimensions dims = _dimensionsMap.GetNodeMemoryDimensions(node);
-    const MemoryHandle inputBuffer = GetMemory(node->GetInputs()[0]);
-    const MemoryHandle resultBuffer = GetMemory(node);
+    const MemoryHandle inputBuffer = GetMemoryLocation(node->GetInputs()[0]);
+    const MemoryHandle resultBuffer = GetMemoryLocation(node);
     _kernels.emplace_back(
         new ExpFuncNodeCPUKernel(inputBuffer, resultBuffer, dims.size())
     );
@@ -34,8 +34,8 @@ void GraphCompilationCPUPlatform::CompileInputNode(const InputNode* const node) 
 void GraphCompilationCPUPlatform::CompileLogFuncNode(const LogFuncNode* const node)
 {
     const MemoryDimensions dims = _dimensionsMap.GetNodeMemoryDimensions(node);
-    const MemoryHandle inputBuffer = GetMemory(node->GetInputs()[0]);
-    const MemoryHandle resultBuffer = GetMemory(node);
+    const MemoryHandle inputBuffer = GetMemoryLocation(node->GetInputs()[0]);
+    const MemoryHandle resultBuffer = GetMemoryLocation(node);
     _kernels.emplace_back(
         new LogFuncNodeCPUKernel(inputBuffer, resultBuffer, dims.size())
     );
@@ -46,9 +46,9 @@ void GraphCompilationCPUPlatform::CompileMatrixMultNode(const MatrixMultNode* co
     Node::ConstNodeList inputs = node->GetInputs();
     const MemoryDimensions inputADims = _dimensionsMap.GetNodeMemoryDimensions(inputs[0]);
     const MemoryDimensions inputBDims = _dimensionsMap.GetNodeMemoryDimensions(inputs[1]);
-    const MemoryHandle inputABuffer = GetMemory(inputs[0]);
-    const MemoryHandle inputBBuffer = GetMemory(inputs[1]);
-    const MemoryHandle resultBuffer = GetMemory(node);
+    const MemoryHandle inputABuffer = GetMemoryLocation(inputs[0]);
+    const MemoryHandle inputBBuffer = GetMemoryLocation(inputs[1]);
+    const MemoryHandle resultBuffer = GetMemoryLocation(node);
     auto m = inputADims.yDim;
     auto n = inputBDims.xDim;
     auto d = inputADims.xDim;
@@ -63,8 +63,8 @@ void GraphCompilationCPUPlatform::CompileMatrixMultNode(const MatrixMultNode* co
 void GraphCompilationCPUPlatform::CompileNegateNode(const NegateNode* const node)
 {
     const MemoryDimensions dims = _dimensionsMap.GetNodeMemoryDimensions(node);
-    const MemoryHandle inputBuffer = GetMemory(node->GetInputs()[0]);
-    const MemoryHandle resultBuffer = GetMemory(node);
+    const MemoryHandle inputBuffer = GetMemoryLocation(node->GetInputs()[0]);
+    const MemoryHandle resultBuffer = GetMemoryLocation(node);
     _kernels.emplace_back(
         new NegateNodeCPUKernel(inputBuffer,
                                 resultBuffer,
@@ -76,8 +76,8 @@ void GraphCompilationCPUPlatform::CompileReduceMeanNode(const ReduceMeanNode* co
 {
     ConstNodePtr inputNode = node->GetInputs()[0];
     const MemoryDimensions inputDims = _dimensionsMap.GetNodeMemoryDimensions(inputNode);
-    const MemoryHandle inputBuffer = GetMemory(inputNode);
-    const MemoryHandle resultBuffer = GetMemory(node);
+    const MemoryHandle inputBuffer = GetMemoryLocation(inputNode);
+    const MemoryHandle resultBuffer = GetMemoryLocation(node);
     _kernels.emplace_back(
         new ReduceMeanNodeCPUKernel(inputBuffer,
                                     resultBuffer,
@@ -90,8 +90,8 @@ void GraphCompilationCPUPlatform::CompileReduceSumNode(const ReduceSumNode* cons
 {
     ConstNodePtr inputNode = node->GetInputs()[0];
     const MemoryDimensions inputDims = _dimensionsMap.GetNodeMemoryDimensions(inputNode);
-    const MemoryHandle inputBuffer = GetMemory(inputNode);
-    const MemoryHandle resultBuffer = GetMemory(node);
+    const MemoryHandle inputBuffer = GetMemoryLocation(inputNode);
+    const MemoryHandle resultBuffer = GetMemoryLocation(node);
     _kernels.emplace_back(
         new ReduceSumNodeCPUKernel(inputBuffer,
                                    resultBuffer,
@@ -104,8 +104,8 @@ void GraphCompilationCPUPlatform::CompileSliceNode(const SliceNode* const node)
 {
     ConstNodePtr inputNode = node->GetInputs()[0];
     const MemoryDimensions inputDims = _dimensionsMap.GetNodeMemoryDimensions(inputNode);
-    const MemoryHandle inputBuffer = GetMemory(inputNode);
-    const MemoryHandle resultBuffer = GetMemory(node);
+    const MemoryHandle inputBuffer = GetMemoryLocation(inputNode);
+    const MemoryHandle resultBuffer = GetMemoryLocation(node);
     const size_t axis = node->GetAxis();
     const size_t sliceId = node->GetSliceId();
     size_t inputStride = 1;
@@ -133,7 +133,7 @@ void GraphCompilationCPUPlatform::CompileStackNode(const StackNode* const node)
     const MemoryDimensions inputDims = _dimensionsMap.GetNodeMemoryDimensions(inputs[0]);
     assert(inputDims.xDim == 1 || inputDims.yDim == 1);
     const MemoryDimensions resultDims = _dimensionsMap.GetNodeMemoryDimensions(node);
-    const MemoryHandle resultBuffer = GetMemory(node);
+    const MemoryHandle resultBuffer = GetMemoryLocation(node);
     const size_t axis = node->GetAxis();
 
     size_t outputStride = 1;
@@ -150,7 +150,7 @@ void GraphCompilationCPUPlatform::CompileStackNode(const StackNode* const node)
 
     for (size_t i = 0; i < inputs.size(); ++i)
     {
-        const MemoryHandle inputBuffer = GetMemory(inputs[i]);
+        const MemoryHandle inputBuffer = GetMemoryLocation(inputs[i]);
         _kernels.emplace_back(
             new CopyDataCPUKernel(inputBuffer,
                                   resultBuffer + i * offsetStride,
@@ -165,8 +165,8 @@ void GraphCompilationCPUPlatform::CompileTransposeNode(const TransposeNode* cons
 {
     ConstNodePtr inputNode = node->GetInputs()[0];
     const MemoryDimensions inputDims = _dimensionsMap.GetNodeMemoryDimensions(inputNode);
-    const MemoryHandle inputBuffer = GetMemory(inputNode);
-    const MemoryHandle resultBuffer = GetMemory(node);
+    const MemoryHandle inputBuffer = GetMemoryLocation(inputNode);
+    const MemoryHandle resultBuffer = GetMemoryLocation(node);
     for (size_t i = 0; i < inputDims.yDim; ++i)
     {
         _kernels.emplace_back(
@@ -188,9 +188,9 @@ void GraphCompilationCPUPlatform::CompileVectorAddNode(const VectorAddNode* cons
     Node::ConstNodeList inputs = node->GetInputs();
     MemoryDimensions inputADims = _dimensionsMap.GetNodeMemoryDimensions(inputs[0]);
     MemoryDimensions inputBDims = _dimensionsMap.GetNodeMemoryDimensions(inputs[1]);
-    MemoryHandle inputABuffer = GetMemory(inputs[0]);
-    MemoryHandle inputBBuffer = GetMemory(inputs[1]);
-    const MemoryHandle resultBuffer = GetMemory(node);
+    MemoryHandle inputABuffer = GetMemoryLocation(inputs[0]);
+    MemoryHandle inputBBuffer = GetMemoryLocation(inputs[1]);
+    const MemoryHandle resultBuffer = GetMemoryLocation(node);
     if (inputADims != inputBDims)
     {
         if (((inputADims.yDim == inputBDims.yDim) && (inputBDims.xDim % inputADims.xDim == 0)) ||
@@ -220,9 +220,9 @@ void GraphCompilationCPUPlatform::CompileVectorDivNode(const VectorDivNode* cons
     Node::ConstNodeList inputs = node->GetInputs();
     MemoryDimensions inputADims = _dimensionsMap.GetNodeMemoryDimensions(inputs[0]);
     MemoryDimensions inputBDims = _dimensionsMap.GetNodeMemoryDimensions(inputs[1]);
-    const MemoryHandle inputABuffer = GetMemory(inputs[0]);
-    const MemoryHandle inputBBuffer = GetMemory(inputs[1]);
-    const MemoryHandle resultBuffer = GetMemory(node);
+    const MemoryHandle inputABuffer = GetMemoryLocation(inputs[0]);
+    const MemoryHandle inputBBuffer = GetMemoryLocation(inputs[1]);
+    const MemoryHandle resultBuffer = GetMemoryLocation(node);
     assert(((inputADims.yDim == inputBDims.yDim) && (inputADims.xDim % inputBDims.xDim == 0)) ||
            ((inputADims.xDim == inputBDims.xDim) && (inputADims.yDim % inputBDims.yDim == 0)));
     assert(_dimensionsMap.GetNodeMemoryDimensions(node) == inputADims);
@@ -240,9 +240,9 @@ void GraphCompilationCPUPlatform::CompileVectorMultNode(const VectorMultNode* co
     Node::ConstNodeList inputs = node->GetInputs();
     MemoryDimensions inputADims = _dimensionsMap.GetNodeMemoryDimensions(inputs[0]);
     MemoryDimensions inputBDims = _dimensionsMap.GetNodeMemoryDimensions(inputs[1]);
-    MemoryHandle inputABuffer = GetMemory(inputs[0]);
-    MemoryHandle inputBBuffer = GetMemory(inputs[1]);
-    const MemoryHandle resultBuffer = GetMemory(node);
+    MemoryHandle inputABuffer = GetMemoryLocation(inputs[0]);
+    MemoryHandle inputBBuffer = GetMemoryLocation(inputs[1]);
+    const MemoryHandle resultBuffer = GetMemoryLocation(node);
     if (inputADims != inputBDims)
     {
         if (((inputADims.yDim == inputBDims.yDim) && (inputBDims.xDim % inputADims.xDim == 0)) ||

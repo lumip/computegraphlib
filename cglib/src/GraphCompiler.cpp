@@ -78,8 +78,15 @@ std::unique_ptr<CompiledGraph> GraphCompiler::Compile(const ConstNodePtr outputN
                     const MemoryDimensions inputDim = context->GetNodeMemoryDimensions(inputNode);
                     if (nodeDim <= inputDim)
                     {
-                        const GraphCompilationPlatform::AbstractMemoryHandle handle = strategy->GetNodeMemoryHandle(inputNode);
-                        strategy->AssignNodeMemory(node, handle);
+                        // if our desired input node does not have a memory assignment yet, we allocate some for it! *being generous*
+                        if (!strategy->NodeIsAssigned(inputNode))
+                        {
+                            strategy->ReserveMemoryBuffer(inputNode);
+                        }
+                        const GraphCompilationPlatform::MemoryBufferHandle handle = strategy->GetNodeMemoryBuffer(inputNode);
+                        strategy->AssignMemoryBuffer(node, handle); // note that we could already have some memory assigned to us already here, but that is not a problem
+                                                                   // (old and new memory locatiosn will be merged by AssignNodeMemory() call)
+                        break; // after finding a suitable input buffer for reuse, leave the loop (important! cannot reassign anymore)
                     }
                 }
             }
@@ -87,7 +94,7 @@ std::unique_ptr<CompiledGraph> GraphCompiler::Compile(const ConstNodePtr outputN
         // if node has no memory assigned from previous check, allocate new memory block
         if (!strategy->NodeIsAssigned(node))
         {
-            strategy->AllocateMemory(node);
+            strategy->ReserveMemoryBuffer(node);
         }
     }
 

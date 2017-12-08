@@ -29,9 +29,9 @@ float testVectorMultNode(const MemoryDimensions input1Dim, InputDataBuffer& inpu
     compilationMemoryMap.RegisterNodeMemory(&i2, input2Dim);
     testMultNode.GetMemoryDimensions(compilationMemoryMap);
 
-    platform->AllocateMemory(&i1);
-    platform->AllocateMemory(&i2);
-    platform->AllocateMemory(&testMultNode);
+    platform->ReserveMemoryBuffer(&i1);
+    platform->ReserveMemoryBuffer(&i2);
+    platform->ReserveMemoryBuffer(&testMultNode);
 
     // compile kernel for VectorMultNode object
     testMultNode.Compile(*platform);

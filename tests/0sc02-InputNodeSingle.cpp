@@ -30,7 +30,7 @@ int main(const int argc, const char * const argv[])
     // set up working memory for input nodes (will usually be done during compilation if whole graph is compiled; testing only single node here)
     testInputNode.GetMemoryDimensions(compilationMemoryMap);
 
-    platform->AllocateMemory(&testInputNode);
+    platform->ReserveMemoryBuffer(&testInputNode);
 
     // compile kernel for InputNode object
     testInputNode.Compile(*platform);

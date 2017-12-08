@@ -1,45 +1,76 @@
 #include "GraphCompilationCPUPlatform.hpp"
 
+#include <set>
+
 #include "CompilationMemoryMap.hpp"
 #include "Kernel.hpp"
 
+struct GraphCompilationCPUPlatform::MemoryBuffer
+{
+    MemoryDimensions Dimensions;
+    std::set<ConstNodePtr> Subscribers;
+};
+
 GraphCompilationCPUPlatform::GraphCompilationCPUPlatform(const CompilationMemoryMap& CompilationMemoryMap)
     : _kernels()
-    , _bufferMap()
-    , _nodeAssignments()
+    , _memoryBufferLocations()
+    , _memoryBuffers()
+    , _nodeMemoryAssignments()
     , _dimensionsMap(CompilationMemoryMap)
 {
 }
 
 GraphCompilationCPUPlatform::~GraphCompilationCPUPlatform() { }
 
-GraphCompilationCPUPlatform::MemoryHandle GraphCompilationCPUPlatform::GetMemory(const ConstNodePtr node) const
+GraphCompilationCPUPlatform::MemoryHandle GraphCompilationCPUPlatform::GetMemoryLocation(const ConstNodePtr node) const
 {
-    return _bufferMap[_nodeAssignments.at(node)].get();
+    return _memoryBufferLocations[_nodeMemoryAssignments.at(node)].get();
 }
 
-GraphCompilationPlatform::AbstractMemoryHandle GraphCompilationCPUPlatform::AllocateMemory(const ConstNodePtr node)
+GraphCompilationPlatform::MemoryBufferHandle GraphCompilationCPUPlatform::ReserveMemoryBuffer(const ConstNodePtr node)
 {
-    AbstractMemoryHandle handle = static_cast<AbstractMemoryHandle>(_bufferMap.size());
+    MemoryBufferHandle handle = static_cast<MemoryBufferHandle>(_memoryBufferLocations.size());
     MemoryDimensions dims = _dimensionsMap.GetNodeMemoryDimensions(node);
-    _bufferMap.emplace_back(new float[dims.size()]); // consider using std::valarray instead of raw float arrays?
-    AssignNodeMemory(node, handle);
+    MemoryBuffer buffer;
+    buffer.Dimensions = dims;
+    buffer.Subscribers.insert(node);
+    _memoryBuffers.push_back(buffer);
+    _memoryBufferLocations.emplace_back(new float[dims.size()]); // consider using std::valarray instead of raw float arrays?
+    AssignMemoryBuffer(node, handle);
     return handle;
 }
 
-void GraphCompilationCPUPlatform::AssignNodeMemory(const ConstNodePtr node, AbstractMemoryHandle memory)
+void GraphCompilationCPUPlatform::AssignMemoryBuffer(const ConstNodePtr node, MemoryBufferHandle memory)
 {
-    _nodeAssignments.emplace(node, memory);
+    if (NodeIsAssigned(node))
+    {
+        // if the node is already assigned to a memory handle, we will have two merge the old and the new buffers:
+        // - move all subscribers from the previous to the new buffer and clear the previous buffer (abandon it)
+        MemoryBuffer& oldBuffer = _memoryBuffers[GetNodeMemoryBuffer(node)];
+        MemoryBuffer& newBuffer = _memoryBuffers[memory];
+        newBuffer.Subscribers.insert(oldBuffer.Subscribers.cbegin(), oldBuffer.Subscribers.cend());
+        for (ConstNodePtr n : oldBuffer.Subscribers)
+        {
+            _nodeMemoryAssignments[n] = memory;
+        }
+        oldBuffer.Subscribers.clear();
+        oldBuffer.Dimensions = {0, 0};
+    }
+    else
+    {
+        _nodeMemoryAssignments[node] = memory;
+        _memoryBuffers[memory].Subscribers.insert(node);
+    }
 }
 
-GraphCompilationPlatform::AbstractMemoryHandle GraphCompilationCPUPlatform::GetNodeMemoryHandle(const ConstNodePtr node) const
+GraphCompilationPlatform::MemoryBufferHandle GraphCompilationCPUPlatform::GetNodeMemoryBuffer(const ConstNodePtr node) const
 {
-    return _nodeAssignments.at(node);
+    return _nodeMemoryAssignments.at(node);
 }
 
 bool GraphCompilationCPUPlatform::NodeIsAssigned(const ConstNodePtr node) const
 {
-    return _nodeAssignments.find(node) != _nodeAssignments.end();
+    return _nodeMemoryAssignments.find(node) != _nodeMemoryAssignments.end();
 }
 
 /*void GraphCompilationCPUStrategy::DeallocateMemory(const NodeMemoryHandle mem)
@@ -57,14 +88,14 @@ void GraphCompilationCPUPlatform::CopyOutputData(const ConstNodePtr outputNode, 
     MemoryDimensions dims = _dimensionsMap.GetNodeMemoryDimensions(outputNode);
     size_t size = dims.size();
     outputBuffer.resize(size);
-    MemoryHandle nodeMemBuffer = _bufferMap[_nodeAssignments.at(outputNode)].get();
+    MemoryHandle nodeMemBuffer = _memoryBufferLocations[_nodeMemoryAssignments.at(outputNode)].get();
     std::copy(nodeMemBuffer, (nodeMemBuffer + size), std::begin(outputBuffer));
 }
 
 void GraphCompilationCPUPlatform::CopyInputData(const ConstNodePtr inputNode, InputDataBuffer& inputBuffer)
 {
     MemoryDimensions dims = _dimensionsMap.GetNodeMemoryDimensions(inputNode);
-    MemoryHandle nodeMemBuffer = _bufferMap[_nodeAssignments.at(inputNode)].get();
+    MemoryHandle nodeMemBuffer = _memoryBufferLocations[_nodeMemoryAssignments.at(inputNode)].get();
     std::copy(std::begin(inputBuffer), std::begin(inputBuffer) + dims.size(), nodeMemBuffer);
 }
 

@@ -58,9 +58,9 @@ int main(int argc, const char * const argv[])
     CompilationMemoryMap.RegisterNodeMemory(&i2, dims);
     testAddNode.GetMemoryDimensions(CompilationMemoryMap);
 
-    platform->AllocateMemory(&i1);
-    platform->AllocateMemory(&i2);
-    platform->AllocateMemory(&testAddNode);
+    platform->ReserveMemoryBuffer(&i1);
+    platform->ReserveMemoryBuffer(&i2);
+    platform->ReserveMemoryBuffer(&testAddNode);
 
     // compile kernel for VectorAddNode object
     testAddNode.Compile(*platform);

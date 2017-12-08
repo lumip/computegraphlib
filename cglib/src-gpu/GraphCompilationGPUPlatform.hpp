@@ -18,25 +18,27 @@ class GraphCompilationGPUPlatform : public GraphCompilationPlatform, public Open
 {
 private:
     typedef cl_mem MemoryHandle;
+    struct MemoryBuffer;
     const CompilationMemoryMap& _dimensionsMap;
     const OCLWrappers::Context _clContext;
     const cl_device_id _clDevice; // we do not allocate the device so we do not have a wrapper keeping care of releasing it
     const OCLWrappers::Queue _clMemoryQueue;
     const OCLWrappers::Queue _clExecutionQueue;
     std::vector<std::unique_ptr<Kernel>> _kernels;
-    std::vector<OCLWrappers::Memory> _bufferMap;
-    std::map<ConstNodePtr, AbstractMemoryHandle> _nodeAssignments;
+    std::vector<OCLWrappers::Memory> _memoryBufferLocations;
+    std::vector<MemoryBuffer> _memoryBuffers;
+    std::map<ConstNodePtr, MemoryBufferHandle> _nodeMemoryAssignments;
     std::vector<OCLWrappers::Program> _programs;
 private:
     cl_device_id SelectDevice();
     OCLWrappers::Queue CreateCommandQueue();
-    MemoryHandle GetMemory(const ConstNodePtr node) const;
+    MemoryHandle GetMemoryLocation(const ConstNodePtr node) const;
 public:
     GraphCompilationGPUPlatform(const CompilationMemoryMap& CompilationMemoryMap, OCLWrappers::Context&& context);
     ~GraphCompilationGPUPlatform();
-    AbstractMemoryHandle AllocateMemory(const ConstNodePtr node);
-    void AssignNodeMemory(const ConstNodePtr node, AbstractMemoryHandle memory);
-    AbstractMemoryHandle GetNodeMemoryHandle(const ConstNodePtr node) const;
+    MemoryBufferHandle ReserveMemoryBuffer(const ConstNodePtr node);
+    void AssignMemoryBuffer(const ConstNodePtr node, MemoryBufferHandle memory);
+    MemoryBufferHandle GetNodeMemoryBuffer(const ConstNodePtr node) const;
     bool NodeIsAssigned(const ConstNodePtr node) const;
     void CopyOutputData(const ConstNodePtr outputNode, DataBuffer& outputBuffer) const;
     void CopyInputData(const ConstNodePtr inputNode, InputDataBuffer& inputBuffer);

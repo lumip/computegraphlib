@@ -26,8 +26,8 @@ float testSliceNode(const MemoryDimensions input1Dim, const InputDataBuffer& inp
     compilationMemoryMap.RegisterNodeMemory(&i1, input1Dim);
     sliceNode.GetMemoryDimensions(compilationMemoryMap);
 
-    platform->AllocateMemory(&i1);
-    platform->AllocateMemory(&sliceNode);
+    platform->ReserveMemoryBuffer(&i1);
+    platform->ReserveMemoryBuffer(&sliceNode);
 
     // compile kernel for SliceNode object
     sliceNode.Compile(*platform);

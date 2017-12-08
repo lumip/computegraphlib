@@ -41,9 +41,9 @@ int main(int argc, const char * const argv[])
     compilationMemoryMap.RegisterNodeMemory(&i2, dims2);
     testMultNode.GetMemoryDimensions(compilationMemoryMap);
 
-    platform->AllocateMemory(&i1);
-    platform->AllocateMemory(&i2);
-    platform->AllocateMemory(&testMultNode);
+    platform->ReserveMemoryBuffer(&i1);
+    platform->ReserveMemoryBuffer(&i2);
+    platform->ReserveMemoryBuffer(&testMultNode);
 
     // compile kernel for MatrixMultNode object
     testMultNode.Compile(*platform);

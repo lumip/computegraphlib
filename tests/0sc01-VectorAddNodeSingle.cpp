@@ -29,9 +29,9 @@ float testVectorAddNode(const MemoryDimensions input1Dim, InputDataBuffer& input
     compilationMemoryMap.RegisterNodeMemory(&i2, input2Dim);
     testAddNode.GetMemoryDimensions(compilationMemoryMap);
 
-    platform->AllocateMemory(&i1);
-    platform->AllocateMemory(&i2);
-    platform->AllocateMemory(&testAddNode);
+    platform->ReserveMemoryBuffer(&i1);
+    platform->ReserveMemoryBuffer(&i2);
+    platform->ReserveMemoryBuffer(&testAddNode);
 
     // compile kernel for VectorAddNode object
     testAddNode.Compile(*platform);

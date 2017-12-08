@@ -33,8 +33,8 @@ int main(int argc, const char * const argv[])
     compilationMemoryMap.RegisterNodeMemory(&i1, {m, n});
     transposeNode.GetMemoryDimensions(compilationMemoryMap);
 
-    platform->AllocateMemory(&i1);
-    platform->AllocateMemory(&transposeNode);
+    platform->ReserveMemoryBuffer(&i1);
+    platform->ReserveMemoryBuffer(&transposeNode);
 
     // compile kernel for TransposeNode object
     transposeNode.Compile(*platform);

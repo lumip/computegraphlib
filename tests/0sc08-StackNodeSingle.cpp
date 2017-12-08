@@ -26,14 +26,14 @@ float testStackNode(const MemoryDimensions sliceDim, const std::vector<DataBuffe
         NodePtr node = new InputNode(ss.str(), sliceDim.xDim);
         sliceInputs[i] = node;
         compilationMemoryMap.RegisterNodeMemory(node, sliceDim);
-        platform->AllocateMemory(node);
+        platform->ReserveMemoryBuffer(node);
         platform->CopyInputData(node, slices[i]);
     }
 
     // create, set up and compile StackNode
     StackNode stackNode(sliceInputs, axis);
     stackNode.GetMemoryDimensions(compilationMemoryMap);
-    platform->AllocateMemory(&stackNode);
+    platform->ReserveMemoryBuffer(&stackNode);
     stackNode.Compile(*platform);
 
     // run compiled kernel

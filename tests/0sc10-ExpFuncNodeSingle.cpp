@@ -34,8 +34,8 @@ int main(int argc, const char * const argv[])
     compilationMemoryMap.RegisterNodeMemory(&i1, {m, n});
     expFuncNode.GetMemoryDimensions(compilationMemoryMap);
 
-    platform->AllocateMemory(&i1);
-    platform->AllocateMemory(&expFuncNode);
+    platform->ReserveMemoryBuffer(&i1);
+    platform->ReserveMemoryBuffer(&expFuncNode);
 
     // compile kernel for ExpFuncNode object
     expFuncNode.Compile(*platform);

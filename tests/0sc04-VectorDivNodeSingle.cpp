@@ -29,9 +29,9 @@ float testVectorDivNode(const MemoryDimensions input1Dim, InputDataBuffer& input
     compilationMemoryMap.RegisterNodeMemory(&i2, input2Dim);
     testDivNode.GetMemoryDimensions(compilationMemoryMap);
 
-    platform->AllocateMemory(&i1);
-    platform->AllocateMemory(&i2);
-    platform->AllocateMemory(&testDivNode);
+    platform->ReserveMemoryBuffer(&i1);
+    platform->ReserveMemoryBuffer(&i2);
+    platform->ReserveMemoryBuffer(&testDivNode);
 
     // compile kernel for VectorDivNode object
     testDivNode.Compile(*platform);

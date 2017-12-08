@@ -22,22 +22,17 @@ class VectorMultNode;
 class GraphCompilationPlatform
 {
 public:
-    typedef size_t AbstractMemoryHandle;
+    typedef size_t MemoryBufferHandle;
 public:
     GraphCompilationPlatform() { }
     virtual ~GraphCompilationPlatform() { }
-    virtual AbstractMemoryHandle AllocateMemory(const ConstNodePtr node) = 0;
-    virtual void AssignNodeMemory(const ConstNodePtr node, AbstractMemoryHandle memory) = 0;
-    virtual AbstractMemoryHandle GetNodeMemoryHandle(const ConstNodePtr node) const = 0;
+    virtual MemoryBufferHandle ReserveMemoryBuffer(const ConstNodePtr node) = 0;
+    virtual void AssignMemoryBuffer(const ConstNodePtr node, MemoryBufferHandle memory) = 0;
+    virtual MemoryBufferHandle GetNodeMemoryBuffer(const ConstNodePtr node) const = 0;
     virtual bool NodeIsAssigned(const ConstNodePtr node) const = 0;
     virtual void CopyOutputData(const ConstNodePtr outputNode, DataBuffer& outputBuffer) const = 0;
     virtual void CopyInputData(const ConstNodePtr inputNode, InputDataBuffer& inputBuffer) = 0;
     virtual void Evaluate() = 0;
-    /* todo: think about identifying memory by some handle instead of by node. this would allow
-     * for abstracting lookup of memory dimensions (which is currently duplicated in the subclasses).
-     * platform specific implementations could then really focus on just providing the platform
-     * dependent code without duplicating the code looking up memory sizes etc
-     */
 
     /* todo: remove all graph-specific compilation state from out of this class. make it truly just a "platform" which can be reused */
 
