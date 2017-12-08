@@ -145,6 +145,7 @@ void GraphCompilationGPUPlatform::CopyInputData(const ConstNodePtr inputNode, In
 void GraphCompilationGPUPlatform::Evaluate()
 {
     clFinish(_clMemoryQueue.get());
+    clFinish(_clExecutionQueue.get()); // make sure that all memory copy and previous executions have finished
     for (const std::unique_ptr<Kernel>& kernel : _kernels)
     {
         kernel->Run();
