@@ -54,7 +54,6 @@ int main(int argc, const char * const argv[])
     ReduceMeanNode loss(&crossEntropy, 0); // 1x1, mean cross entropy over batch
 
     // build backpropagation/derivation graph (todo: it would be nice if we could automate this later on)
-    // todo: this entire part is currently ignored by the GraphCompiler, fix!
     NegateNode negCorrectClasses(&correctClasses); // BatchSize x OutputDim
     VectorAddNode gradFactors(&softmax, &negCorrectClasses); // BatchSize x OutputDim
     ReduceMeanNode biasGrad(&gradFactors, 0); // 1 x OutputDim
