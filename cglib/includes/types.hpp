@@ -33,6 +33,26 @@ inline bool operator !=(const MemoryDimensions& lhs, const MemoryDimensions& rhs
     return !(lhs == rhs);
 }
 
+inline bool operator <=(const MemoryDimensions& lhs, const MemoryDimensions& rhs)
+{
+    return lhs.yDim <= rhs.yDim && lhs.xDim <= rhs.xDim;
+}
+
+inline bool operator <(const MemoryDimensions& lhs, const MemoryDimensions& rhs)
+{
+    return lhs <= rhs && lhs != rhs;
+}
+
+inline bool operator >=(const MemoryDimensions& lhs, const MemoryDimensions& rhs)
+{
+    return lhs.yDim >= rhs.yDim && lhs.xDim >= rhs.xDim;
+}
+
+inline bool operator >(const MemoryDimensions& lhs, const MemoryDimensions& rhs)
+{
+    return lhs >= rhs && lhs != rhs;
+}
+
 typedef std::map<std::string, const MemoryDimensions> InputDimensionsMap;
 
 class Node;
