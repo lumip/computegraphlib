@@ -6,7 +6,7 @@
 #include "GraphCompilationPlatform.hpp"
 
 ReduceMeanNode::ReduceMeanNode(NodePtr input, size_t axis)
-    : Node(true, false)
+    : Node(false, false)
     , _input(input)
     , _axis(axis)
 {
