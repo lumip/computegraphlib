@@ -1,6 +1,6 @@
 #include "GraphCompiler.hpp"
 
-#include <queue>
+#include <assert.h>
 
 #include "nodes/Node.hpp"
 #include "CompilationMemoryMap.hpp"
@@ -58,20 +58,45 @@ std::unique_ptr<CompiledGraph> GraphCompiler::Compile(const ConstNodePtr outputN
 {
     std::unique_ptr<CompilationMemoryMap> context(new CompilationMemoryMap(inputDimensions));
     std::unique_ptr<GraphCompilationPlatform> strategy = _strategyFactory->CreateGraphCompilationTargetStrategy(*context);
-    //std::unique_ptr<NodeCompiler> nodeCompiler(_strategyFactory->CreateNodeCompiler(&(*strategy)));
 
     const std::vector<ConstNodePtr> nodeTopology = DetermineNodeOrder(outputNode);
-    // todo: add functionality which determines which nodes need separate memory and which do not (temporary results only used in one other node can be overwritten)
-    for (size_t i = 0; i < nodeTopology.size(); ++i)
+    for (ConstNodePtr node : nodeTopology)
     {
-        ConstNodePtr node = nodeTopology[i];
         node->GetMemoryDimensions(*context);
-        strategy->AllocateMemory(node);
     }
-    // todo: figure out how to check output and input size of variable node for consistency.
-    for (size_t i = 0; i < nodeTopology.size(); ++i)
+
+    for (ConstNodePtr node : nodeTopology)
     {
-        nodeTopology[i]->Compile(*strategy);
+        // if node can operate in-place, try to find an input node that is used only by this node and reuse it's memory buffer (if size is sufficient)
+        if (node->CanOperateInPlace())
+        {
+            const MemoryDimensions nodeDim = context->GetNodeMemoryDimensions(node);
+            for (ConstNodePtr inputNode : node->GetInputs())
+            {
+                if (inputNode->GetSubscribers().size() == 1)
+                {
+                    const MemoryDimensions inputDim = context->GetNodeMemoryDimensions(inputNode);
+                    if (nodeDim <= inputDim)
+                    {
+                        const GraphCompilationPlatform::AbstractMemoryHandle handle = strategy->GetNodeMemoryHandle(inputNode);
+                        strategy->AssignNodeMemory(node, handle);
+                    }
+                }
+            }
+        }
+        // if node has no memory assigned from previous check, allocate new memory block
+        if (!strategy->NodeIsAssigned(node))
+        {
+            strategy->AllocateMemory(node);
+        }
+    }
+
+
+    // todo: figure out how to check output and input size of variable node for consistency.
+    for (ConstNodePtr node : nodeTopology)
+    {
+        assert(strategy->NodeIsAssigned(node));
+        node->Compile(*strategy);
     }
     return std::unique_ptr<CompiledGraph>(new CompiledGraph(std::move(strategy), std::move(context)));
 }

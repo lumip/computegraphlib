@@ -67,6 +67,16 @@ void GraphCompilationGPUPlatform::AssignNodeMemory(const ConstNodePtr node, Abst
     _nodeAssignments.emplace(node, memory);
 }
 
+GraphCompilationPlatform::AbstractMemoryHandle GraphCompilationGPUPlatform::GetNodeMemoryHandle(const ConstNodePtr node) const
+{
+    return _nodeAssignments.at(node);
+}
+
+bool GraphCompilationGPUPlatform::NodeIsAssigned(const ConstNodePtr node) const
+{
+    return _nodeAssignments.find(node) != _nodeAssignments.end();
+}
+
 void GraphCompilationGPUPlatform::CopyOutputData(const ConstNodePtr outputNode, DataBuffer& outputBuffer) const
 {
     MemoryDimensions dims = _dimensionsMap.GetNodeMemoryDimensions(outputNode);

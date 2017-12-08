@@ -32,6 +32,16 @@ void GraphCompilationCPUPlatform::AssignNodeMemory(const ConstNodePtr node, Abst
     _nodeAssignments.emplace(node, memory);
 }
 
+GraphCompilationPlatform::AbstractMemoryHandle GraphCompilationCPUPlatform::GetNodeMemoryHandle(const ConstNodePtr node) const
+{
+    return _nodeAssignments.at(node);
+}
+
+bool GraphCompilationCPUPlatform::NodeIsAssigned(const ConstNodePtr node) const
+{
+    return _nodeAssignments.find(node) != _nodeAssignments.end();
+}
+
 /*void GraphCompilationCPUStrategy::DeallocateMemory(const NodeMemoryHandle mem)
 {
     delete[] reinterpret_cast<float* const>(mem);

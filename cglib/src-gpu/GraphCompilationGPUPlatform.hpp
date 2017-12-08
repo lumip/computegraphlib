@@ -36,6 +36,8 @@ public:
     ~GraphCompilationGPUPlatform();
     AbstractMemoryHandle AllocateMemory(const ConstNodePtr node);
     void AssignNodeMemory(const ConstNodePtr node, AbstractMemoryHandle memory);
+    AbstractMemoryHandle GetNodeMemoryHandle(const ConstNodePtr node) const;
+    bool NodeIsAssigned(const ConstNodePtr node) const;
     void CopyOutputData(const ConstNodePtr outputNode, DataBuffer& outputBuffer) const;
     void CopyInputData(const ConstNodePtr inputNode, InputDataBuffer& inputBuffer);
     void Evaluate();
