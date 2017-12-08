@@ -9,8 +9,9 @@ class CompilationMemoryMap
 {
 private:
     InputDimensionsMap _inputDimensions;
-    std::map<ConstNodePtr, MemoryDimensions> _memoryMap;
-    std::map<std::string, ConstNodePtr> _inputMemoryMap;
+    std::map<ConstNodePtr, MemoryDimensions> _memoryDimensions;
+    std::map<std::string, ConstNodePtr> _inputNodes;
+    std::map<std::string, ConstNodePtr> _variableNodes;
 public:
     CompilationMemoryMap();
     CompilationMemoryMap(const InputDimensionsMap inputDimensions);
@@ -23,8 +24,10 @@ public:
     void RegisterNodeMemory(const ConstNodePtr node, const MemoryDimensions MemoryDimensions); // todo: add readonly flag
     MemoryDimensions GetNodeMemoryDimensions(const ConstNodePtr node) const;
     MemoryDimensions GetInputDimensions(std::string inputName) const;
-    void RegisterInputMemory(const std::string inputName, const ConstNodePtr node);
+    void RegisterInputNode(const std::string inputName, const ConstNodePtr node);
     ConstNodePtr GetInputNode(const std::string inputName) const;
+    void RegisterVariableNode(const std::string variableName, const ConstNodePtr node);
+    ConstNodePtr GetVariableNode(const std::string variableName) const;
 };
 
 #endif

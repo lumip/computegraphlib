@@ -94,11 +94,14 @@ int main(int argc, const char * const argv[])
         }
     }
 
+    InputDataMap variablesDataMap;
+    variablesDataMap.emplace("Weights", weightsData);
+    variablesDataMap.emplace("Bias", biasData);
+    graph->InitializeVariables(variablesDataMap);
+
     InputDataMap inputDataMap;
     inputDataMap.emplace("ImgBatch", imgInputData);
     inputDataMap.emplace("Classes", classesInputData);
-    inputDataMap.emplace("Weights", weightsData);
-    inputDataMap.emplace("Bias", biasData);
 
     graph->Evaluate(inputDataMap);
 

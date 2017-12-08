@@ -122,18 +122,19 @@ int main(int argc, const char * const argv[])
         }
     }
 
+    InputDataMap variablesDataMap;
+    variablesDataMap.emplace("Weights", weightsData);
+    variablesDataMap.emplace("Bias", biasData);
+    graph->InitializeVariables(variablesDataMap);
+
     InputDataMap inputDataMap;
     inputDataMap.emplace("ImgBatch", imgInputData);
     inputDataMap.emplace("Classes", classesInputData);
-    inputDataMap.emplace("Weights", weightsData);
-    inputDataMap.emplace("Bias", biasData);
 
     DataBuffer lossOutput(1);
     for (size_t j = 0; j < 10; ++j)
     {
         graph->Evaluate(inputDataMap);
-        inputDataMap.erase("Weights");
-        inputDataMap.erase("Bias");
 
         graph->GetNodeData(&loss, lossOutput);
         std::cout << "Loss: " << lossOutput[0] << std::endl;

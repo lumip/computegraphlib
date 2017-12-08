@@ -33,5 +33,5 @@ void InputNode::GetMemoryDimensions(CompilationMemoryMap& memoryMap) const
         throw std::invalid_argument("Dimension sizes for input " + _name + " differ between node declaration and input map delcaration.");
     }
     memoryMap.RegisterNodeMemory(this, dim);
-    memoryMap.RegisterInputMemory(_name, this);
+    memoryMap.RegisterInputNode(_name, this);
 }

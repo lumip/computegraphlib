@@ -59,5 +59,5 @@ void VariableNode::GetMemoryDimensions(CompilationMemoryMap& memoryMap) const
         }
     }*/
     memoryMap.RegisterNodeMemory(this, initDim);
-    memoryMap.RegisterInputMemory(_name, this);
+    memoryMap.RegisterVariableNode(_name, this);
 }
