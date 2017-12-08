@@ -73,10 +73,12 @@ int main(int argc, const char * const argv[])
 
     const float LearningRate = 0.5f;
     ConstMultNode biasUpdateDelta(&biasGrad, LearningRate); // 1 x OutputDim
-    VectorAddNode biasUpdated(&bias, &biasUpdateDelta); // 1 x OutputDim
+    NegateNode biasUpdateDeltaNeg(&biasUpdateDelta); // 1 x OutputDim
+    VectorAddNode biasUpdated(&bias, &biasUpdateDeltaNeg); // 1 x OutputDim
     bias.SetInput(&biasUpdated);
     ConstMultNode weightsUpdateDelta(&weightGrad, LearningRate); // InputDim x OutputDim
-    VectorAddNode weightsUpdated(&weights, &weightsUpdateDelta); // InputDim x OutputDim
+    NegateNode weightsUpdateDeltaNeg(&weightsUpdateDelta); // InputDim x OutputDim
+    VectorAddNode weightsUpdated(&weights, &weightsUpdateDeltaNeg); // InputDim x OutputDim
     weights.SetInput(&weightsUpdated);
 
     // load inputs and initialize variables
