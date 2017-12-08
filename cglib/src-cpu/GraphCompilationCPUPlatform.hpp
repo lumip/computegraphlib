@@ -12,22 +12,14 @@ class GraphCompilationCPUPlatform : public GraphCompilationPlatform
 {
 private:
     typedef float* MemoryHandle;
-    struct MemoryBuffer;
 private:
     std::vector<std::unique_ptr<Kernel>> _kernels;
     std::vector<std::unique_ptr<float[]>> _memoryBufferLocations;
-    std::vector<MemoryBuffer> _memoryBuffers;
-    std::map<ConstNodePtr, MemoryBufferHandle> _nodeMemoryAssignments;
-    const CompilationMemoryMap& _dimensionsMap;
 private:
     MemoryHandle GetMemoryLocation(const ConstNodePtr node) const;
 public:
-    GraphCompilationCPUPlatform(const CompilationMemoryMap& CompilationMemoryMap);
+    GraphCompilationCPUPlatform(const CompilationMemoryMap& compilationMemoryMap);
     ~GraphCompilationCPUPlatform();
-    MemoryBufferHandle ReserveMemoryBuffer(const ConstNodePtr node);
-    void AssignMemoryBuffer(const ConstNodePtr node, MemoryBufferHandle memory);
-    MemoryBufferHandle GetNodeMemoryBuffer(const ConstNodePtr node) const;
-    bool NodeIsAssigned(const ConstNodePtr node) const;
     void AllocateAllMemory();
     void CopyOutputData(const ConstNodePtr outputNode, DataBuffer& outputBuffer) const;
     void CopyInputData(const ConstNodePtr inputNode, InputDataBuffer& inputBuffer);

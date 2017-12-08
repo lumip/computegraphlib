@@ -6,22 +6,15 @@
 #include "CompilationMemoryMap.hpp"
 #include "Kernel.hpp"
 
-struct GraphCompilationGPUPlatform::MemoryBuffer
-{
-    MemoryDimensions Dimensions;
-    std::set<ConstNodePtr> Subscribers;
-};
-
-GraphCompilationGPUPlatform::GraphCompilationGPUPlatform(const CompilationMemoryMap& CompilationMemoryMap, OCLWrappers::Context&& context)
-    : _dimensionsMap(CompilationMemoryMap)
+GraphCompilationGPUPlatform::GraphCompilationGPUPlatform(const CompilationMemoryMap& compilationMemoryMap, OCLWrappers::Context&& context)
+    : GraphCompilationPlatform(compilationMemoryMap)
     , _clContext(std::move(context))
     , _clDevice(SelectDevice())
     , _clMemoryQueue(CreateCommandQueue())
     , _clExecutionQueue(CreateCommandQueue())
     , _kernels()
     , _memoryBufferLocations()
-    , _memoryBuffers()
-    , _nodeMemoryAssignments()
+    , _programs()
 {
 }
 
@@ -51,58 +44,17 @@ OCLWrappers::Queue GraphCompilationGPUPlatform::CreateCommandQueue()
 
 GraphCompilationGPUPlatform::MemoryHandle GraphCompilationGPUPlatform::GetMemoryLocation(const ConstNodePtr node) const
 {
-    return _memoryBufferLocations[_nodeMemoryAssignments.at(node)].get();
+    return _memoryBufferLocations[GetNodeMemoryBuffer(node)].get();
 }
 
-GraphCompilationPlatform::MemoryBufferHandle GraphCompilationGPUPlatform::ReserveMemoryBuffer(const ConstNodePtr node)
+/*void GraphCompilationGPUPlatform::AllocateMemory(MemoryBufferHandle buffer, size_t size)
 {
-    MemoryDimensions dims = _dimensionsMap.GetNodeMemoryDimensions(node);
-    size_t size = dims.size();
-    if (size == 0)
-    {
-        std::invalid_argument("cannot allocate memory of size 0!");
-    }
-    MemoryBufferHandle handle = static_cast<MemoryBufferHandle>(_memoryBuffers.size());
-    MemoryBuffer buffer;
-    buffer.Dimensions = dims;
-    buffer.Subscribers.insert(node);
-    _memoryBuffers.push_back(buffer);
-    AssignMemoryBuffer(node, handle);
-    return handle;
-}
-
-void GraphCompilationGPUPlatform::AssignMemoryBuffer(const ConstNodePtr node, MemoryBufferHandle memory)
-{
-    if (NodeIsAssigned(node))
-    {
-        // if the node is already assigned to a memory handle, we will have two merge the old and the new buffers:
-        // - move all subscribers from the previous to the new buffer and clear the previous buffer (abandon it)
-        MemoryBuffer& oldBuffer = _memoryBuffers[GetNodeMemoryBuffer(node)];
-        MemoryBuffer& newBuffer = _memoryBuffers[memory];
-        newBuffer.Subscribers.insert(oldBuffer.Subscribers.cbegin(), oldBuffer.Subscribers.cend());
-        for (ConstNodePtr n : oldBuffer.Subscribers)
-        {
-            _nodeMemoryAssignments[n] = memory;
-        }
-        oldBuffer.Subscribers.clear();
-        oldBuffer.Dimensions = {0, 0};
-    }
-    else
-    {
-        _nodeMemoryAssignments[node] = memory;
-        _memoryBuffers[memory].Subscribers.insert(node);
-    }
-}
-
-GraphCompilationPlatform::MemoryBufferHandle GraphCompilationGPUPlatform::GetNodeMemoryBuffer(const ConstNodePtr node) const
-{
-    return _nodeMemoryAssignments.at(node);
-}
-
-bool GraphCompilationGPUPlatform::NodeIsAssigned(const ConstNodePtr node) const
-{
-    return _nodeMemoryAssignments.find(node) != _nodeMemoryAssignments.end();
-}
+    _memoryBufferLocations.resize(buffer + 1); // todo: this is not too nice, find better solution...
+    cl_int status = CL_SUCCESS;
+    OCLWrappers::Memory mem = clCreateBuffer(_clContext.get(), CL_MEM_READ_WRITE, size * sizeof(float), nullptr, &status);
+    OCLWrappers::CheckCLError(status, "clCreateBuffer");
+    _memoryBufferLocations[buffer] = std::move(mem);
+}*/
 
 void GraphCompilationGPUPlatform::AllocateAllMemory()
 {
