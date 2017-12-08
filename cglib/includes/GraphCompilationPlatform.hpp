@@ -30,6 +30,7 @@ public:
     virtual void AssignMemoryBuffer(const ConstNodePtr node, MemoryBufferHandle memory) = 0;
     virtual MemoryBufferHandle GetNodeMemoryBuffer(const ConstNodePtr node) const = 0;
     virtual bool NodeIsAssigned(const ConstNodePtr node) const = 0;
+    virtual void AllocateAllMemory() = 0;
     virtual void CopyOutputData(const ConstNodePtr outputNode, DataBuffer& outputBuffer) const = 0;
     virtual void CopyInputData(const ConstNodePtr inputNode, InputDataBuffer& inputBuffer) = 0;
     virtual void Evaluate() = 0;

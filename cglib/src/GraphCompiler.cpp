@@ -98,6 +98,8 @@ std::unique_ptr<CompiledGraph> GraphCompiler::Compile(const ConstNodePtr outputN
         }
     }
 
+    strategy->AllocateAllMemory();
+
 
     // todo: figure out how to check output and input size of variable node for consistency.
     for (ConstNodePtr node : nodeTopology)

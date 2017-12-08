@@ -40,6 +40,7 @@ public:
     void AssignMemoryBuffer(const ConstNodePtr node, MemoryBufferHandle memory);
     MemoryBufferHandle GetNodeMemoryBuffer(const ConstNodePtr node) const;
     bool NodeIsAssigned(const ConstNodePtr node) const;
+    void AllocateAllMemory();
     void CopyOutputData(const ConstNodePtr outputNode, DataBuffer& outputBuffer) const;
     void CopyInputData(const ConstNodePtr inputNode, InputDataBuffer& inputBuffer);
     void Evaluate();

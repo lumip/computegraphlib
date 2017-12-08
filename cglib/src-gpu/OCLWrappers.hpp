@@ -21,6 +21,7 @@ namespace OCLWrappers
         T _value;
         bool _owning;
     public:
+        Wrapper();
         Wrapper(const T value);
         ~Wrapper();
         Wrapper(Wrapper const &) = delete;

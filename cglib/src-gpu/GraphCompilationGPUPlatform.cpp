@@ -62,15 +62,11 @@ GraphCompilationPlatform::MemoryBufferHandle GraphCompilationGPUPlatform::Reserv
     {
         std::invalid_argument("cannot allocate memory of size 0!");
     }
-    MemoryBufferHandle handle = static_cast<MemoryBufferHandle>(_memoryBufferLocations.size());
+    MemoryBufferHandle handle = static_cast<MemoryBufferHandle>(_memoryBuffers.size());
     MemoryBuffer buffer;
     buffer.Dimensions = dims;
     buffer.Subscribers.insert(node);
     _memoryBuffers.push_back(buffer);
-    cl_int status = CL_SUCCESS;
-    OCLWrappers::Memory mem = clCreateBuffer(_clContext.get(), CL_MEM_READ_WRITE, dims.size() * sizeof(float), nullptr, &status);
-    OCLWrappers::CheckCLError(status, "clCreateBuffer");
-    _memoryBufferLocations.emplace_back(std::move(mem));
     AssignMemoryBuffer(node, handle);
     return handle;
 }
@@ -106,6 +102,22 @@ GraphCompilationPlatform::MemoryBufferHandle GraphCompilationGPUPlatform::GetNod
 bool GraphCompilationGPUPlatform::NodeIsAssigned(const ConstNodePtr node) const
 {
     return _nodeMemoryAssignments.find(node) != _nodeMemoryAssignments.end();
+}
+
+void GraphCompilationGPUPlatform::AllocateAllMemory()
+{
+    _memoryBufferLocations.resize(_memoryBuffers.size());
+    for (size_t i = 0; i < _memoryBuffers.size(); ++i)
+    {
+        const MemoryBuffer& buffer = _memoryBuffers[i];
+        if (buffer.Subscribers.size() > 0)
+        {
+            cl_int status = CL_SUCCESS;
+            OCLWrappers::Memory mem = clCreateBuffer(_clContext.get(), CL_MEM_READ_WRITE, buffer.Dimensions.size() * sizeof(float), nullptr, &status);
+            OCLWrappers::CheckCLError(status, "clCreateBuffer");
+            _memoryBufferLocations[i] = std::move(mem);
+        }
+    }
 }
 
 void GraphCompilationGPUPlatform::CopyOutputData(const ConstNodePtr outputNode, DataBuffer& outputBuffer) const

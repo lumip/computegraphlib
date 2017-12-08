@@ -76,6 +76,9 @@ namespace OCLWrappers
     }
 
     template<typename T, cl_int(*releaseFct)(T)>
+    Wrapper<T, releaseFct>::Wrapper() : _value(), _owning(false) { }
+
+    template<typename T, cl_int(*releaseFct)(T)>
     Wrapper<T, releaseFct>::Wrapper(const T value) : _value(value), _owning(true) { }
 
     template<typename T, cl_int(*releaseFct)(T)>

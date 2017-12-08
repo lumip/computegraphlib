@@ -29,13 +29,12 @@ GraphCompilationCPUPlatform::MemoryHandle GraphCompilationCPUPlatform::GetMemory
 
 GraphCompilationPlatform::MemoryBufferHandle GraphCompilationCPUPlatform::ReserveMemoryBuffer(const ConstNodePtr node)
 {
-    MemoryBufferHandle handle = static_cast<MemoryBufferHandle>(_memoryBufferLocations.size());
+    MemoryBufferHandle handle = static_cast<MemoryBufferHandle>(_memoryBuffers.size());
     MemoryDimensions dims = _dimensionsMap.GetNodeMemoryDimensions(node);
     MemoryBuffer buffer;
     buffer.Dimensions = dims;
     buffer.Subscribers.insert(node);
     _memoryBuffers.push_back(buffer);
-    _memoryBufferLocations.emplace_back(new float[dims.size()]); // consider using std::valarray instead of raw float arrays?
     AssignMemoryBuffer(node, handle);
     return handle;
 }
@@ -71,6 +70,19 @@ GraphCompilationPlatform::MemoryBufferHandle GraphCompilationCPUPlatform::GetNod
 bool GraphCompilationCPUPlatform::NodeIsAssigned(const ConstNodePtr node) const
 {
     return _nodeMemoryAssignments.find(node) != _nodeMemoryAssignments.end();
+}
+
+void GraphCompilationCPUPlatform::AllocateAllMemory()
+{
+    _memoryBufferLocations.resize(_memoryBuffers.size());
+    for (size_t i = 0; i < _memoryBuffers.size(); ++i)
+    {
+        const MemoryBuffer& buffer = _memoryBuffers[i];
+        if (buffer.Subscribers.size() > 0)
+        {
+            _memoryBufferLocations[i] = std::unique_ptr<float[]>(new float[buffer.Dimensions.size()]);
+        }
+    }
 }
 
 /*void GraphCompilationCPUStrategy::DeallocateMemory(const NodeMemoryHandle mem)
