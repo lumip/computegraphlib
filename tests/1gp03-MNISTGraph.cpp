@@ -158,24 +158,39 @@ public:
 
 int main(int argc, const char * const argv[])
 {
+    const size_t InputDim = 784;
+    const size_t OutputDim = 10;
+    size_t BatchSize = 500;
+    float StopThreshold = 0.01f;
+    float LearningRate = 0.1f;
+
     // Check command line arguments
     if (argc < 2)
     {
-        std::cout << "Usage: " << argv[0] << " <path to MNIST dataset>" << std::endl;
+        std::cout << "Usage: " << argv[0] << " <path to MNIST dataset> [<training batch size> [<learning rate> [<training convergence threshold>]]]" << std::endl;
         return -1;
     }
     const std::string mnistDataDir(argv[1]);
 
-    const size_t InputDim = 784;
-    const size_t BatchSize = 500;
-    const size_t OutputDim = 10;
+    if (argc > 2)
+    {
+        BatchSize = std::stoi(argv[2]);
+        if (argc > 3)
+        {
+            LearningRate = std::stof(argv[3]);
+            if (argc > 4)
+            {
+                StopThreshold = std::stof(argv[4]);
+            }
+        }
+    }
 
     // ####### load training data #######
     MNISTDataset dataset(mnistDataDir, OutputDim);
     assert(dataset.GetTrainingSampleCount() % BatchSize == 0); // to simplify stuff: assert that BatchSize divides available training samples evenly
 
     // ####### use helper class for graph setup #######
-    MNISTGraph graphTemplate;
+    MNISTGraph graphTemplate(LearningRate);
     NodePtr softmax = graphTemplate.ConstructClassifierGraph();
     NodePtr loss = graphTemplate.ConstructLossGraph(softmax);
     graphTemplate.ConstructBackpropagationGraph(softmax, loss, OutputDim);
@@ -215,7 +230,6 @@ int main(int argc, const char * const argv[])
     // ####### run training iterations until loss converges #######
     float previousLoss = std::numeric_limits<float>::infinity();
     float currentLoss = std::numeric_limits<float>::infinity();
-    const float StopThreshold = 1e-1;
     DataBuffer lossOutput(1);
     do
     {
