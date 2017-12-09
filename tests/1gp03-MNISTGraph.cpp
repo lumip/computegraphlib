@@ -98,6 +98,62 @@ public:
     ConstNodePtr GetBiasNode() const { return bias; }
 };
 
+class MNISTDataset
+{
+private:
+    mnist::MNIST_dataset<std::vector, DataBuffer, uint8_t> _dataset;
+    const size_t OutputDim;
+    size_t _trainingCursor;
+    size_t _testCursor;
+public:
+    MNISTDataset(const std::string& mnistDataDir, const size_t outputDim)
+        : _dataset(mnist::read_dataset_direct<std::vector, DataBuffer, uint8_t>(mnistDataDir, 0, 0))
+        , OutputDim(outputDim)
+        , _trainingCursor(0)
+        , _testCursor(0)
+    {}
+    size_t GetTrainingSampleCount() const { return _dataset.training_images.size(); }
+    size_t GetTestSampleCount() const { return _dataset.test_images.size(); }
+    bool GetTrainingBatch(DataBuffer& inputs, DataBuffer& classes, const size_t batchSize)
+    {
+        std::fill(std::begin(classes), std::end(classes), 0.0f);
+        DataBuffer::iterator it = std::begin(inputs);
+        for (size_t i = 0; i < batchSize; ++i)
+        {
+            const size_t id = (_trainingCursor + i) % GetTrainingSampleCount();
+            const DataBuffer& sampleImageBuffer = _dataset.training_images[id];
+            it = std::copy(std::begin(sampleImageBuffer), std::end(sampleImageBuffer), it);
+            uint8_t sampleLabel = _dataset.training_labels[id];
+            classes[i * OutputDim + sampleLabel] = 1.0f;
+        }
+        for (size_t i = 0; i < inputs.size(); ++i)
+        {
+            inputs[i] /= 255.0f; // normalization of input data (with unnormalized data, the exponentiation within the graph might exceed float maximum value)
+        }
+        bool wrappedAround = (_trainingCursor + batchSize) >= GetTrainingSampleCount();
+        _trainingCursor = (_trainingCursor + batchSize) % GetTrainingSampleCount();
+        return wrappedAround;
+    }
+    bool GetTestBatch(DataBuffer& inputs, std::vector<uint8_t>& labels, const size_t batchSize)
+    {
+        DataBuffer::iterator it = std::begin(inputs);
+        for (size_t i = 0; i < batchSize; ++i)
+        {
+            const size_t id = (_testCursor + i) % GetTestSampleCount();
+            const DataBuffer& sampleImageBuffer = _dataset.test_images[id];
+            it = std::copy(std::begin(sampleImageBuffer), std::end(sampleImageBuffer), it);
+            labels[i] = _dataset.test_labels[id];
+        }
+        for (size_t i = 0; i < inputs.size(); ++i)
+        {
+            inputs[i] /= 255.0f; // normalization of input data (with unnormalized data, the exponentiation within the graph might exceed float maximum value)
+        }
+        bool wrappedAround = (_testCursor + batchSize) >= GetTestSampleCount();
+        _testCursor = (_testCursor + batchSize) % GetTestSampleCount();
+        return wrappedAround;
+    }
+};
+
 int main(int argc, const char * const argv[])
 {
     // Check command line arguments
@@ -112,67 +168,49 @@ int main(int argc, const char * const argv[])
     const size_t BatchSize = 500;
     const size_t OutputDim = 10;
 
-    // use helper class for graph setup
+    // ####### use helper class for graph setup #######
     MNISTGraph graphTemplate;
     NodePtr softmax = graphTemplate.ConstructClassifierGraph();
     NodePtr loss = graphTemplate.ConstructLossGraph(softmax);
     graphTemplate.ConstructBackpropagationGraph(softmax, loss, OutputDim);
 
-    // load inputs and initialize variables
+    // ####### setup dimension feeding dictionary and compile graph #######
+    InputDimensionsMap variableDimensions;
+    variableDimensions.emplace("ImgBatch", MemoryDimensions({BatchSize, InputDim}));
+    variableDimensions.emplace("Weights", MemoryDimensions({InputDim, OutputDim}));
+    variableDimensions.emplace("Bias", MemoryDimensions({1, OutputDim}));
+    variableDimensions.emplace("Classes", MemoryDimensions({BatchSize, OutputDim}));
+
+    GraphCompiler compiler(std::unique_ptr<const ImplementationStrategyFactory>(new ImplementationStrategyFactory));
+    const std::unique_ptr<CompiledGraph> graph = compiler.Compile(loss, variableDimensions);
+
+    // ####### initialize variables with small random values #######
     DataBuffer weightsData(InputDim * OutputDim);
     DataBuffer biasData(OutputDim);
 
-    /*std::random_device rd;
-    std::mt19937 gen(rd());*/
     std::mt19937 gen(22); // with fixed seed, reproducible results
     std::uniform_real_distribution<float> dist(-1.f, 1.f);
 
     std::generate(std::begin(weightsData), std::end(weightsData), [&dist, &gen]()->float {return dist(gen);});
     std::generate(std::begin(biasData), std::end(biasData), [&dist, &gen]()->float {return dist(gen);});
 
-    mnist::MNIST_dataset<std::vector, DataBuffer, uint8_t> dataset = mnist::read_dataset_direct<std::vector, DataBuffer, uint8_t>(mnistDataDir, 0, 0);
-
-    // setup dimension feeding dictionary and compile graph
-    InputDimensionsMap inputDimensions;
-    inputDimensions.emplace("ImgBatch", MemoryDimensions({BatchSize, InputDim}));
-    inputDimensions.emplace("Weights", MemoryDimensions({InputDim, OutputDim}));
-    inputDimensions.emplace("Bias", MemoryDimensions({1, OutputDim}));
-    inputDimensions.emplace("Classes", MemoryDimensions({BatchSize, OutputDim}));
-
-    GraphCompiler compiler(std::unique_ptr<const ImplementationStrategyFactory>(new ImplementationStrategyFactory));
-    const std::unique_ptr<CompiledGraph> graph = compiler.Compile(loss, inputDimensions);
-
-    // initialize graph variables
     InputDataMap variablesDataMap;
     variablesDataMap.emplace("Weights", weightsData);
     variablesDataMap.emplace("Bias", biasData);
     graph->InitializeVariables(variablesDataMap);
 
-    // read input data
+    // ####### read input data #######
+    MNISTDataset dataset(mnistDataDir, OutputDim);
     DataBuffer imgInputData(BatchSize * InputDim);
     DataBuffer classesInputData(BatchSize * OutputDim);
-    std::fill(std::begin(classesInputData), std::begin(classesInputData), 0.0f);
-    {
-        DataBuffer::iterator it = std::begin(imgInputData);
-        for (size_t i = 0; i < BatchSize; ++i)
-        {
-            InputDataBuffer& sampleImageBuffer = dataset.training_images[i];
-            it = std::copy(std::begin(sampleImageBuffer), std::end(sampleImageBuffer), it);
-            uint8_t sampleLabel = dataset.training_labels[i];
-            classesInputData[i * OutputDim + sampleLabel] = 1.0f;
-        }
-        for (size_t i = 0; i < imgInputData.size(); ++i)
-        {
-            imgInputData[i] /= 255.0f; // normalization of input data (with unnormalized data, the exponentiation within the graph might exceed float maximum value)
-        }
-    }
+    dataset.GetTrainingBatch(imgInputData, classesInputData, BatchSize);
 
-    // prepare input feeding dict
+    // ####### prepare input feeding dict #######
     InputDataMap inputDataMap;
     inputDataMap.emplace("ImgBatch", imgInputData);
     inputDataMap.emplace("Classes", classesInputData);
 
-    // run training iterations until loss converges
+    // ####### run training iterations until loss converges #######
     float previousLoss = std::numeric_limits<float>::infinity();
     float currentLoss = std::numeric_limits<float>::infinity();
     const size_t StopThreshold = 1e-7;
@@ -187,55 +225,50 @@ int main(int argc, const char * const argv[])
         std::cout << "Loss: " << currentLoss << std::endl;
     } while (previousLoss - currentLoss > StopThreshold);
 
-    // retrieve trained values for weights and bias
-    graph->GetNodeData(graphTemplate.GetWeightsNode(), weightsData);
-    graph->GetNodeData(graphTemplate.GetBiasNode(), biasData);
-
-    // set up evaluation graph (forward classification graph only)
+    // ####### set up and compile evaluation graph (forward classification graph only) #######
+    const size_t TestSampleCount = dataset.GetTestSampleCount();
     MNISTGraph evaluationGraphTemplate;
     NodePtr evalSoftmax = evaluationGraphTemplate.ConstructClassifierGraph();
-    std::unique_ptr<CompiledGraph> evalGraph = compiler.Compile(evalSoftmax, inputDimensions);
+    variableDimensions.clear();
+    variableDimensions.emplace("ImgBatch", MemoryDimensions({TestSampleCount, InputDim}));
+    variableDimensions.emplace("Weights", MemoryDimensions({InputDim, OutputDim}));
+    variableDimensions.emplace("Bias", MemoryDimensions({1, OutputDim}));
+    std::unique_ptr<CompiledGraph> evalGraph = compiler.Compile(evalSoftmax, variableDimensions);
 
-    // set trained variable values for evaluation grpah
+    // ####### initialize variables in evaluation graph with values trained in training graph #######
+    graph->GetNodeData(graphTemplate.GetWeightsNode(), weightsData);
+    graph->GetNodeData(graphTemplate.GetBiasNode(), biasData);
     evalGraph->InitializeVariables(variablesDataMap);
 
-    // prepare testing/evaluation data
-    const size_t TestDataCount = dataset.test_images.size();
-    DataBuffer evalInputData(TestDataCount * InputDim);
-    {
-        DataBuffer::iterator it = std::begin(evalInputData);
-        for (size_t i = 0; i < TestDataCount; ++i)
-        {
-            InputDataBuffer& sampleImageBuffer = dataset.test_images[i];
-            it = std::copy(std::begin(sampleImageBuffer), std::end(sampleImageBuffer), it);
-        }
-        for (size_t i = 0; i < evalInputData.size(); ++i)
-        {
-            evalInputData[i] /= 255.0f;
-        }
-    }
+    // ####### prepare testing/evaluation data #######
+    DataBuffer evalInputData(TestSampleCount * InputDim);
+    std::vector<uint8_t> evalLabels(TestSampleCount);
+    dataset.GetTestBatch(evalInputData, evalLabels, TestSampleCount);
+
     InputDataMap evalInputDataMap;
     evalInputDataMap.emplace("ImgBatch", evalInputData);
-    DataBuffer evalPredictions(TestDataCount * OutputDim);
+    DataBuffer evalPredictions(TestSampleCount * OutputDim);
 
-    // run evaluation graph on evaluation input data
+    // ####### run evaluation graph on evaluation input data #######
     evalGraph->Evaluate(evalInputDataMap);
 
-    // retrieve predictions and calculate classifier precision
+    // ####### retrieve predictions and calculate classifier precision #######
     evalGraph->GetNodeData(evalSoftmax, evalPredictions);
     size_t correct = 0;
-    for (size_t i = 0; i < TestDataCount; ++i)
+    for (size_t i = 0; i < TestSampleCount; ++i)
     {
         // get index of maximum element in softmax predictions for single sample ( == predicted class )
         DataBuffer::iterator it = std::begin(evalPredictions) + i * OutputDim;
         uint8_t prediction = std::max_element(it, it + OutputDim) - it;
 
         // is that prediction correct?
-        if (prediction == dataset.test_labels[i])
+        if (prediction == evalLabels[i])
             ++correct;
     }
-    float ratio = static_cast<float>(correct) / static_cast<float>(TestDataCount);
-    std::cout << correct << " / " << TestDataCount << " (" << ratio << ") classifications are correct." << std::endl;
+
+    // ####### output results #######
+    float ratio = static_cast<float>(correct) / static_cast<float>(TestSampleCount);
+    std::cout << correct << " / " << TestSampleCount << " (" << ratio << ") classifications are correct." << std::endl;
 
     return 0;
 }
