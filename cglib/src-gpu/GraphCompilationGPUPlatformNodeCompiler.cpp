@@ -206,7 +206,28 @@ void GraphCompilationGPUPlatform::CompileTransposeNode(const TransposeNode* cons
     }
 }
 
-void GraphCompilationGPUPlatform::CompileVariableNode(const VariableNode* const node) { }
+void GraphCompilationGPUPlatform::CompileVariableNode(const VariableNode* const node)
+{
+    Node::ConstNodeList inputs = node->GetInputs();
+    if (inputs.size() > 0)
+    {
+        ConstNodePtr inputNode = node->GetInputs()[0];
+        const MemoryHandle inputBuffer = GetMemoryLocation(inputNode);
+        const MemoryHandle resultBuffer = GetMemoryLocation(node);
+        if (inputBuffer != resultBuffer) // if the VariableNode has an input path and which doesn't share the buffer, copy data over
+        {
+            const MemoryDimensions inputDims = _dimensionsMap.GetNodeMemoryDimensions(inputNode);
+            _kernels.emplace_back(
+                new CopyDataGPUKernel(*this,
+                                      _clExecutionQueue.get(),
+                                      inputBuffer,
+                                      resultBuffer,
+                                      inputDims.size(),
+                                      0, 0, 1, 1)
+            );
+        }
+    }
+}
 
 void GraphCompilationGPUPlatform::CompileVectorAddNode(const VectorAddNode* const node)
 {

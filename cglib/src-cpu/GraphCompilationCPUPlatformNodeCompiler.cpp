@@ -181,6 +181,23 @@ void GraphCompilationCPUPlatform::CompileTransposeNode(const TransposeNode* cons
 
 void GraphCompilationCPUPlatform::CompileVariableNode(const VariableNode* const node)
 {
+    Node::ConstNodeList inputs = node->GetInputs();
+    if (inputs.size() > 0)
+    {
+        ConstNodePtr inputNode = node->GetInputs()[0];
+        const MemoryHandle inputBuffer = GetMemoryLocation(inputNode);
+        const MemoryHandle resultBuffer = GetMemoryLocation(node);
+        if (inputBuffer != resultBuffer) // if the VariableNode has an input path and which doesn't share the buffer, copy data over
+        {
+            const MemoryDimensions inputDims = _dimensionsMap.GetNodeMemoryDimensions(inputNode);
+            _kernels.emplace_back(
+                new CopyDataCPUKernel(inputBuffer,
+                                      resultBuffer,
+                                      inputDims.size(),
+                                      1, 1)
+            );
+        }
+    }
 }
 
 void GraphCompilationCPUPlatform::CompileVectorAddNode(const VectorAddNode* const node)

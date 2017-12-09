@@ -59,18 +59,41 @@ std::unique_ptr<CompiledGraph> GraphCompiler::Compile(const ConstNodePtr outputN
     std::unique_ptr<CompilationMemoryMap> context(new CompilationMemoryMap(inputDimensions));
     std::unique_ptr<GraphCompilationPlatform> strategy = _strategyFactory->CreateGraphCompilationTargetStrategy(*context);
 
+    // determine node buffer dimensions
     const std::vector<ConstNodePtr> nodeTopology = DetermineNodeOrder(outputNode);
     for (ConstNodePtr node : nodeTopology)
     {
         node->GetMemoryDimensions(*context);
     }
 
+    // todo: figure out how to check output and input size of variable node for consistency.
+
+    // determine which nodes can share buffers
     for (ConstNodePtr node : nodeTopology)
     {
         // if node can operate in-place, try to find an input node that is used only by this node and reuse it's memory buffer (if size is sufficient)
         if (node->CanOperateInPlace())
         {
             const MemoryDimensions nodeDim = context->GetNodeMemoryDimensions(node);
+            if (strategy->NodeIsAssigned(node)) // if a buffer was already assigned, check whether it is shared with an input node already.
+                                                // if so, go on to next node
+                                                // if not the buffer is shared with an output node, meaning further reuse with an input node might be possible
+            {
+                const GraphCompilationPlatform::MemoryBufferHandle handle = strategy->GetNodeMemoryBuffer(node);
+                bool bufferSharedWithInput = false;
+                for (ConstNodePtr inputNode : node->GetInputs())
+                {
+                    if (strategy->GetNodeMemoryBuffer(inputNode) == handle)
+                    {
+                        bufferSharedWithInput = true;
+                        break;
+                    }
+                }
+                if (bufferSharedWithInput)
+                {
+                    continue; // node shared buffer with input, go on to next node in topology
+                }
+            }
             for (ConstNodePtr inputNode : node->GetInputs())
             {
                 if (inputNode->GetSubscribers().size() == 1)
@@ -98,10 +121,10 @@ std::unique_ptr<CompiledGraph> GraphCompiler::Compile(const ConstNodePtr outputN
         }
     }
 
+    // allocate all buffers
     strategy->AllocateAllMemory();
 
-
-    // todo: figure out how to check output and input size of variable node for consistency.
+    // compile node runtime kernels
     for (ConstNodePtr node : nodeTopology)
     {
         assert(strategy->NodeIsAssigned(node));
