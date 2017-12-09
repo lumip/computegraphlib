@@ -12,7 +12,7 @@ int main(const int argc, const char * const argv[])
     const MemoryDimensions dim = { 5, 4 };
     const MemoryDimensions& expectedDim(dim);
 
-    InputNode testInputNode("x", dim.xDim);
+    InputNode testInputNode("x");
 
     // define input data
     InputDataBuffer input1 { 1,2,3,4, 2,2,2,2, 0,0,0,0, 1,0,-1,0, -1,-3,-5,-7 };

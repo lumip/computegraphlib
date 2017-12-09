@@ -13,8 +13,8 @@ int main(int argc, const char * const argv[])
     size_t m = 5;
     size_t n = 4;
 
-    InputNode i1("x", n);
-    InputNode i2("y", m);
+    InputNode i1("x");
+    InputNode i2("y");
     MatrixMultNode testMultNode(&i1, &i2);
 
     // define input and expected output data

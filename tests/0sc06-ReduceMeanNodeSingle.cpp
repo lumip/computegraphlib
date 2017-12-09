@@ -10,7 +10,7 @@
 
 float testReduceMeanNode(const MemoryDimensions input1Dim, const InputDataBuffer& input1, const size_t axis, const MemoryDimensions expectedDim, ConstDataBuffer& expected)
 {
-    InputNode i1("x", input1Dim.xDim);
+    InputNode i1("x");
     ReduceMeanNode reduceMeanNode(&i1, axis);
 
     // create InputDimensionsMap object to provide input dimensions to graph compilation routines

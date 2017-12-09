@@ -24,8 +24,8 @@ int main(int argc, const char * const argv[])
     size_t n = 10000;
     size_t size = m * n;
 
-    InputNode i1("x", m);
-    InputNode i2("y", n);
+    InputNode i1("x");
+    InputNode i2("y");
     MatrixMultNode testMultNode(&i1, &i2);
 
     MemoryDimensions dims1 {m, n};

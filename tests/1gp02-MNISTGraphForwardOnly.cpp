@@ -30,9 +30,9 @@ int main(int argc, const char * const argv[])
 
     // build feedforward network for classification
     // declare inputs and variables
-    InputNode inputBatch("ImgBatch", InputDim); // BatchSize x InputDim (batch of row vectors of inputs)
-    VariableNode weights("Weights", InputDim, OutputDim); // InputDim x OutputDim (weight matrix for multiplication from the right)
-    VariableNode bias("Bias", 1, OutputDim); // 1 x OutputDim (row vector of biases)
+    InputNode inputBatch("ImgBatch"); // BatchSize x InputDim (batch of row vectors of inputs)
+    VariableNode weights("Weights"); // InputDim x OutputDim (weight matrix for multiplication from the right)
+    VariableNode bias("Bias"); // 1 x OutputDim (row vector of biases)
 
     // weighting inputs and applying bias
     MatrixMultNode weightedInputs(&inputBatch, &weights); // BatchSize x OutputDim
@@ -45,7 +45,7 @@ int main(int argc, const char * const argv[])
 
     // add loss function graph part for training
     // compute loss (cross-entropy)
-    InputNode correctClasses("Classes", OutputDim); // BatchSize x OutputDim, input for correct results (represented as one-hot vector (correct class indicated by 1 in that dimension))
+    InputNode correctClasses("Classes"); // BatchSize x OutputDim, input for correct results (represented as one-hot vector (correct class indicated by 1 in that dimension))
     LogFuncNode logSoftmax(&softmax); // BatchSize x OutputDim
     VectorMultNode vm(&correctClasses, &logSoftmax); // BatchSize x OutputDim
     ReduceSumNode negCrossEntropy(&vm, 1); // BatchSize x 1

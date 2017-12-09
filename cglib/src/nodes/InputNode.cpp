@@ -2,10 +2,9 @@
 
 #include "CompilationMemoryMap.hpp"
 
-InputNode::InputNode(std::string name, size_t dim)
+InputNode::InputNode(std::string name)
     : Node(true, true)
     , _name(name)
-    , _dim(dim)
 {
 }
 
@@ -28,10 +27,6 @@ void InputNode::Compile(GraphCompilationPlatform& platform) const
 void InputNode::GetMemoryDimensions(CompilationMemoryMap& memoryMap) const
 {
     const MemoryDimensions dim = memoryMap.GetInputDimensions(_name);
-    if (dim.xDim != this->_dim)
-    {
-        throw std::invalid_argument("Dimension sizes for input " + _name + " differ between node declaration and input map delcaration.");
-    }
     memoryMap.RegisterNodeMemory(this, dim);
     memoryMap.RegisterInputNode(_name, this);
 }

@@ -10,8 +10,8 @@
 
 float testVectorAddNode(const MemoryDimensions input1Dim, InputDataBuffer& input1, const MemoryDimensions input2Dim, InputDataBuffer& input2, const MemoryDimensions& expectedDim, ConstDataBuffer& expected)
 {
-    InputNode i1("x", input1Dim.xDim);
-    InputNode i2("y", input2Dim.xDim);
+    InputNode i1("x");
+    InputNode i2("y");
     VectorAddNode testAddNode(&i1, &i2);
 
     // create InputDimensionsMap object to provide input dimensions to graph compilation routines

@@ -7,9 +7,8 @@ class InputNode : public Node
 {
 private:
     const std::string _name;
-    const size_t _dim;
 public:
-    InputNode(std::string name, size_t dim);
+    InputNode(std::string name);
     virtual ~InputNode();
     ConstNodeList GetInputs() const;
     void Compile(GraphCompilationPlatform& platform) const;

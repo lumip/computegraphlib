@@ -25,7 +25,7 @@ float testStackNode(const MemoryDimensions sliceDim, const std::vector<DataBuffe
     {
         std::stringstream ss;
         ss << i;
-        NodePtr node = new InputNode(ss.str(), sliceDim.xDim);
+        NodePtr node = new InputNode(ss.str());
         createdNodes[i] = std::unique_ptr<Node>(node);
         sliceInputs[i] = node;
         compilationMemoryMap.RegisterNodeMemory(node, sliceDim);

@@ -24,8 +24,8 @@ int main(int argc, const char * const argv[])
     size_t n = 100000;
     size_t size = dim * n;
 
-    InputNode i1("x", dim);
-    InputNode i2("y", dim);
+    InputNode i1("x");
+    InputNode i2("y");
     VectorAddNode testAddNode(&i1, &i2);
 
     // generate input data

@@ -3,11 +3,9 @@
 #include "CompilationMemoryMap.hpp"
 #include "GraphCompilationPlatform.hpp"
 
-VariableNode::VariableNode(std::string name, size_t xDim, size_t yDim)
+VariableNode::VariableNode(std::string name)
     : Node(true, true)
     , _name(name)
-    , _xDim(xDim)
-    , _yDim(yDim)
     , _input(nullptr)
 {
 }

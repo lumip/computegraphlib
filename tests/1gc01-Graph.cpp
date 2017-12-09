@@ -18,9 +18,9 @@ int main(int argc, const char * const argv[])
 
     // very simple graph which computes: softmax(X*Y+b)
     // declare inputs and variables
-    InputNode X("X", InputDim); // BatchSize x InputDim
-    VariableNode Y("Y", InputDim, OutputDim); // InputDim x OutputDim
-    VariableNode b("b", 1, OutputDim); // 1 x OutputDim
+    InputNode X("X"); // BatchSize x InputDim
+    VariableNode Y("Y"); // InputDim x OutputDim
+    VariableNode b("b"); // 1 x OutputDim
 
     // weighting inputs and applying bias
     MatrixMultNode XY(&X, &Y); // BatchSize x OutputDim
