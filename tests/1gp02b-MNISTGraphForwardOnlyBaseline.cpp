@@ -1,6 +1,5 @@
 #include <iostream>
 #include <algorithm>
-#include <random>
 #include <cmath>
 
 #include <mnist/mnist_reader.hpp>
@@ -34,12 +33,9 @@ void initializeData(const std::string& mnistDataDir, DataBuffer& inputs, DataBuf
         inputs[i] /= 255.0f;
     }
 
-    // fill weights and bias with random numbers
-    std::mt19937 gen(22); // with fixed seed, reproducible results
-    std::uniform_real_distribution<float> dist(-1.f, 1.f);
-
-    std::generate(std::begin(weights), std::end(weights), [&dist, &gen]()->float {return dist(gen);});
-    std::generate(std::begin(bias), std::end(bias), [&dist, &gen]()->float {return dist(gen);}); // we write the bias values into an additional row of inputs
+    // fill weights and bias with zeroes
+    std::fill(std::begin(weights), std::end(weights), 0.0f);
+    std::fill(std::begin(bias), std::end(bias), 0.0f);
 }
 
 inline size_t getIndex(size_t i, size_t j, size_t stride)

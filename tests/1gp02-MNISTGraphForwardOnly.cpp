@@ -1,6 +1,5 @@
 #include <iostream>
 #include <algorithm>
-#include <random>
 
 #include <mnist/mnist_reader.hpp>
 
@@ -57,13 +56,8 @@ int main(int argc, const char * const argv[])
     DataBuffer weightsData(InputDim * OutputDim);
     DataBuffer biasData(OutputDim);
 
-    /*std::random_device rd;
-    std::mt19937 gen(rd());*/
-    std::mt19937 gen(22); // with fixed seed, reproducible results
-    std::uniform_real_distribution<float> dist(-1.f, 1.f);
-
-    std::generate(std::begin(weightsData), std::end(weightsData), [&dist, &gen]()->float {return dist(gen);});
-    std::generate(std::begin(biasData), std::end(biasData), [&dist, &gen]()->float {return dist(gen);});
+    std::fill(std::begin(weightsData), std::end(weightsData), 0.0f);
+    std::fill(std::begin(biasData), std::end(biasData), 0.0f);
 
     mnist::MNIST_dataset<std::vector, DataBuffer, uint8_t> dataset = mnist::read_dataset_direct<std::vector, DataBuffer, uint8_t>(mnistDataDir, 0, 0);
 

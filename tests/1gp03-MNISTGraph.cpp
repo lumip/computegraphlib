@@ -1,6 +1,5 @@
 #include <iostream>
 #include <algorithm>
-#include <random>
 #include <assert.h>
 
 #include <mnist/mnist_reader.hpp>
@@ -191,15 +190,12 @@ int main(int argc, const char * const argv[])
     GraphCompiler compiler(std::unique_ptr<const ImplementationStrategyFactory>(new ImplementationStrategyFactory));
     const std::unique_ptr<CompiledGraph> graph = compiler.Compile(loss, variableDimensions);
 
-    // ####### initialize variables with small random values #######
+    // ####### initialize variables with zero values #######
     DataBuffer weightsData(InputDim * OutputDim);
     DataBuffer biasData(OutputDim);
 
-    std::mt19937 gen(22); // with fixed seed, reproducible results
-    std::uniform_real_distribution<float> dist(-1.f, 1.f);
-
-    std::generate(std::begin(weightsData), std::end(weightsData), [&dist, &gen]()->float {return dist(gen);});
-    std::generate(std::begin(biasData), std::end(biasData), [&dist, &gen]()->float {return dist(gen);});
+    std::fill(std::begin(weightsData), std::end(weightsData), 0.0f);
+    std::fill(std::begin(biasData), std::end(biasData), 0.0f);
 
     InputDataMap variablesDataMap;
     variablesDataMap.emplace("Weights", weightsData);
