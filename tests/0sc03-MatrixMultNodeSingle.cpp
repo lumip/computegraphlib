@@ -44,6 +44,7 @@ int main(int argc, const char * const argv[])
     platform->ReserveMemoryBuffer(&i1);
     platform->ReserveMemoryBuffer(&i2);
     platform->ReserveMemoryBuffer(&testMultNode);
+    platform->AllocateAllMemory();
 
     // compile kernel for MatrixMultNode object
     testMultNode.Compile(*platform);

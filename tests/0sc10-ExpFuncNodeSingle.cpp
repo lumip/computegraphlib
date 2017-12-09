@@ -36,6 +36,7 @@ int main(int argc, const char * const argv[])
 
     platform->ReserveMemoryBuffer(&i1);
     platform->ReserveMemoryBuffer(&expFuncNode);
+    platform->AllocateAllMemory();
 
     // compile kernel for ExpFuncNode object
     expFuncNode.Compile(*platform);

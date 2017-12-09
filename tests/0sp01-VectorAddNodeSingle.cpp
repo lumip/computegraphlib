@@ -61,6 +61,7 @@ int main(int argc, const char * const argv[])
     platform->ReserveMemoryBuffer(&i1);
     platform->ReserveMemoryBuffer(&i2);
     platform->ReserveMemoryBuffer(&testAddNode);
+    platform->AllocateAllMemory();
 
     // compile kernel for VectorAddNode object
     testAddNode.Compile(*platform);

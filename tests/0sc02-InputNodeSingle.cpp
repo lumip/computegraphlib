@@ -31,6 +31,7 @@ int main(const int argc, const char * const argv[])
     testInputNode.GetMemoryDimensions(compilationMemoryMap);
 
     platform->ReserveMemoryBuffer(&testInputNode);
+    platform->AllocateAllMemory();
 
     // compile kernel for InputNode object
     testInputNode.Compile(*platform);

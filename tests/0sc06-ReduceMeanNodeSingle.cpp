@@ -28,6 +28,7 @@ float testReduceMeanNode(const MemoryDimensions input1Dim, const InputDataBuffer
 
     platform->ReserveMemoryBuffer(&i1);
     platform->ReserveMemoryBuffer(&reduceMeanNode);
+    platform->AllocateAllMemory();
 
     // compile kernel for ReduceMeanNode object
     reduceMeanNode.Compile(*platform);

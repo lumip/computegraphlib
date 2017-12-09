@@ -35,6 +35,7 @@ int main(int argc, const char * const argv[])
 
     platform->ReserveMemoryBuffer(&i1);
     platform->ReserveMemoryBuffer(&transposeNode);
+    platform->AllocateAllMemory();
 
     // compile kernel for TransposeNode object
     transposeNode.Compile(*platform);

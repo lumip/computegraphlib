@@ -42,7 +42,6 @@ int main(int argc, const char * const argv[])
     const std::unique_ptr<CompiledGraph> graph = compiler.Compile(&softmax, inputDimensions);
 
     // prepare inputs
-    InputDataMap inputDataMap;
     DataBuffer dataX = { 1,2,3,4,
                          2,3,4,5,
                          3,4,5,6,
@@ -62,9 +61,14 @@ int main(int argc, const char * const argv[])
                             0.99685884f, 0.00314121f,
                             0.99858618f, 0.00141388f };
 
+    // initialize variables
+    InputDataMap variableDataMap;
+    variableDataMap.emplace("Y", dataY);
+    variableDataMap.emplace("b", datab);
+    graph->InitializeVariables(variableDataMap);
+
+    InputDataMap inputDataMap;
     inputDataMap.emplace("X", dataX);
-    inputDataMap.emplace("Y", dataY);
-    inputDataMap.emplace("b", datab);
 
     // evaluate graph
     graph->Evaluate(inputDataMap);
