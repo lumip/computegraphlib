@@ -27,9 +27,21 @@ int main(int argc, const char * const argv[])
     VectorAddNode XYb(&XY, &b);
 
     // apply softmax
-    ExpFuncNode expXYB(&XYb); // BatchSize x OutputDim
-    ReduceSumNode sumexpXYb(&expXYB, 1); // BatchSize x 1
-    VectorDivNode softmax(&expXYB, &sumexpXYb); // BatchSize x OutputDim
+    ExpFuncNode expXYb(&XYb); // BatchSize x OutputDim
+    ReduceSumNode sumexpXYb(&expXYb, 1); // BatchSize x 1
+    VectorDivNode softmax(&expXYb, &sumexpXYb); // BatchSize x OutputDim
+
+    // create the exact same network one more time with separate nodes (to test a parallel independent execution path)
+    MatrixMultNode XY2(&X, &Y);
+    VectorAddNode XYb2(&XY2, &b);
+    ExpFuncNode expXYb2(&XYb2);
+    ReduceSumNode sumexpXYb2(&expXYb2, 1);
+    VectorDivNode softmax2(&expXYb2, &sumexpXYb2);
+
+    TransposeNode softmaxT(&softmax);
+    TransposeNode softmax2T(&softmax2);
+    VectorAddNode combiner(&softmax, &softmax2); // we are not interested in adding it up but we need a single result node for compilation
+                                                 // (preceeding tranposes serve to break up potential buffer reuse of VectorAddNode)
 
     // specify concrete input dimensions for compilation
     InputDimensionsMap inputDimensions;
@@ -39,7 +51,9 @@ int main(int argc, const char * const argv[])
 
     // compile the graph
     GraphCompiler compiler(std::unique_ptr<const ImplementationStrategyFactory>(new ImplementationStrategyFactory));
-    const std::unique_ptr<CompiledGraph> graph = compiler.Compile(&softmax, inputDimensions);
+    const std::unique_ptr<CompiledGraph> graph = compiler.Compile(&combiner, inputDimensions);  // we compile combiner node
+                                                                                                // but we will ignore it afterwards
+                                                                                                // and get results from the sotmax nodes
 
     // prepare inputs
     DataBuffer dataX = { 1,2,3,4,
@@ -75,13 +89,16 @@ int main(int argc, const char * const argv[])
 
     // otbain result
     DataBuffer result(OutputDim);
+    DataBuffer result2(OutputDim);
     graph->GetNodeData(&softmax, result);
+    graph->GetNodeData(&softmax2, result2);
 
     // compute and return squared error
     float error = 0.0f;
     for (size_t i = 0; i < OutputDim; ++i)
     {
         error += std::pow(result[i] - expected[i], 2);
+        error += std::pow(result2[i] - expected[i], 2);
     }
     std::cout << "Error: " << error << std::endl;
 
