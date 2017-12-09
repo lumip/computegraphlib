@@ -26,15 +26,18 @@ void GraphCompilationPlatform::AssignMemoryBuffer(const ConstNodePtr node, Memor
     {
         // if the node is already assigned to a memory handle, we will have two merge the old and the new buffers:
         // - move all subscribers from the previous to the new buffer and clear the previous buffer (abandon it)
-        MemoryBuffer& oldBuffer = _memoryBuffers[GetNodeMemoryBuffer(node)];
-        MemoryBuffer& newBuffer = _memoryBuffers[memory];
-        newBuffer.Subscribers.insert(oldBuffer.Subscribers.cbegin(), oldBuffer.Subscribers.cend());
-        for (ConstNodePtr n : oldBuffer.Subscribers)
+        if (GetNodeMemoryBuffer(node) == memory) // .. but do nothing if we assign the same buffer again
         {
-            _nodeMemoryAssignments[n] = memory;
+            MemoryBuffer& oldBuffer = _memoryBuffers[GetNodeMemoryBuffer(node)];
+            MemoryBuffer& newBuffer = _memoryBuffers[memory];
+            newBuffer.Subscribers.insert(oldBuffer.Subscribers.cbegin(), oldBuffer.Subscribers.cend());
+            for (ConstNodePtr n : oldBuffer.Subscribers)
+            {
+                _nodeMemoryAssignments[n] = memory;
+            }
+            oldBuffer.Subscribers.clear();
+            oldBuffer.Dimensions = {0, 0};
         }
-        oldBuffer.Subscribers.clear();
-        oldBuffer.Dimensions = {0, 0};
     }
     else
     {
