@@ -90,5 +90,5 @@ int main(int argc, const char * const argv[])
 
     std::cout << "Computation on " << size << " elements took " << cycs_stop - cycs_start << " cycles in "<< time_stop - time_start << " ns and " << time_start - time_copy_start << " ns to copy input data" << std::endl;
 
-    return -1;
+    return 0;
 }
