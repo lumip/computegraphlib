@@ -65,7 +65,9 @@ int main(int argc, const char * const argv[])
     platform->ReserveMemoryBuffer(&testMultNode);
     platform->AllocateAllMemory();
 
-    // compile kernel for MatrixMultNode object
+    // compile kernels
+    i1.Compile(*platform);
+    i2.Compile(*platform);
     testMultNode.Compile(*platform);
 
     std::cout << "done setting up" << std::endl;

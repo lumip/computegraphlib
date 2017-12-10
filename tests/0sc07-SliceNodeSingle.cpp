@@ -30,7 +30,8 @@ float testSliceNode(const MemoryDimensions input1Dim, const InputDataBuffer& inp
     platform->ReserveMemoryBuffer(&sliceNode);
     platform->AllocateAllMemory();
 
-    // compile kernel for SliceNode object
+    // compile kernels
+    i1.Compile(*platform);
     sliceNode.Compile(*platform);
 
     // copy input data into node working memory (will usually be done by compiled kernels for InputNode if whole graph is run; testing only single node here)

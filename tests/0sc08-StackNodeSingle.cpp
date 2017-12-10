@@ -30,6 +30,7 @@ float testStackNode(const MemoryDimensions sliceDim, const std::vector<DataBuffe
         sliceInputs[i] = node;
         compilationMemoryMap.RegisterNodeMemory(node, sliceDim);
         platform->ReserveMemoryBuffer(node);
+        node->Compile(*platform);
     }
 
     // create, set up and compile StackNode

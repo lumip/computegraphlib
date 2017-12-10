@@ -38,7 +38,8 @@ int main(int argc, const char * const argv[])
     platform->ReserveMemoryBuffer(&expFuncNode);
     platform->AllocateAllMemory();
 
-    // compile kernel for ExpFuncNode object
+    // compile kernels
+    i1.Compile(*platform);
     expFuncNode.Compile(*platform);
 
     // copy input data into node working memory (will usually be done by compiled kernels for InputNode if whole graph is run; testing only single node here)

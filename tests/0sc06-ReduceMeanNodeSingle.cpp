@@ -30,7 +30,8 @@ float testReduceMeanNode(const MemoryDimensions input1Dim, const InputDataBuffer
     platform->ReserveMemoryBuffer(&reduceMeanNode);
     platform->AllocateAllMemory();
 
-    // compile kernel for ReduceMeanNode object
+    // compile kernels
+    i1.Compile(*platform);
     reduceMeanNode.Compile(*platform);
 
     // copy input data into node working memory (will usually be done by compiled kernels for InputNode if whole graph is run; testing only single node here)

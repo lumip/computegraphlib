@@ -34,7 +34,9 @@ float testVectorAddNode(const MemoryDimensions input1Dim, InputDataBuffer& input
     platform->ReserveMemoryBuffer(&testAddNode);
     platform->AllocateAllMemory();
 
-    // compile kernel for VectorAddNode object
+    // compile kernels
+    i1.Compile(*platform);
+    i2.Compile(*platform);
     testAddNode.Compile(*platform);
 
     // copy input data into node working memory (will usually be done by compiled kernels for InputNode if whole graph is run; testing only single node here)

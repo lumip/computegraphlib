@@ -34,7 +34,9 @@ float testVectorMultNode(const MemoryDimensions input1Dim, InputDataBuffer& inpu
     platform->ReserveMemoryBuffer(&testMultNode);
     platform->AllocateAllMemory();
 
-    // compile kernel for VectorMultNode object
+    // compile kernels
+    i1.Compile(*platform);
+    i2.Compile(*platform);
     testMultNode.Compile(*platform);
 
     // copy input data into node working memory (will usually be done by compiled kernels for InputNode if whole graph is run; testing only single node here)
