@@ -25,8 +25,8 @@ __kernel void main(__global float* vecA, __global float* vecB, __global float* v
 }
 )==kernel==";
 
-VectorMultNodeGPUKernel::VectorMultNodeGPUKernel(OpenCLCompiler& compiler, cl_command_queue queue, cl_mem memA, cl_mem memB, cl_mem memRes, MemoryDimensions dimA, MemoryDimensions dimB)
-    : _kernel(compiler.CompileKernel(KernelSource)), _queue(queue), _memA(memA), _memB(memB), _memRes(memRes), _dimA(dimA), _dimB(dimB)
+VectorMultNodeGPUKernel::VectorMultNodeGPUKernel(OpenCLCompiler& compiler, cl_command_queue queue, const GPUKernel::ConstList& inputKernels, cl_mem memA, cl_mem memB, cl_mem memRes, MemoryDimensions dimA, MemoryDimensions dimB)
+    : GPUKernel(queue, compiler.CompileKernel(KernelSource), inputKernels), _memA(memA), _memB(memB), _memRes(memRes), _dimA(dimA), _dimB(dimB)
 {
     assert(((_dimA.xDim == _dimB.xDim) && ((_dimA.yDim % _dimB.yDim == 0) || (_dimB.yDim % _dimA.yDim == 0))) ||
            ((_dimA.yDim == _dimB.yDim) && ((_dimA.xDim % _dimB.xDim == 0) || (_dimB.xDim % _dimA.xDim == 0))));
@@ -46,8 +46,11 @@ void VectorMultNodeGPUKernel::Run()
     clSetKernelArg(_kernel, 4, sizeof(cl_uint), &sizeBy);
     clSetKernelArg(_kernel, 5, sizeof(cl_uint), &sizeBx);
     size_t globalWorkSize[2] = { _dimA.yDim, _dimA.xDim };
+    std::vector<cl_event> inputEvents = GetNodeInputEvents();
+    cl_event ownEvent;
     OCLWrappers::CheckCLError(
-        clEnqueueNDRangeKernel(_queue, _kernel, 2, nullptr, globalWorkSize, nullptr, 0, nullptr, nullptr)
+        clEnqueueNDRangeKernel(_queue, _kernel, 2, nullptr, globalWorkSize, nullptr, inputEvents.size(), inputEvents.data(), &ownEvent)
     , "clEnqueueNDRangeKernel (for VectorMultNodeGPUKernel)");
-    // todo: can be optimized by having dump kernel (without any index computations, that get enqueue multiple times with modified arguments?
+    SetEvent(ownEvent);
+    // todo: can be optimized by having dumb kernel (without any index computations, that get enqueue multiple times with modified arguments?
 }

@@ -18,8 +18,8 @@ __kernel void main(__global float* memIn, __global float* memOut, uint offsetStr
 }
 )==kernel==";
 
-ReduceSumNodeGPUKernel::ReduceSumNodeGPUKernel(OpenCLCompiler& compiler, cl_command_queue queue, cl_mem memIn, cl_mem memOut, const MemoryDimensions dimIn, size_t axis)
-    : _kernel(compiler.CompileKernel(KernelSource)), _queue(queue), _memIn(memIn), _memOut(memOut), _dimIn(dimIn), _axis(axis)
+ReduceSumNodeGPUKernel::ReduceSumNodeGPUKernel(OpenCLCompiler& compiler, cl_command_queue queue, const GPUKernel::ConstList& inputKernels, cl_mem memIn, cl_mem memOut, const MemoryDimensions dimIn, size_t axis)
+    : GPUKernel(queue, compiler.CompileKernel(KernelSource), inputKernels), _memIn(memIn), _memOut(memOut), _dimIn(dimIn), _axis(axis)
 {
     assert(_axis == 0 || _axis == 1);
 }
@@ -46,7 +46,10 @@ void ReduceSumNodeGPUKernel::Run()
     clSetKernelArg(_kernel, 3, sizeof(cl_uint), &sumStride);
     clSetKernelArg(_kernel, 4, sizeof(cl_uint), &workSize);
     size_t globalWorkSize[2] = { workersCount };
+    std::vector<cl_event> inputEvents = GetNodeInputEvents();
+    cl_event ownEvent;
     OCLWrappers::CheckCLError(
-        clEnqueueNDRangeKernel(_queue, _kernel, 1, nullptr, globalWorkSize, nullptr, 0, nullptr, nullptr)
+        clEnqueueNDRangeKernel(_queue, _kernel, 1, nullptr, globalWorkSize, nullptr, inputEvents.size(), inputEvents.data(), &ownEvent)
     , "clEnqueueNDRangeKernel (for ReduceSumNodeGPUKernel)");
+    SetEvent(ownEvent);
 }

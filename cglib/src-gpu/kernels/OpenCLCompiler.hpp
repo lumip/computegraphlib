@@ -2,8 +2,12 @@
 #define _OPENCL_COMPILER_HPP_
 
 #include <string>
+#include <vector>
+#include <CL/cl.h>
 
-class OpenCLCompiler
+class GPUKernel;
+
+class OpenCLCompiler // rename to OpenCLRuntime ?
 {
 public:
     OpenCLCompiler() { }

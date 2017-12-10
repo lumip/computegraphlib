@@ -3,23 +3,21 @@
 
 #include <CL/cl.h>
 
-#include "Kernel.hpp"
+#include "GPUKernel.hpp"
 
 class OpenCLCompiler;
 
-class ReduceSumNodeGPUKernel : public Kernel
+class ReduceSumNodeGPUKernel : public GPUKernel
 {
 private:
     static const std::string KernelSource;
 private:
-    const cl_kernel _kernel;
-    const cl_command_queue _queue;
     const cl_mem _memIn;
     const cl_mem _memOut;
     const MemoryDimensions _dimIn;
     const size_t _axis;
 public:
-    ReduceSumNodeGPUKernel(OpenCLCompiler& compiler, cl_command_queue queue, cl_mem memIn, cl_mem memOut, const MemoryDimensions dimIn, size_t axis);
+    ReduceSumNodeGPUKernel(OpenCLCompiler& compiler, cl_command_queue queue, const GPUKernel::ConstList& inputKernels, cl_mem memIn, cl_mem memOut, const MemoryDimensions dimIn, size_t axis);
     virtual ~ReduceSumNodeGPUKernel();
     void Run();
 };

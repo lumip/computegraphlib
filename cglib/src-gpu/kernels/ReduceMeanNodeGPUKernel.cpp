@@ -2,9 +2,10 @@
 
 #include <assert.h>
 
-ReduceMeanNodeGPUKernel::ReduceMeanNodeGPUKernel(OpenCLCompiler& compiler, cl_command_queue queue, cl_mem memIn, cl_mem memOut, const MemoryDimensions dimIn, size_t axis)
-    : _reducSumNode(compiler, queue, memIn, memOut, dimIn, axis)
-    , _constDivNode(compiler, queue, memOut, memOut, 1.0f/static_cast<float>(dimIn.dims[axis]), dimIn.dims[1-axis])
+ReduceMeanNodeGPUKernel::ReduceMeanNodeGPUKernel(OpenCLCompiler& compiler, cl_command_queue queue, const GPUKernel::ConstList& inputKernels, cl_mem memIn, cl_mem memOut, const MemoryDimensions dimIn, size_t axis)
+    : GPUKernel(queue, 0, inputKernels)
+    , _reducSumNode(compiler, queue, inputKernels, memIn, memOut, dimIn, axis)
+    , _constDivNode(compiler, queue, inputKernels, memOut, memOut, 1.0f/static_cast<float>(dimIn.dims[axis]), dimIn.dims[1-axis])
 {
     assert(axis == 0 || axis == 1);
 }
@@ -15,4 +16,9 @@ void ReduceMeanNodeGPUKernel::Run()
 {
     _reducSumNode.Run();
     _constDivNode.Run();
+}
+
+cl_event ReduceMeanNodeGPUKernel::GetEvent() const
+{
+    return _constDivNode.GetEvent();
 }

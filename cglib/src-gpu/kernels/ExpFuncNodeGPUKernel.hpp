@@ -3,22 +3,20 @@
 
 #include <CL/cl.h>
 
-#include "Kernel.hpp"
+#include "GPUKernel.hpp"
 
 class OpenCLCompiler;
 
-class ExpFuncNodeGPUKernel : public Kernel
+class ExpFuncNodeGPUKernel : public GPUKernel
 {
 private:
     static const std::string KernelSource;
 private:
-    const cl_kernel _kernel;
-    const cl_command_queue _queue;
     const cl_mem _memIn;
     const cl_mem _memOut;
     const size_t _size;
 public:
-    ExpFuncNodeGPUKernel(OpenCLCompiler& compiler, cl_command_queue queue, cl_mem memIn, cl_mem memOut,  size_t size);
+    ExpFuncNodeGPUKernel(OpenCLCompiler& compiler, cl_command_queue queue, const GPUKernel::ConstList& inputKernels, cl_mem memIn, cl_mem memOut,  size_t size);
     ~ExpFuncNodeGPUKernel();
     void Run();
 };

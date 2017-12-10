@@ -18,6 +18,7 @@ GraphCompilationGPUPlatform::GraphCompilationGPUPlatform(const CompilationMemory
     , _clKernels()
     , _executionFinishedEvent()
     , _isRunning(false)
+    , _nodeKernels()
 {
 }
 
@@ -39,8 +40,12 @@ cl_device_id GraphCompilationGPUPlatform::SelectDevice()
 OCLWrappers::Queue GraphCompilationGPUPlatform::CreateCommandQueue()
 {
     cl_int status = CL_SUCCESS;
-    // todo: set cl_queue_properties
-    OCLWrappers::Queue queue = clCreateCommandQueueWithProperties(_clContext.get(), _clDevice, nullptr, &status);
+    cl_queue_properties queueProperties[] =
+    {
+        CL_QUEUE_PROPERTIES,
+        (cl_queue_properties)CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, 0
+    };
+    OCLWrappers::Queue queue = clCreateCommandQueueWithProperties(_clContext.get(), _clDevice, queueProperties, &status);
     OCLWrappers::CheckCLError(status, "clCreateCommandQueue");
     return queue;
 }
@@ -179,4 +184,9 @@ cl_kernel GraphCompilationGPUPlatform::CompileKernel(const std::string& kernelSo
     _clKernels[kernelSource] = std::move(kernel);
     _clPrograms.push_back(std::move(program)); // if all checks go well, store handle of program. if not, it will be released automatically upon method exit
     return clKernel;
+}
+
+GPUKernel const* GraphCompilationGPUPlatform::GetNodeKernel(ConstNodePtr node) const
+{
+    return _nodeKernels.at(node);
 }
