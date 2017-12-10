@@ -1,6 +1,7 @@
 #include "nodes/InputNode.hpp"
 
 #include "CompilationMemoryMap.hpp"
+#include "GraphCompilationPlatform.hpp"
 
 InputNode::InputNode(std::string name)
     : Node(true, true)
@@ -22,6 +23,7 @@ std::string InputNode::ToString() const
 
 void InputNode::Compile(GraphCompilationPlatform& platform) const
 {
+    platform.CompileInputNode(this);
 }
 
 void InputNode::GetMemoryDimensions(CompilationMemoryMap& memoryMap) const
