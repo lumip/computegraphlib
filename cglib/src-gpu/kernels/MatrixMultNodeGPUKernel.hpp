@@ -1,9 +1,9 @@
 #ifndef _MATRIX_MULT_NODE_GPU_KERNEL_HPP_
 #define _MATRIX_MULT_NODE_GPU_KERNEL_HPP_
 
-#include "Kernel.hpp"
+#include <CL/cl.h>
 
-#include "../OCLWrappers.hpp"
+#include "Kernel.hpp"
 
 class OpenCLCompiler;
 
@@ -12,7 +12,7 @@ class MatrixMultNodeGPUKernel : public Kernel
 private:
     static const std::string KernelSource;
 private:
-    const OCLWrappers::Kernel _kernel;
+    const cl_kernel _kernel;
     const cl_command_queue _queue;
     const cl_mem _memA;
     const cl_mem _memB;

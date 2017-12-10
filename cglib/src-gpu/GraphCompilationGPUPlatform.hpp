@@ -25,7 +25,8 @@ private:
     const OCLWrappers::Queue _clExecutionQueue;
     std::vector<std::unique_ptr<Kernel>> _kernels;
     std::vector<OCLWrappers::Memory> _memoryBufferLocations;
-    std::vector<OCLWrappers::Program> _programs;
+    std::vector<OCLWrappers::Program> _clPrograms;
+    std::map<std::string, OCLWrappers::Kernel> _clKernels;
 private:
     cl_device_id SelectDevice();
     OCLWrappers::Queue CreateCommandQueue();
@@ -37,7 +38,7 @@ public:
     void CopyOutputData(const ConstNodePtr outputNode, DataBuffer& outputBuffer) const;
     void CopyInputData(const ConstNodePtr inputNode, InputDataBuffer& inputBuffer);
     void Evaluate();
-    OCLWrappers::Kernel CompileKernel(const std::string& kernelSource);
+    cl_kernel CompileKernel(const std::string& kernelSource);
 
     void CompileConstMultNode(const ConstMultNode* const node);
     void CompileExpFuncNode(const ExpFuncNode* const node);

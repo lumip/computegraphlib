@@ -14,7 +14,8 @@ GraphCompilationGPUPlatform::GraphCompilationGPUPlatform(const CompilationMemory
     , _clExecutionQueue(CreateCommandQueue())
     , _kernels()
     , _memoryBufferLocations()
-    , _programs()
+    , _clPrograms()
+    , _clKernels()
 {
 }
 
@@ -104,8 +105,12 @@ void GraphCompilationGPUPlatform::Evaluate()
     }
 }
 
-OCLWrappers::Kernel GraphCompilationGPUPlatform::CompileKernel(const std::string& kernelSource)
+cl_kernel GraphCompilationGPUPlatform::CompileKernel(const std::string& kernelSource)
 {
+    if (_clKernels.find(kernelSource) != _clKernels.end())
+    {
+        return _clKernels[kernelSource].get();
+    }
     size_t length = kernelSource.length();
     const char* s = kernelSource.c_str();
     const char** sources = &s;
@@ -129,6 +134,8 @@ OCLWrappers::Kernel GraphCompilationGPUPlatform::CompileKernel(const std::string
     }
     OCLWrappers::Kernel kernel = clCreateKernel(program.get(), "main", &status);
     OCLWrappers::CheckCLError(status, "clCreateKernel");
-    _programs.emplace_back(std::move(program)); // if all checks go well, store handle of program. if not, it will be released automatically upon method exit
-    return kernel;
+    const cl_kernel clKernel = kernel.get();
+    _clKernels[kernelSource] = std::move(kernel);
+    _clPrograms.push_back(std::move(program)); // if all checks go well, store handle of program. if not, it will be released automatically upon method exit
+    return clKernel;
 }

@@ -3,6 +3,7 @@
 #include <assert.h>
 
 #include "OpenCLCompiler.hpp"
+#include "../OCLWrappers.hpp"
 
 const std::string CopyDataGPUKernel::KernelSource = R"==kernel==(
 __kernel void main(__global float* memIn, __global float* memOut, uint offsetIn, uint offsetOut, uint strideIn, uint strideOut)
@@ -20,14 +21,14 @@ CopyDataGPUKernel::~CopyDataGPUKernel() { }
 
 void CopyDataGPUKernel::Run()
 {
-    clSetKernelArg(_kernel.get(), 0, sizeof(cl_mem), &_memIn);
-    clSetKernelArg(_kernel.get(), 1, sizeof(cl_mem), &_memOut);
-    clSetKernelArg(_kernel.get(), 2, sizeof(cl_uint), &_offsetIn);
-    clSetKernelArg(_kernel.get(), 3, sizeof(cl_uint), &_offsetOut);
-    clSetKernelArg(_kernel.get(), 4, sizeof(cl_uint), &_strideIn);
-    clSetKernelArg(_kernel.get(), 5, sizeof(cl_uint), &_strideOut);
+    clSetKernelArg(_kernel, 0, sizeof(cl_mem), &_memIn);
+    clSetKernelArg(_kernel, 1, sizeof(cl_mem), &_memOut);
+    clSetKernelArg(_kernel, 2, sizeof(cl_uint), &_offsetIn);
+    clSetKernelArg(_kernel, 3, sizeof(cl_uint), &_offsetOut);
+    clSetKernelArg(_kernel, 4, sizeof(cl_uint), &_strideIn);
+    clSetKernelArg(_kernel, 5, sizeof(cl_uint), &_strideOut);
     size_t globalWorkSize[1] = { _count };
     OCLWrappers::CheckCLError(
-        clEnqueueNDRangeKernel(_queue, _kernel.get(), 1, nullptr, globalWorkSize, nullptr, 0, nullptr, nullptr)
+        clEnqueueNDRangeKernel(_queue, _kernel, 1, nullptr, globalWorkSize, nullptr, 0, nullptr, nullptr)
     , "clEnqueueNDRangeKernel (for CopyDataGPUKernel)");
 }

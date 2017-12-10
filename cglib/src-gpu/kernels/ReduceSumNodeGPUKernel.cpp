@@ -3,6 +3,7 @@
 #include <assert.h>
 
 #include "OpenCLCompiler.hpp"
+#include "../OCLWrappers.hpp"
 
 const std::string ReduceSumNodeGPUKernel::KernelSource = R"==kernel==(
 __kernel void main(__global float* memIn, __global float* memOut, uint offsetStride, uint sumStride, uint count)
@@ -39,13 +40,13 @@ void ReduceSumNodeGPUKernel::Run()
         std::swap(workersCount, workSize);
     }
 
-    clSetKernelArg(_kernel.get(), 0, sizeof(cl_mem), &_memIn);
-    clSetKernelArg(_kernel.get(), 1, sizeof(cl_mem), &_memOut);
-    clSetKernelArg(_kernel.get(), 2, sizeof(cl_uint), &offsetStride);
-    clSetKernelArg(_kernel.get(), 3, sizeof(cl_uint), &sumStride);
-    clSetKernelArg(_kernel.get(), 4, sizeof(cl_uint), &workSize);
+    clSetKernelArg(_kernel, 0, sizeof(cl_mem), &_memIn);
+    clSetKernelArg(_kernel, 1, sizeof(cl_mem), &_memOut);
+    clSetKernelArg(_kernel, 2, sizeof(cl_uint), &offsetStride);
+    clSetKernelArg(_kernel, 3, sizeof(cl_uint), &sumStride);
+    clSetKernelArg(_kernel, 4, sizeof(cl_uint), &workSize);
     size_t globalWorkSize[2] = { workersCount };
     OCLWrappers::CheckCLError(
-        clEnqueueNDRangeKernel(_queue, _kernel.get(), 1, nullptr, globalWorkSize, nullptr, 0, nullptr, nullptr)
+        clEnqueueNDRangeKernel(_queue, _kernel, 1, nullptr, globalWorkSize, nullptr, 0, nullptr, nullptr)
     , "clEnqueueNDRangeKernel (for ReduceSumNodeGPUKernel)");
 }

@@ -3,6 +3,7 @@
 #include <assert.h>
 
 #include "OpenCLCompiler.hpp"
+#include "../OCLWrappers.hpp"
 
 const std::string VectorDivNodeGPUKernel::KernelSource = R"==kernel==(
 uint getIndex(uint y, uint x, uint stride)
@@ -38,15 +39,15 @@ void VectorDivNodeGPUKernel::Run()
     const cl_uint sizeAx = static_cast<cl_uint>(_dimA.xDim);
     const cl_uint sizeBy = static_cast<cl_uint>(_dimB.yDim);
     const cl_uint sizeBx = static_cast<cl_uint>(_dimB.xDim);
-    clSetKernelArg(_kernel.get(), 0, sizeof(cl_mem), &_memA);
-    clSetKernelArg(_kernel.get(), 1, sizeof(cl_mem), &_memB);
-    clSetKernelArg(_kernel.get(), 2, sizeof(cl_mem), &_memRes);
-    clSetKernelArg(_kernel.get(), 3, sizeof(cl_uint), &sizeAx);
-    clSetKernelArg(_kernel.get(), 4, sizeof(cl_uint), &sizeBy);
-    clSetKernelArg(_kernel.get(), 5, sizeof(cl_uint), &sizeBx);
+    clSetKernelArg(_kernel, 0, sizeof(cl_mem), &_memA);
+    clSetKernelArg(_kernel, 1, sizeof(cl_mem), &_memB);
+    clSetKernelArg(_kernel, 2, sizeof(cl_mem), &_memRes);
+    clSetKernelArg(_kernel, 3, sizeof(cl_uint), &sizeAx);
+    clSetKernelArg(_kernel, 4, sizeof(cl_uint), &sizeBy);
+    clSetKernelArg(_kernel, 5, sizeof(cl_uint), &sizeBx);
     size_t globalWorkSize[2] = { _dimA.yDim, _dimA.xDim };
     OCLWrappers::CheckCLError(
-        clEnqueueNDRangeKernel(_queue, _kernel.get(), 2, nullptr, globalWorkSize, nullptr, 0, nullptr, nullptr)
+        clEnqueueNDRangeKernel(_queue, _kernel, 2, nullptr, globalWorkSize, nullptr, 0, nullptr, nullptr)
     , "clEnqueueNDRangeKernel (for VectorDivNodeGPUKernel)");
     // todo: can be optimized by having dump kernel (without any index computations, that get enqueue multiple times with modified arguments?
 }

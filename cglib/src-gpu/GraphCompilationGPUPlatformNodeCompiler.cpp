@@ -175,7 +175,7 @@ void GraphCompilationGPUPlatform::CompileStackNode(const StackNode* const node)
     {
         const MemoryHandle inputBuffer = GetMemoryLocation(inputs[i]);
         _kernels.emplace_back(
-            new CopyDataGPUKernel(*this,            // todo: this will result in compiling and storing i copies of the kernel. should this be avoided?
+            new CopyDataGPUKernel(*this,
                                   _clExecutionQueue.get(),
                                   inputBuffer,
                                   resultBuffer,
@@ -195,7 +195,7 @@ void GraphCompilationGPUPlatform::CompileTransposeNode(const TransposeNode* cons
     for (size_t i = 0; i < inputDims.yDim; ++i)
     {
         _kernels.emplace_back(
-            new CopyDataGPUKernel(*this,            // todo: this will result in compiling and storing i copies of the kernel. should this be avoided?
+            new CopyDataGPUKernel(*this,
                                   _clExecutionQueue.get(),
                                   inputBuffer,
                                   resultBuffer,

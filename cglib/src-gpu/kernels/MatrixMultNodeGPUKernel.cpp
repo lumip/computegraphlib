@@ -3,6 +3,7 @@
 #include <assert.h>
 
 #include "OpenCLCompiler.hpp"
+#include "../OCLWrappers.hpp"
 
 const std::string MatrixMultNodeGPUKernel::KernelSource = R"==kernel==(
 __kernel void main(__global float* matA, __global float* matB, __global float* matResult, uint dim)
@@ -28,12 +29,12 @@ MatrixMultNodeGPUKernel::~MatrixMultNodeGPUKernel() { }
 
 void MatrixMultNodeGPUKernel::Run()
 {
-    clSetKernelArg(_kernel.get(), 0, sizeof(cl_mem), &_memA);
-    clSetKernelArg(_kernel.get(), 1, sizeof(cl_mem), &_memB);
-    clSetKernelArg(_kernel.get(), 2, sizeof(cl_mem), &_memRes);
-    clSetKernelArg(_kernel.get(), 3, sizeof(cl_uint), &_d);
+    clSetKernelArg(_kernel, 0, sizeof(cl_mem), &_memA);
+    clSetKernelArg(_kernel, 1, sizeof(cl_mem), &_memB);
+    clSetKernelArg(_kernel, 2, sizeof(cl_mem), &_memRes);
+    clSetKernelArg(_kernel, 3, sizeof(cl_uint), &_d);
     size_t globalWorkSize[2] = { _m, _n };
     OCLWrappers::CheckCLError(
-        clEnqueueNDRangeKernel(_queue, _kernel.get(), 2, nullptr, globalWorkSize, nullptr, 0, nullptr, nullptr)
+        clEnqueueNDRangeKernel(_queue, _kernel, 2, nullptr, globalWorkSize, nullptr, 0, nullptr, nullptr)
     , "clEnqueueNDRangeKernel (for MatrixMultNodeGPUKernel)");
 }

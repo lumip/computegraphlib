@@ -2,10 +2,10 @@
 #define _REDUCE_MEAN_NODE_GPU_KERNEL_HPP_
 
 #include <memory>
+#include <CL/cl.h>
 
 #include "Kernel.hpp"
 
-#include "../OCLWrappers.hpp"
 #include "ConstMultNodeGPUKernel.hpp"
 #include "ReduceSumNodeGPUKernel.hpp"
 
