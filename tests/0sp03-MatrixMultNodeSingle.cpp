@@ -55,6 +55,8 @@ int main(int argc, const char * const argv[])
     CompilationMemoryMap CompilationMemoryMap(inputDimensions);
     std::unique_ptr<GraphCompilationPlatform> platform = fact.CreateGraphCompilationTargetStrategy(CompilationMemoryMap);
 
+    long long time_setup_start = PAPI_get_real_nsec();
+
     // set up working memory for input nodes (will usually be done during compilation if whole graph is compiled; testing only single node here)
     CompilationMemoryMap.RegisterNodeMemory(&i1, dims1);
     CompilationMemoryMap.RegisterNodeMemory(&i2, dims2);
@@ -70,10 +72,9 @@ int main(int argc, const char * const argv[])
     i2.Compile(*platform);
     testMultNode.Compile(*platform);
 
+    long long time_setup_stop = PAPI_get_real_nsec();
     std::cout << "done setting up" << std::endl;
-
-    std::cout << "copying data and running computation" << std::endl;
-
+    std::cout << "copying data" << std::endl;
     long long time_copy_start = PAPI_get_real_nsec();
 
     // copy input data into node working memory (will usually be done by compiled kernels for InputNode if whole graph is run; testing only single node here)
@@ -81,17 +82,16 @@ int main(int argc, const char * const argv[])
     platform->CopyInputData(&i2, input2);
     platform->WaitUntilDataTransferFinished();
 
+    long long time_copy_stop = PAPI_get_real_nsec();
+    std::cout << "running computation" << std::endl;
     long long time_start = PAPI_get_real_nsec();
-    long long cycs_start = PAPI_get_real_cyc();
 
     // run compiled kernel
     platform->Evaluate();
     platform->WaitUntilEvaluationFinished();
 
-    long long cycs_stop = PAPI_get_real_cyc();
     long long time_stop = PAPI_get_real_nsec();
 
-    std::cout << "Computation on " << size << " elements took " << cycs_stop - cycs_start << " cycles in "<< time_stop - time_start << " ns and " << time_start - time_copy_start << " ns to copy input data" << std::endl;
-
+    std::cout << "Setup: " << time_setup_stop - time_setup_start << " ns; Copy: "<< time_copy_stop - time_copy_start << " ns; Compute: " << time_stop - time_start << " ns" << std::endl;
     return 0;
 }

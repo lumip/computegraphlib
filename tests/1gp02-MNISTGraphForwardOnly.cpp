@@ -2,6 +2,7 @@
 #include <algorithm>
 
 #include <mnist/mnist_reader.hpp>
+#include <papi.h>
 
 #include "types.hpp"
 #include "nodes/nodes.hpp"
@@ -67,8 +68,10 @@ int main(int argc, const char * const argv[])
     inputDimensions.emplace("Bias", MemoryDimensions({1, OutputDim}));
     inputDimensions.emplace("Classes", MemoryDimensions({BatchSize, OutputDim}));
 
+    long long time_setup_start = PAPI_get_real_nsec();
     GraphCompiler compiler(std::unique_ptr<const ImplementationStrategyFactory>(new ImplementationStrategyFactory));
     const std::unique_ptr<CompiledGraph> graph = compiler.Compile(&loss, inputDimensions);
+    long long time_setup_stop = PAPI_get_real_nsec();
 
     DataBuffer imgInputData(BatchSize * InputDim);
     DataBuffer classesInputData(BatchSize * OutputDim);
@@ -97,12 +100,16 @@ int main(int argc, const char * const argv[])
     inputDataMap.emplace("ImgBatch", imgInputData);
     inputDataMap.emplace("Classes", classesInputData);
 
+    long long time_start = PAPI_get_real_nsec();
     graph->Evaluate(inputDataMap);
+    long long time_stop = PAPI_get_real_nsec();
 
     DataBuffer lossOutput(1);
     graph->GetNodeData(&loss, lossOutput);
     std::cout << lossOutput.size() << std::endl;
     std::cout << "Loss: " << lossOutput[0] << std::endl;
+
+    std::cout << "Setup: " << time_setup_stop - time_setup_start << " ns; Copy: -1 ns; Compute+Copy: " << time_stop - time_start << " ns" << std::endl;
 
     return 0;
 }

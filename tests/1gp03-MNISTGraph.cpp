@@ -3,6 +3,7 @@
 #include <assert.h>
 
 #include <mnist/mnist_reader.hpp>
+#include <papi.h>
 
 #include "types.hpp"
 #include "nodes/nodes.hpp"
@@ -202,8 +203,10 @@ int main(int argc, const char * const argv[])
     variableDimensions.emplace("Bias", MemoryDimensions({1, OutputDim}));
     variableDimensions.emplace("Classes", MemoryDimensions({BatchSize, OutputDim}));
 
+    long long time_setup_start = PAPI_get_real_nsec();
     GraphCompiler compiler(std::unique_ptr<const ImplementationStrategyFactory>(new ImplementationStrategyFactory));
     const std::unique_ptr<CompiledGraph> graph = compiler.Compile(loss, variableDimensions);
+    long long time_setup_stop = PAPI_get_real_nsec();
 
     // ####### initialize variables with zero values #######
     DataBuffer weightsData(InputDim * OutputDim);
@@ -228,6 +231,7 @@ int main(int argc, const char * const argv[])
     inputDataMap.emplace("Classes", classesInputData);
 
     // ####### run training iterations until loss converges #######
+    long long time_start = PAPI_get_real_nsec();
     float previousLoss = std::numeric_limits<float>::infinity();
     float currentLoss = std::numeric_limits<float>::infinity();
     DataBuffer lossOutput(1);
@@ -250,6 +254,7 @@ int main(int argc, const char * const argv[])
         currentLoss = epochLoss / static_cast<float>(epochBatchCount);
         std::cout << "Loss: " << currentLoss << std::endl;
     } while (previousLoss - currentLoss > StopThreshold);
+    long long time_stop = PAPI_get_real_nsec();
 
 
     // ######################### EVALUATION #########################
@@ -299,5 +304,6 @@ int main(int argc, const char * const argv[])
     float ratio = static_cast<float>(correct) / static_cast<float>(TestSampleCount);
     std::cout << correct << " / " << TestSampleCount << " (" << ratio << ") classifications are correct." << std::endl;
 
+    std::cout << "Setup: " << time_setup_stop - time_setup_start << " ns; Copy: -1 ns; Compute+Copy: " << time_stop - time_start << " ns" << std::endl;
     return 0;
 }

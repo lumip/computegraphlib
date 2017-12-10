@@ -3,6 +3,8 @@
 #include <random>
 #include <assert.h>
 
+#include <papi.h>
+
 #include "types.hpp"
 #include "nodes/nodes.hpp"
 #include "CompilationMemoryMap.hpp"
@@ -52,8 +54,10 @@ int main(int argc, const char * const argv[])
     inputDimensions.emplace("y", MemoryDimensions({sharedDim, yDim}));
 
     // compile the graph
+    long long time_setup_start = PAPI_get_real_nsec();
     GraphCompiler compiler(std::unique_ptr<const ImplementationStrategyFactory>(new ImplementationStrategyFactory));
     const std::unique_ptr<CompiledGraph> graph = compiler.Compile(finalNode, inputDimensions);
+    long long time_setup_stop = PAPI_get_real_nsec();
 
     // prepare inputs
     DataBuffer xData(xDim * sharedDim);
@@ -73,7 +77,11 @@ int main(int argc, const char * const argv[])
 
     std::cout << "evaluating graph" << std::endl;
     // evaluate graph
+    long long time_start = PAPI_get_real_nsec();
     graph->Evaluate(inputDataMap);
+    long long time_stop = PAPI_get_real_nsec();
+
+    std::cout << "Setup: " << time_setup_stop - time_setup_start << " ns; Copy: -1 ns; Compute+Copy: " << time_stop - time_start << " ns" << std::endl;
 
     return 0;
 }
