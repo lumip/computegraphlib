@@ -2,6 +2,7 @@
 #define _GRAPH_COMPILATION_GPU_STRATEGY_HPP_
 
 #include <memory>
+#include <atomic>
 
 #include <CL/cl.h>
 
@@ -27,6 +28,8 @@ private:
     std::vector<OCLWrappers::Memory> _memoryBufferLocations;
     std::vector<OCLWrappers::Program> _clPrograms;
     std::map<std::string, OCLWrappers::Kernel> _clKernels;
+    OCLWrappers::Event _executionFinishedEvent;
+    std::atomic<bool> _isRunning; // used in (asynchronous) OpenCL callback
 private:
     cl_device_id SelectDevice();
     OCLWrappers::Queue CreateCommandQueue();
@@ -38,6 +41,9 @@ public:
     void CopyOutputData(const ConstNodePtr outputNode, DataBuffer& outputBuffer) const;
     void CopyInputData(const ConstNodePtr inputNode, InputDataBuffer& inputBuffer);
     void Evaluate();
+    bool IsEvaluating() const;
+    void WaitUntilEvaluationFinished() const;
+
     cl_kernel CompileKernel(const std::string& kernelSource);
 
     void CompileConstMultNode(const ConstMultNode* const node);

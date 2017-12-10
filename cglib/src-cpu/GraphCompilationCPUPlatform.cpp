@@ -65,3 +65,10 @@ void GraphCompilationCPUPlatform::Evaluate()
         kernel->Run();
     }
 }
+
+bool GraphCompilationCPUPlatform::IsEvaluating() const
+{
+    return false;
+}
+
+void GraphCompilationCPUPlatform::WaitUntilEvaluationFinished() const { }

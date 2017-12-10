@@ -23,6 +23,16 @@ void CompiledGraph::Evaluate(const InputDataMap& inputData)
     _platform->Evaluate();
 }
 
+bool CompiledGraph::IsEvaluating() const
+{
+    return _platform->IsEvaluating();
+}
+
+void CompiledGraph::WaitUntilFinished() const
+{
+    _platform->WaitUntilEvaluationFinished();
+}
+
 void CompiledGraph::InitializeVariables(const InputDataMap& inputData)
 {
     for (auto input : inputData)

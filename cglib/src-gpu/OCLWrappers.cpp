@@ -122,12 +122,19 @@ namespace OCLWrappers
         return get();
     }
 
+    template<typename T, cl_int(*releaseFct)(T)>
+    bool Wrapper<T, releaseFct>::valid() const
+    {
+        return _owning;
+    }
+
     template class Wrapper<cl_mem, clReleaseMemObject>;
     template class Wrapper<cl_context, clReleaseContext>;
     template class Wrapper<cl_device_id, clReleaseDevice>;
     template class Wrapper<cl_command_queue, clReleaseCommandQueue>;
     template class Wrapper<cl_kernel, clReleaseKernel>;
     template class Wrapper<cl_program, clReleaseProgram>;
+    template class Wrapper<cl_event, clReleaseEvent>;
 
 
 

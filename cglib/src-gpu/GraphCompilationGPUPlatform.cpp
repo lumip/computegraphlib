@@ -16,6 +16,8 @@ GraphCompilationGPUPlatform::GraphCompilationGPUPlatform(const CompilationMemory
     , _memoryBufferLocations()
     , _clPrograms()
     , _clKernels()
+    , _executionFinishedEvent()
+    , _isRunning(false)
 {
 }
 
@@ -99,10 +101,44 @@ void GraphCompilationGPUPlatform::Evaluate()
 {
     clFinish(_clMemoryQueue.get());
     clFinish(_clExecutionQueue.get()); // make sure that all memory copy and previous executions have finished
+    _isRunning = true;
     for (const std::unique_ptr<Kernel>& kernel : _kernels)
     {
         kernel->Run();
     }
+    cl_event rawEvent;
+    OCLWrappers::CheckCLError(
+        clEnqueueMarkerWithWaitList(_clExecutionQueue.get(), 0, nullptr, &rawEvent)
+    , "clEnqueueMarkerWithWaitList");
+    _executionFinishedEvent = OCLWrappers::Event(rawEvent);
+    OCLWrappers::CheckCLError( // set callback to set _isRunning to false. would rather retrieve completion status from event but that does not seem to work..
+        clSetEventCallback(rawEvent, CL_COMPLETE,
+            [](cl_event, cl_int, void* isRunning){*reinterpret_cast<std::atomic<bool>*>(isRunning) = false;}, &(this->_isRunning))
+    , "clSetEventCallback");
+    // note: OpenCL docs state that callback might occur asynchronously and should be thread-safe.
+}
+
+bool GraphCompilationGPUPlatform::IsEvaluating() const
+{
+    return _isRunning;
+    // the clGetEventInfo method apparently just returns generic error "Out of resources" after evaluation completes
+    // so it is not a reliable information source here... have to resort to status variable and completion callback
+    /*if (!_executionFinishedEvent.valid())
+    {
+        return false;
+    }
+    cl_int eventStatus;
+    OCLWrappers::CheckCLError(
+        clGetEventInfo(_executionFinishedEvent.get(), CL_EVENT_COMMAND_EXECUTION_STATUS, sizeof(eventStatus), &eventStatus, nullptr)
+    , "clGetEventInfo");
+    return !(eventStatus == CL_COMPLETE);*/
+}
+
+void GraphCompilationGPUPlatform::WaitUntilEvaluationFinished() const
+{
+    cl_event eventList[1] = { _executionFinishedEvent.get() };
+    OCLWrappers::CheckCLError(clWaitForEvents(1, eventList), "clWaitForEvents");
+    while (_isRunning) {} // have to wait until callback occured so that IsEvaluating gives consistent result.....
 }
 
 cl_kernel GraphCompilationGPUPlatform::CompileKernel(const std::string& kernelSource)

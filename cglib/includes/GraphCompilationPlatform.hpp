@@ -47,6 +47,8 @@ public:
     virtual void CopyOutputData(const ConstNodePtr outputNode, DataBuffer& outputBuffer) const = 0;
     virtual void CopyInputData(const ConstNodePtr inputNode, InputDataBuffer& inputBuffer) = 0;
     virtual void Evaluate() = 0;
+    virtual bool IsEvaluating() const = 0;
+    virtual void WaitUntilEvaluationFinished() const = 0;
 
     /* todo: remove all graph-specific compilation state from out of this class. make it truly just a "platform" which can be reused */
 

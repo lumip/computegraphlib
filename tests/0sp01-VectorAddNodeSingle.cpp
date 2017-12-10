@@ -81,6 +81,7 @@ int main(int argc, const char * const argv[])
 
     // run compiled kernel
     platform->Evaluate();
+    platform->WaitUntilEvaluationFinished();
 
     long long cycs_stop = PAPI_get_real_cyc();
     long long time_stop = PAPI_get_real_nsec();
