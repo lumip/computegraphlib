@@ -26,6 +26,7 @@ public:
     void Evaluate();
     bool IsEvaluating() const;
     void WaitUntilEvaluationFinished() const;
+    void WaitUntilDataTransferFinished() const;
 
     void CompileConstMultNode(const ConstMultNode* const node);
     void CompileExpFuncNode(const ExpFuncNode* const node);

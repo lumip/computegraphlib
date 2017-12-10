@@ -72,3 +72,5 @@ bool GraphCompilationCPUPlatform::IsEvaluating() const
 }
 
 void GraphCompilationCPUPlatform::WaitUntilEvaluationFinished() const { }
+
+void GraphCompilationCPUPlatform::WaitUntilDataTransferFinished() const { }

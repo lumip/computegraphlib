@@ -49,6 +49,7 @@ public:
     virtual void Evaluate() = 0;
     virtual bool IsEvaluating() const = 0;
     virtual void WaitUntilEvaluationFinished() const = 0;
+    virtual void WaitUntilDataTransferFinished() const = 0;
 
     /* todo: remove all graph-specific compilation state from out of this class. make it truly just a "platform" which can be reused */
 

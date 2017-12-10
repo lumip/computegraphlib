@@ -141,6 +141,11 @@ void GraphCompilationGPUPlatform::WaitUntilEvaluationFinished() const
     while (_isRunning) {} // have to wait until callback occured so that IsEvaluating gives consistent result.....
 }
 
+void GraphCompilationGPUPlatform::WaitUntilDataTransferFinished() const
+{
+    clFinish(_clMemoryQueue.get());
+}
+
 cl_kernel GraphCompilationGPUPlatform::CompileKernel(const std::string& kernelSource)
 {
     if (_clKernels.find(kernelSource) != _clKernels.end())

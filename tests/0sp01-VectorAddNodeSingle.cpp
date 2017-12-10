@@ -75,6 +75,7 @@ int main(int argc, const char * const argv[])
     // copy input data into node working memory (will usually be done by compiled kernels for InputNode if whole graph is run; testing only single node here)
     platform->CopyInputData(&i1, input1);
     platform->CopyInputData(&i2, input2);
+    platform->WaitUntilDataTransferFinished();
 
     long long time_start = PAPI_get_real_nsec();
     long long cycs_start = PAPI_get_real_cyc();
