@@ -61,3 +61,8 @@ void CompiledGraph::SetNodeData(const ConstNodePtr node, float const* inputBuffe
 {
     _platform->CopyInputData(node, inputBuffer);
 }
+
+float* CompiledGraph::GetMappedInputBuffer(std::string const& inputName)
+{
+    return _platform->GetMappedInputBuffer(inputName);
+}

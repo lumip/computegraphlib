@@ -9,8 +9,7 @@ GraphCompilationCPUPlatform::GraphCompilationCPUPlatform(const CompilationMemory
     :  GraphCompilationPlatform(compilationMemoryMap)
     , _kernels()
     , _memoryBufferLocations()
-{
-}
+{ }
 
 GraphCompilationCPUPlatform::~GraphCompilationCPUPlatform() { }
 
@@ -32,29 +31,22 @@ void GraphCompilationCPUPlatform::AllocateAllMemory()
     }
 }
 
-/*void GraphCompilationCPUStrategy::DeallocateMemory(const NodeMemoryHandle mem)
-{
-    delete[] reinterpret_cast<float* const>(mem);
-}*/
-
-/*void GraphCompilationCPUStrategy::EnqueueKernel(std::unique_ptr<Kernel>&& kernel)
-{
-    _kernels.emplace_back(std::move(kernel));
-}*/
-
 void GraphCompilationCPUPlatform::CopyOutputData(const ConstNodePtr outputNode, float* outputBuffer) const
 {
     MemoryDimensions dims = _dimensionsMap.GetNodeMemoryDimensions(outputNode);
     size_t size = dims.size();
-    MemoryHandle nodeMemBuffer = _memoryBufferLocations[GetNodeMemoryBuffer(outputNode)].get();
+    MemoryHandle nodeMemBuffer = GetMemoryLocation(outputNode);
     std::copy(nodeMemBuffer, (nodeMemBuffer + size), outputBuffer);
 }
 
 void GraphCompilationCPUPlatform::CopyInputData(const ConstNodePtr inputNode, float const* inputBuffer)
 {
     MemoryDimensions dims = _dimensionsMap.GetNodeMemoryDimensions(inputNode);
-    MemoryHandle nodeMemBuffer = _memoryBufferLocations[GetNodeMemoryBuffer(inputNode)].get();
-    std::copy(inputBuffer, inputBuffer + dims.size(), nodeMemBuffer);
+    MemoryHandle nodeMemBuffer = GetMemoryLocation(inputNode);
+    if (inputBuffer != nodeMemBuffer)
+    {
+        std::copy(inputBuffer, inputBuffer + dims.size(), nodeMemBuffer);
+    }
 }
 
 void GraphCompilationCPUPlatform::Evaluate()
@@ -73,3 +65,18 @@ bool GraphCompilationCPUPlatform::IsEvaluating() const
 void GraphCompilationCPUPlatform::WaitUntilEvaluationFinished() const { }
 
 void GraphCompilationCPUPlatform::WaitUntilDataTransferFinished() const { }
+
+float* GraphCompilationCPUPlatform::GetMappedInputBuffer(std::string const& inputName)
+{
+    ConstNodePtr node = nullptr;
+    try
+    {
+        node = _dimensionsMap.GetInputNode(inputName);
+    }
+    catch (std::out_of_range&)
+    {
+        node = _dimensionsMap.GetVariableNode(inputName);
+    }
+    MemoryHandle nodeMemBuffer = GetMemoryLocation(node);
+    return nodeMemBuffer;
+}

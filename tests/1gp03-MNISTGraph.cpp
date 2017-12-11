@@ -104,56 +104,78 @@ public:
 class MNISTDataset
 {
 private:
-    mnist::MNIST_dataset<std::vector, DataBuffer, uint8_t> _dataset;
+    std::vector<float> _trainingData;
+    std::vector<float> _trainingLabels;
+    std::vector<float> _testData;
+    std::vector<uint8_t> _testLabels;
     const size_t OutputDim;
+    size_t InputDim;
     size_t _trainingCursor;
     size_t _testCursor;
 public:
-    MNISTDataset(const std::string& mnistDataDir, const size_t outputDim)
-        : _dataset(mnist::read_dataset_direct<std::vector, DataBuffer, uint8_t>(mnistDataDir, 0, 0))
-        , OutputDim(outputDim)
+    MNISTDataset(const std::string& mnistDataDir)
+        : _trainingData()
+        , _trainingLabels()
+        , _testData()
+        , _testLabels()
+        , OutputDim(10)
+        , InputDim(0)
         , _trainingCursor(0)
         , _testCursor(0)
-    { }
-    size_t GetTrainingSampleCount() const { return _dataset.training_images.size(); }
-    size_t GetTestSampleCount() const { return _dataset.test_images.size(); }
-    bool GetTrainingBatch(DataBuffer& inputs, DataBuffer& classes, const size_t batchSize)
     {
-        std::fill(std::begin(classes), std::end(classes), 0.0f);
-        DataBuffer::iterator it = std::begin(inputs);
-        for (size_t i = 0; i < batchSize; ++i)
+        mnist::MNIST_dataset<std::vector, DataBuffer, uint8_t> dataset =
+                mnist::read_dataset_direct<std::vector, DataBuffer, uint8_t>(mnistDataDir, 0, 0);
+        InputDim = dataset.training_images[0].size();
+        _trainingData.resize(dataset.training_images.size() * InputDim);
+        _trainingLabels.resize(dataset.training_labels.size() * OutputDim);
+        auto training_it = _trainingData.begin();
+        for (size_t i = 0; i < dataset.training_images.size(); ++i)
         {
-            const size_t id = (_trainingCursor + i) % GetTrainingSampleCount();
-            const DataBuffer& sampleImageBuffer = _dataset.training_images[id];
-            it = std::copy(std::begin(sampleImageBuffer), std::end(sampleImageBuffer), it);
-            uint8_t sampleLabel = _dataset.training_labels[id];
-            classes[i * OutputDim + sampleLabel] = 1.0f;
+            const DataBuffer& sampleImageBuffer = dataset.training_images[i];
+            for (float const& val : sampleImageBuffer)
+            {
+                *(training_it++) = val / 255.f;
+                //training_it = training_it + 1;
+            }
+            uint8_t sampleLabel = dataset.training_labels[i];
+            _trainingLabels[i * OutputDim + sampleLabel] = 1.0f;
         }
-        for (size_t i = 0; i < inputs.size(); ++i)
+
+        _testData.resize(dataset.test_images.size() * InputDim);
+        auto test_it = _testData.begin();
+        for (size_t i = 0; i < dataset.test_images.size(); ++i)
         {
-            inputs[i] /= 255.0f; // normalization of input data (with unnormalized data, the exponentiation within the graph might exceed float maximum value)
+            const DataBuffer& sampleImageBuffer = dataset.test_images[i];
+            for (float const& val : sampleImageBuffer)
+            {
+                *(test_it++) = val / 255.f;
+            }
         }
-        bool wrappedAround = (_trainingCursor + batchSize) >= GetTrainingSampleCount();
-        _trainingCursor = (_trainingCursor + batchSize) % GetTrainingSampleCount();
-        return wrappedAround;
+        _testLabels = std::move(dataset.test_labels);
     }
-    bool GetTestBatch(DataBuffer& inputs, std::vector<uint8_t>& labels, const size_t batchSize)
+    size_t GetTrainingSampleCount() const { return _trainingData.size() / InputDim; }
+    size_t GetTestSampleCount() const { return _testData.size() / InputDim; }
+    bool GetTrainingBatch(float* inputs, float* classes, const size_t batchSize)
     {
-        DataBuffer::iterator it = std::begin(inputs);
-        for (size_t i = 0; i < batchSize; ++i)
+        if (_trainingCursor + batchSize > GetTrainingSampleCount())
         {
-            const size_t id = (_testCursor + i) % GetTestSampleCount();
-            const DataBuffer& sampleImageBuffer = _dataset.test_images[id];
-            it = std::copy(std::begin(sampleImageBuffer), std::end(sampleImageBuffer), it);
-            labels[i] = _dataset.test_labels[id];
+            throw std::out_of_range("batchSize exceeds available samples");
         }
-        for (size_t i = 0; i < inputs.size(); ++i)
+        std::copy_n(&(_trainingData[_trainingCursor * InputDim]), batchSize * InputDim, inputs);
+        std::copy_n(&(_trainingLabels[_trainingCursor * OutputDim]), batchSize * OutputDim, classes);
+        _trainingCursor = (_trainingCursor + batchSize) % GetTrainingSampleCount();
+        return _trainingCursor == 0; // return true (epoch complete) if _trainingCursor reached GetTrainingSampleCount()
+    }
+    bool GetTestBatch(float* inputs, std::vector<uint8_t>& labels, const size_t batchSize)
+    {
+        if (_testCursor + batchSize > GetTestSampleCount())
         {
-            inputs[i] /= 255.0f; // normalization of input data (with unnormalized data, the exponentiation within the graph might exceed float maximum value)
+            throw std::out_of_range("batchSize exceeds available samples");
         }
-        bool wrappedAround = (_testCursor + batchSize) >= GetTestSampleCount();
+        std::copy_n(&(_testData[_testCursor * InputDim]), batchSize * InputDim, inputs);
+        std::copy_n(&(_testLabels[_testCursor]), batchSize, labels.begin());
         _testCursor = (_testCursor + batchSize) % GetTestSampleCount();
-        return wrappedAround;
+        return _testCursor == 0; // return true (epoch complete) if _testCursor reached GetTestSampleCount()
     }
 };
 
@@ -187,7 +209,7 @@ int main(int argc, const char * const argv[])
     }
 
     // ####### load training data #######
-    MNISTDataset dataset(mnistDataDir, OutputDim);
+    MNISTDataset dataset(mnistDataDir);
     assert(dataset.GetTrainingSampleCount() % BatchSize == 0); // to simplify stuff: assert that BatchSize divides available training samples evenly
 
     // ####### use helper class for graph setup #######
@@ -209,47 +231,46 @@ int main(int argc, const char * const argv[])
     long long time_setup_stop = PAPI_get_real_nsec();
 
     // ####### initialize variables with zero values #######
-    DataBuffer weightsData(InputDim * OutputDim);
-    DataBuffer biasData(OutputDim);
+    float* const weightsData = graph->GetMappedInputBuffer("Weights");
+    float* const biasData = graph->GetMappedInputBuffer("Bias");
 
-    std::fill(std::begin(weightsData), std::end(weightsData), 0.0f);
-    std::fill(std::begin(biasData), std::end(biasData), 0.0f);
+    std::fill_n(weightsData, InputDim * OutputDim, 0.0f);
+    std::fill_n(biasData, 1 * OutputDim, 0.0f);
 
     InputDataMap variablesDataMap;
-    variablesDataMap.emplace("Weights", weightsData.data());
-    variablesDataMap.emplace("Bias", biasData.data());
+    variablesDataMap.emplace("Weights", weightsData);
+    variablesDataMap.emplace("Bias", biasData);
     graph->InitializeVariables(variablesDataMap);
 
     // ####### fetch input data #######
-    DataBuffer imgInputData(BatchSize * InputDim);
-    DataBuffer classesInputData(BatchSize * OutputDim);
-    //dataset.GetTrainingBatch(imgInputData, classesInputData, BatchSize);
+    float* const imgInputData = graph->GetMappedInputBuffer("ImgBatch");
+    float* const classesInputData = graph->GetMappedInputBuffer("Classes");
 
     // ####### prepare input feeding dict #######
     InputDataMap inputDataMap;
-    inputDataMap.emplace("ImgBatch", imgInputData.data());
-    inputDataMap.emplace("Classes", classesInputData.data());
+    inputDataMap.emplace("ImgBatch", imgInputData);
+    inputDataMap.emplace("Classes", classesInputData);
 
     // ####### run training iterations until loss converges #######
     long long time_start = PAPI_get_real_nsec();
     float previousLoss = std::numeric_limits<float>::infinity();
     float currentLoss = std::numeric_limits<float>::infinity();
-    DataBuffer lossOutput(1);
     do
     {
         previousLoss = currentLoss;
         float epochLoss = 0.0f;
         size_t epochBatchCount = 0;
-        bool moreBatches = false;
+        bool epochDone = false;
         do
         {
-            moreBatches = dataset.GetTrainingBatch(imgInputData, classesInputData, BatchSize);
+            epochDone = dataset.GetTrainingBatch(imgInputData, classesInputData, BatchSize);
             graph->Evaluate(inputDataMap);
 
-            graph->GetNodeData(loss, lossOutput.data());
-            epochLoss += lossOutput[0];
+            float lossOutput;
+            graph->GetNodeData(loss, &lossOutput);
+            epochLoss += lossOutput;
             ++epochBatchCount;
-        } while (!moreBatches);
+        } while (!epochDone);
 
         currentLoss = epochLoss / static_cast<float>(epochBatchCount);
         std::cout << "Loss: " << currentLoss << std::endl;
@@ -269,17 +290,21 @@ int main(int argc, const char * const argv[])
     std::unique_ptr<CompiledGraph> evalGraph = compiler.Compile(evalSoftmax, variableDimensions);
 
     // ####### initialize variables in evaluation graph with values trained in training graph #######
-    graph->GetNodeData(graphTemplate.GetWeightsNode(), weightsData.data());
-    graph->GetNodeData(graphTemplate.GetBiasNode(), biasData.data());
+    float* const evalWeightsData = evalGraph->GetMappedInputBuffer("Weights");
+    float* const evalBiasData = evalGraph->GetMappedInputBuffer("Bias");
+    graph->GetNodeData(graphTemplate.GetWeightsNode(), evalWeightsData);
+    graph->GetNodeData(graphTemplate.GetBiasNode(), evalBiasData);
+    variablesDataMap["Weights"] = evalWeightsData;
+    variablesDataMap["Bias"] = evalBiasData;
     evalGraph->InitializeVariables(variablesDataMap);
 
     // ####### prepare testing/evaluation data #######
-    DataBuffer evalInputData(TestSampleCount * InputDim);
+    float* const evalInputData = evalGraph->GetMappedInputBuffer("ImgBatch");
     std::vector<uint8_t> evalLabels(TestSampleCount);
     dataset.GetTestBatch(evalInputData, evalLabels, TestSampleCount);
 
     InputDataMap evalInputDataMap;
-    evalInputDataMap.emplace("ImgBatch", evalInputData.data());
+    evalInputDataMap["ImgBatch"] = evalInputData;
     DataBuffer evalPredictions(TestSampleCount * OutputDim);
 
     // ####### run evaluation graph on evaluation input data #######

@@ -30,12 +30,14 @@ private:
     std::map<std::string, OCLWrappers::Kernel> _clKernels;
     OCLWrappers::Event _executionFinishedEvent;
     std::atomic<bool> _isRunning; // used in (asynchronous) OpenCL callback
-    std::map<ConstNodePtr,GPUKernel const*> _nodeKernels;
+    std::map<ConstNodePtr, GPUKernel const*> _nodeKernels;
+    std::map<std::string, std::pair<OCLWrappers::Memory, float*>> _mappedInputBuffers;
 private:
     cl_device_id SelectDevice();
     OCLWrappers::Queue CreateCommandQueue();
     MemoryHandle GetMemoryLocation(const ConstNodePtr node) const;
     GPUKernel const* GetNodeKernel(ConstNodePtr node) const;
+    void AllocateMappedMemory(std::string const& inputName, ConstNodePtr const node);
 public:
     GraphCompilationGPUPlatform(const CompilationMemoryMap& compilationMemoryMap, OCLWrappers::Context&& context);
     ~GraphCompilationGPUPlatform();
@@ -46,6 +48,7 @@ public:
     bool IsEvaluating() const;
     void WaitUntilEvaluationFinished() const;
     void WaitUntilDataTransferFinished() const;
+    float* GetMappedInputBuffer(std::string const& inputName);
 
     cl_kernel CompileKernel(const std::string& kernelSource);
 

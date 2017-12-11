@@ -19,10 +19,23 @@ GraphCompilationGPUPlatform::GraphCompilationGPUPlatform(const CompilationMemory
     , _executionFinishedEvent()
     , _isRunning(false)
     , _nodeKernels()
+    , _mappedInputBuffers()
 {
 }
 
-GraphCompilationGPUPlatform::~GraphCompilationGPUPlatform() { }
+GraphCompilationGPUPlatform::~GraphCompilationGPUPlatform()
+{
+    clFinish(_clExecutionQueue.get());
+    for (auto& elem : _mappedInputBuffers)
+    {
+        OCLWrappers::Memory& devMem = elem.second.first;
+        float* hostMem = elem.second.second;
+        OCLWrappers::CheckCLError(
+            clEnqueueUnmapMemObject(_clMemoryQueue.get(), devMem.get(), static_cast<void*>(hostMem), 0, nullptr, nullptr)
+        , "clEnqueueUnmapMemObject (for ~GraphCompilationGPUPlatform)");
+    }
+    clFinish(_clMemoryQueue.get());
+}
 
 cl_device_id GraphCompilationGPUPlatform::SelectDevice()
 {
@@ -64,8 +77,20 @@ GraphCompilationGPUPlatform::MemoryHandle GraphCompilationGPUPlatform::GetMemory
     _memoryBufferLocations[buffer] = std::move(mem);
 }*/
 
+void GraphCompilationGPUPlatform::AllocateMappedMemory(std::string const& inputName, ConstNodePtr const node)
+{
+    MemoryDimensions const dims = _dimensionsMap.GetNodeMemoryDimensions(node);
+    cl_int status = CL_SUCCESS;
+    OCLWrappers::Memory deviceMem = clCreateBuffer(_clContext.get(), CL_MEM_READ_ONLY | CL_MEM_ALLOC_HOST_PTR, dims.size() * sizeof(float), nullptr, &status);
+    OCLWrappers::CheckCLError(status, "clCreateBuffer(CL_MEM_ALLOC_HOST_PTR) for AllocateAllMemory to allocate pinned memory");
+    float* hostMem = static_cast<float*>(clEnqueueMapBuffer(_clMemoryQueue.get(), deviceMem.get(), CL_FALSE, CL_MAP_WRITE_INVALIDATE_REGION, 0, dims.size() * sizeof(float), 0, nullptr, nullptr, &status));
+    OCLWrappers::CheckCLError(status, "clEnqueueMapMemory for AllocateAllMemory to map pinned memory.");
+    _mappedInputBuffers[inputName] = std::pair<OCLWrappers::Memory, float*>(std::move(deviceMem), hostMem);
+}
+
 void GraphCompilationGPUPlatform::AllocateAllMemory()
 {
+    // allocate device memory buffers for all nodes
     _memoryBufferLocations.resize(_memoryBuffers.size());
     for (size_t i = 0; i < _memoryBuffers.size(); ++i)
     {
@@ -78,6 +103,19 @@ void GraphCompilationGPUPlatform::AllocateAllMemory()
             _memoryBufferLocations[i] = std::move(mem);
         }
     }
+
+    // allocate (hopefully) pinned memory for inputs and variables
+    for (std::string inputName : _dimensionsMap.GetInputNames())
+    {
+        ConstNodePtr node = _dimensionsMap.GetInputNode(inputName);
+        AllocateMappedMemory(inputName, node);
+    }
+    for (std::string variableName : _dimensionsMap.GetVariableNames())
+    {
+        ConstNodePtr node = _dimensionsMap.GetVariableNode(variableName);
+        AllocateMappedMemory(variableName, node);
+    }
+    clFinish(_clMemoryQueue.get());
 }
 
 void GraphCompilationGPUPlatform::CopyOutputData(const ConstNodePtr outputNode, float* outputBuffer) const
@@ -148,6 +186,11 @@ void GraphCompilationGPUPlatform::WaitUntilEvaluationFinished() const
 void GraphCompilationGPUPlatform::WaitUntilDataTransferFinished() const
 {
     clFinish(_clMemoryQueue.get());
+}
+
+float* GraphCompilationGPUPlatform::GetMappedInputBuffer(std::string const& inputName)
+{
+    return _mappedInputBuffers.at(inputName).second;
 }
 
 cl_kernel GraphCompilationGPUPlatform::CompileKernel(const std::string& kernelSource)

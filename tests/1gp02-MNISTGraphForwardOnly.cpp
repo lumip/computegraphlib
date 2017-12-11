@@ -53,15 +53,7 @@ int main(int argc, const char * const argv[])
 
     ReduceMeanNode loss(&crossEntropy, 0); // 1x1, mean cross entropy over batch
 
-    // load inputs and initialize variables
-    DataBuffer weightsData(InputDim * OutputDim);
-    DataBuffer biasData(OutputDim);
-
-    std::fill(std::begin(weightsData), std::end(weightsData), 0.0f);
-    std::fill(std::begin(biasData), std::end(biasData), 0.0f);
-
-    mnist::MNIST_dataset<std::vector, DataBuffer, uint8_t> dataset = mnist::read_dataset_direct<std::vector, DataBuffer, uint8_t>(mnistDataDir, 0, 0);
-
+    // compile graph
     InputDimensionsMap inputDimensions;
     inputDimensions.emplace("ImgBatch", MemoryDimensions({BatchSize, InputDim}));
     inputDimensions.emplace("Weights", MemoryDimensions({InputDim, OutputDim}));
@@ -73,11 +65,20 @@ int main(int argc, const char * const argv[])
     const std::unique_ptr<CompiledGraph> graph = compiler.Compile(&loss, inputDimensions);
     long long time_setup_stop = PAPI_get_real_nsec();
 
-    DataBuffer imgInputData(BatchSize * InputDim);
-    DataBuffer classesInputData(BatchSize * OutputDim);
-    std::fill(std::begin(classesInputData), std::begin(classesInputData), 0.0f);
+    // load inputs and initialize variables
+    float* const weightsData = graph->GetMappedInputBuffer("Weights");
+    float* const biasData = graph->GetMappedInputBuffer("Bias");
+
+    std::fill_n(weightsData, InputDim * OutputDim, 0.0f);
+    std::fill_n(biasData, 1 * OutputDim, 0.0f);
+
+    mnist::MNIST_dataset<std::vector, DataBuffer, uint8_t> dataset = mnist::read_dataset_direct<std::vector, DataBuffer, uint8_t>(mnistDataDir, 0, 0);
+
+    float* const imgInputData = graph->GetMappedInputBuffer("ImgBatch");
+    float* const classesInputData = graph->GetMappedInputBuffer("Classes");
+    std::fill_n(classesInputData, BatchSize * OutputDim, 0.0f);
     {
-        DataBuffer::iterator it = std::begin(imgInputData);
+        float* it = imgInputData;
         for (size_t i = 0; i < BatchSize; ++i)
         {
             InputDataBuffer& sampleImageBuffer = dataset.training_images[i];
@@ -85,29 +86,28 @@ int main(int argc, const char * const argv[])
             uint8_t sampleLabel = dataset.training_labels[i];
             classesInputData[i * OutputDim + sampleLabel] = 1.0f;
         }
-        for (size_t i = 0; i < imgInputData.size(); ++i)
+        for (size_t i = 0; i < BatchSize * InputDim; ++i)
         {
             imgInputData[i] /= 255.0f;
         }
     }
 
     InputDataMap variablesDataMap;
-    variablesDataMap.emplace("Weights", weightsData.data());
-    variablesDataMap.emplace("Bias", biasData.data());
+    variablesDataMap.emplace("Weights", weightsData);
+    variablesDataMap.emplace("Bias", biasData);
     graph->InitializeVariables(variablesDataMap);
 
     InputDataMap inputDataMap;
-    inputDataMap.emplace("ImgBatch", imgInputData.data());
-    inputDataMap.emplace("Classes", classesInputData.data());
+    inputDataMap.emplace("ImgBatch", imgInputData);
+    inputDataMap.emplace("Classes", classesInputData);
 
     long long time_start = PAPI_get_real_nsec();
     graph->Evaluate(inputDataMap);
     long long time_stop = PAPI_get_real_nsec();
 
-    DataBuffer lossOutput(1);
-    graph->GetNodeData(&loss, lossOutput.data());
-    std::cout << lossOutput.size() << std::endl;
-    std::cout << "Loss: " << lossOutput[0] << std::endl;
+    float lossOutput;
+    graph->GetNodeData(&loss, &lossOutput);
+    std::cout << "Loss: " << lossOutput << std::endl;
 
     std::cout << "Setup: " << time_setup_stop - time_setup_start << " ns; Copy: -1 ns; Compute+Copy: " << time_stop - time_start << " ns" << std::endl;
 

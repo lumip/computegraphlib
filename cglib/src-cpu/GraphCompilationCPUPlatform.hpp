@@ -27,6 +27,7 @@ public:
     bool IsEvaluating() const;
     void WaitUntilEvaluationFinished() const;
     void WaitUntilDataTransferFinished() const;
+    float* GetMappedInputBuffer(std::string const& inputName);
 
     void CompileConstMultNode(const ConstMultNode* const node);
     void CompileExpFuncNode(const ExpFuncNode* const node);

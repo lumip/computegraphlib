@@ -60,20 +60,20 @@ int main(int argc, const char * const argv[])
     long long time_setup_stop = PAPI_get_real_nsec();
 
     // prepare inputs
-    DataBuffer xData(xDim * sharedDim);
-    DataBuffer yData(yDim * sharedDim);
+    float* const xData = graph->GetMappedInputBuffer("x");
+    float* const yData = graph->GetMappedInputBuffer("y");
 
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution<float> dist(-1.f, 1.f);
 
     std::cout << "generating data" << std::endl;
-    std::generate(std::begin(xData), std::end(xData), [&dist, &gen]()->float {return dist(gen);});
-    std::generate(std::begin(yData), std::end(yData), [&dist, &gen]()->float {return dist(gen);});
+    std::generate(xData, xData + (xDim * sharedDim), [&dist, &gen]()->float {return dist(gen);});
+    std::generate(yData, yData + (yDim * sharedDim), [&dist, &gen]()->float {return dist(gen);});
 
     InputDataMap inputDataMap;
-    inputDataMap.emplace("x", xData.data());
-    inputDataMap.emplace("y", yData.data());
+    inputDataMap.emplace("x", xData);
+    inputDataMap.emplace("y", yData);
 
     std::cout << "evaluating graph" << std::endl;
     // evaluate graph
