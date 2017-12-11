@@ -50,27 +50,47 @@ MemoryDimensions CompilationMemoryMap::GetNodeMemoryDimensions(const ConstNodePt
     return this->_memoryDimensions.at(node);
 }
 
-MemoryDimensions CompilationMemoryMap::GetInputDimensions(std::string inputName) const
+MemoryDimensions CompilationMemoryMap::GetInputDimensions(const std::string& inputName) const
 {
     return this->_inputDimensions.at(inputName);
 }
 
-void CompilationMemoryMap::RegisterInputNode(const std::string inputName, const ConstNodePtr node)
+void CompilationMemoryMap::RegisterInputNode(const std::string& inputName, const ConstNodePtr node)
 {
     this->_inputNodes.emplace(inputName, node);
 }
 
-ConstNodePtr CompilationMemoryMap::GetInputNode(const std::string inputName) const
+ConstNodePtr CompilationMemoryMap::GetInputNode(const std::string& inputName) const
 {
     return this->_inputNodes.at(inputName);
 }
 
-void CompilationMemoryMap::RegisterVariableNode(const std::string variableName, const ConstNodePtr node)
+void CompilationMemoryMap::RegisterVariableNode(const std::string& variableName, const ConstNodePtr node)
 {
     this->_variableNodes.emplace(variableName, node);
 }
 
-ConstNodePtr CompilationMemoryMap::GetVariableNode(const std::string variableName) const
+ConstNodePtr CompilationMemoryMap::GetVariableNode(const std::string& variableName) const
 {
     return this->_variableNodes.at(variableName);
+}
+
+std::vector<std::string> CompilationMemoryMap::GetInputNames() const
+{
+    std::vector<std::string> names;
+    for (auto elem : this->_inputNodes)
+    {
+        names.push_back(elem.first);
+    }
+    return names;
+}
+
+std::vector<std::string> CompilationMemoryMap::GetVariableNames() const
+{
+    std::vector<std::string> names;
+    for (auto elem : this->_variableNodes)
+    {
+        names.push_back(elem.first);
+    }
+    return names;
 }

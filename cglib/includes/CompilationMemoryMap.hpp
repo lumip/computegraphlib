@@ -23,11 +23,13 @@ public:
 
     void RegisterNodeMemory(const ConstNodePtr node, const MemoryDimensions MemoryDimensions); // todo: add readonly flag
     MemoryDimensions GetNodeMemoryDimensions(const ConstNodePtr node) const;
-    MemoryDimensions GetInputDimensions(std::string inputName) const;
-    void RegisterInputNode(const std::string inputName, const ConstNodePtr node);
-    ConstNodePtr GetInputNode(const std::string inputName) const;
-    void RegisterVariableNode(const std::string variableName, const ConstNodePtr node);
-    ConstNodePtr GetVariableNode(const std::string variableName) const;
+    MemoryDimensions GetInputDimensions(const std::string& inputName) const;
+    void RegisterInputNode(const std::string& inputName, const ConstNodePtr node);
+    ConstNodePtr GetInputNode(const std::string& inputName) const;
+    void RegisterVariableNode(const std::string& variableName, const ConstNodePtr node);
+    ConstNodePtr GetVariableNode(const std::string& variableName) const;
+    std::vector<std::string> GetInputNames() const;
+    std::vector<std::string> GetVariableNames() const;
 };
 
 #endif
