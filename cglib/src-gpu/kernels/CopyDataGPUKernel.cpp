@@ -6,9 +6,10 @@
 #include "../OCLWrappers.hpp"
 
 const std::string CopyDataGPUKernel::KernelSource = R"==kernel==(
-__kernel void main(__global float* memIn, __global float* memOut, uint offsetIn, uint offsetOut, uint strideIn, uint strideOut)
+__kernel void main(__global float* memIn, __global float* memOut, uint offsetIn, uint offsetOut, uint strideIn, uint strideOut, uint maxId)
 {
     uint i = get_global_id(0);
+    if (i >= maxId) return;
     memOut[i * strideOut + offsetOut] = memIn[i * strideIn + offsetIn];
 }
 )==kernel==";
@@ -27,11 +28,12 @@ void CopyDataGPUKernel::Run()
     clSetKernelArg(_kernel, 3, sizeof(cl_uint), &_offsetOut);
     clSetKernelArg(_kernel, 4, sizeof(cl_uint), &_strideIn);
     clSetKernelArg(_kernel, 5, sizeof(cl_uint), &_strideOut);
-    size_t globalWorkSize[1] = { _count };
+    clSetKernelArg(_kernel, 6, sizeof(cl_uint), &_count);
+    std::pair<size_t, size_t> workSize = GetWorkSize(_count);
     std::vector<cl_event> inputEvents = GetNodeInputEvents();
     cl_event ownEvent;
     OCLWrappers::CheckCLError(
-        clEnqueueNDRangeKernel(_queue, _kernel, 1, nullptr, globalWorkSize, nullptr, inputEvents.size(), inputEvents.data(), &ownEvent)
+        clEnqueueNDRangeKernel(_queue, _kernel, 1, nullptr, &(workSize.first), &(workSize.second), inputEvents.size(), inputEvents.data(), &ownEvent)
     , "clEnqueueNDRangeKernel (for CopyDataGPUKernel)");
     SetEvent(ownEvent);
 }

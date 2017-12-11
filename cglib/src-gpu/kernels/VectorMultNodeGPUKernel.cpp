@@ -11,13 +11,15 @@ uint getIndex(uint y, uint x, uint stride)
     return y * stride + x;
 }
 
-__kernel void main(__global float* vecA, __global float* vecB, __global float* vecResult, uint sizeAx, uint sizeBy, uint sizeBx)
+__kernel void main(__global float* vecA, __global float* vecB, __global float* vecResult, uint sizeAx, uint sizeBy, uint sizeBx, uint maxId)
 {
     // get id into vector A -- the bigger one
-    uint idAy = get_global_id(0);
-    uint idAx = get_global_id(1);
-    // get corresponding id into vector B -- to possibly broadcasted one
-    uint idA = getIndex(idAy, idAx, sizeAx);
+    uint idA = get_global_id(0);
+    if (idA >= maxId) return;
+
+    // get corresponding id into vector B -- the possibly broadcasted one
+    uint idAy = idA / sizeAx;
+    uint idAx = idA - (idAy * sizeAx);
     uint idB = getIndex(idAy % sizeBy, idAx % sizeBx, sizeBx);
 
     // perform computation -- multiply
@@ -39,17 +41,19 @@ void VectorMultNodeGPUKernel::Run()
     const cl_uint sizeAx = static_cast<cl_uint>(_dimA.xDim);
     const cl_uint sizeBy = static_cast<cl_uint>(_dimB.yDim);
     const cl_uint sizeBx = static_cast<cl_uint>(_dimB.xDim);
+    size_t totalWorkItems = _dimA.yDim * _dimA.xDim;
     clSetKernelArg(_kernel, 0, sizeof(cl_mem), &_memA);
     clSetKernelArg(_kernel, 1, sizeof(cl_mem), &_memB);
     clSetKernelArg(_kernel, 2, sizeof(cl_mem), &_memRes);
     clSetKernelArg(_kernel, 3, sizeof(cl_uint), &sizeAx);
     clSetKernelArg(_kernel, 4, sizeof(cl_uint), &sizeBy);
     clSetKernelArg(_kernel, 5, sizeof(cl_uint), &sizeBx);
-    size_t globalWorkSize[2] = { _dimA.yDim, _dimA.xDim };
+    clSetKernelArg(_kernel, 6, sizeof(cl_uint), &totalWorkItems);
+    std::pair<size_t, size_t> workSize = GetWorkSize(totalWorkItems);
     std::vector<cl_event> inputEvents = GetNodeInputEvents();
     cl_event ownEvent;
     OCLWrappers::CheckCLError(
-        clEnqueueNDRangeKernel(_queue, _kernel, 2, nullptr, globalWorkSize, nullptr, inputEvents.size(), inputEvents.data(), &ownEvent)
+        clEnqueueNDRangeKernel(_queue, _kernel, 1, nullptr, &(workSize.first), &(workSize.second), inputEvents.size(), inputEvents.data(), &ownEvent)
     , "clEnqueueNDRangeKernel (for VectorMultNodeGPUKernel)");
     SetEvent(ownEvent);
     // todo: can be optimized by having dumb kernel (without any index computations, that get enqueue multiple times with modified arguments?

@@ -25,7 +25,7 @@ __kernel void main(__global float* matA, __global float* matB, __global float* m
         }
         work_group_barrier(CLK_LOCAL_MEM_FENCE);
 
-        if (j < n)
+        if (j < n) // if worker is outside of working set, do not compute. (IMPORTANT: the worker must! be active in the loop above)
         {
             float val = 0.0f;
             for (uint k = 0; k < d; ++k)
