@@ -44,8 +44,8 @@ public:
     MemoryBufferHandle GetNodeMemoryBuffer(const ConstNodePtr node) const;
     bool NodeIsAssigned(const ConstNodePtr node) const;
     virtual void AllocateAllMemory() = 0;
-    virtual void CopyOutputData(const ConstNodePtr outputNode, DataBuffer& outputBuffer) const = 0;
-    virtual void CopyInputData(const ConstNodePtr inputNode, InputDataBuffer& inputBuffer) = 0;
+    virtual void CopyOutputData(const ConstNodePtr outputNode, float* outputBuffer) const = 0;
+    virtual void CopyInputData(const ConstNodePtr inputNode, float const* inputBuffer) = 0;
     virtual void Evaluate() = 0;
     virtual bool IsEvaluating() const = 0;
     virtual void WaitUntilEvaluationFinished() const = 0;

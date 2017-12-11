@@ -44,7 +44,7 @@ float testStackNode(const MemoryDimensions sliceDim, const std::vector<DataBuffe
     // copy input data
     for (size_t i = 0; i < sliceCount; ++i)
     {
-        platform->CopyInputData(sliceInputs[i], slices[i]);
+        platform->CopyInputData(sliceInputs[i], slices[i].data());
     }
 
     // run compiled kernel
@@ -53,7 +53,7 @@ float testStackNode(const MemoryDimensions sliceDim, const std::vector<DataBuffe
     // get output (pointer to working memory of StackNode which holds the computation result)
     const MemoryDimensions resultDim = compilationMemoryMap.GetNodeMemoryDimensions(&stackNode);
     DataBuffer result(resultDim.size());
-    platform->CopyOutputData(&stackNode, result);
+    platform->CopyOutputData(&stackNode, result.data());
 
     // compute and return squared error
     float error = 0.0f;

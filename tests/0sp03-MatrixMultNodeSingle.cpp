@@ -78,8 +78,8 @@ int main(int argc, const char * const argv[])
     long long time_copy_start = PAPI_get_real_nsec();
 
     // copy input data into node working memory (will usually be done by compiled kernels for InputNode if whole graph is run; testing only single node here)
-    platform->CopyInputData(&i1, input1);
-    platform->CopyInputData(&i2, input2);
+    platform->CopyInputData(&i1, input1.data());
+    platform->CopyInputData(&i2, input2.data());
     platform->WaitUntilDataTransferFinished();
 
     long long time_copy_stop = PAPI_get_real_nsec();

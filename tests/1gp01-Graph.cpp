@@ -72,8 +72,8 @@ int main(int argc, const char * const argv[])
     std::generate(std::begin(yData), std::end(yData), [&dist, &gen]()->float {return dist(gen);});
 
     InputDataMap inputDataMap;
-    inputDataMap.emplace("x", xData);
-    inputDataMap.emplace("y", yData);
+    inputDataMap.emplace("x", xData.data());
+    inputDataMap.emplace("y", yData.data());
 
     std::cout << "evaluating graph" << std::endl;
     // evaluate graph

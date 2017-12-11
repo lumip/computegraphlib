@@ -9,7 +9,7 @@ typedef std::vector<float> DataBuffer; // todo: consider using std::valarray
 typedef const DataBuffer ConstDataBuffer;
 typedef ConstDataBuffer InputDataBuffer;
 
-typedef std::map<std::string, std::reference_wrapper<InputDataBuffer>> InputDataMap;
+typedef std::map<std::string, float const*> InputDataMap;
 struct MemoryDimensions
 {
     union {

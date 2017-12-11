@@ -43,7 +43,7 @@ int main(int argc, const char * const argv[])
     expFuncNode.Compile(*platform);
 
     // copy input data into node working memory (will usually be done by compiled kernels for InputNode if whole graph is run; testing only single node here)
-    platform->CopyInputData(&i1, input1);
+    platform->CopyInputData(&i1, input1.data());
 
     // run compiled kernel
     platform->Evaluate();
@@ -51,7 +51,7 @@ int main(int argc, const char * const argv[])
     // get output (pointer to working memory of ExpFuncNode which holds the computation result)
     const MemoryDimensions resultDim = compilationMemoryMap.GetNodeMemoryDimensions(&expFuncNode);
     DataBuffer result(resultDim.size());
-    platform->CopyOutputData(&expFuncNode, result);
+    platform->CopyOutputData(&expFuncNode, result.data());
 
     // compute and output squared error
     float error = 0.0f;

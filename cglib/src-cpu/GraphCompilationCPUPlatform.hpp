@@ -21,8 +21,8 @@ public:
     GraphCompilationCPUPlatform(const CompilationMemoryMap& compilationMemoryMap);
     ~GraphCompilationCPUPlatform();
     void AllocateAllMemory();
-    void CopyOutputData(const ConstNodePtr outputNode, DataBuffer& outputBuffer) const;
-    void CopyInputData(const ConstNodePtr inputNode, InputDataBuffer& inputBuffer);
+    void CopyOutputData(const ConstNodePtr outputNode, float* outputBuffer) const;
+    void CopyInputData(const ConstNodePtr inputNode, float const* inputBuffer);
     void Evaluate();
     bool IsEvaluating() const;
     void WaitUntilEvaluationFinished() const;

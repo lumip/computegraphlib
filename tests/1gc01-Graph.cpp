@@ -77,21 +77,23 @@ int main(int argc, const char * const argv[])
 
     // initialize variables
     InputDataMap variableDataMap;
-    variableDataMap.emplace("Y", dataY);
-    variableDataMap.emplace("b", datab);
+    variableDataMap["Y"] = dataY.data();
+    variableDataMap["b"] = datab.data();
+    //variableDataMap.emplace("Y", dataY.data());
+    //variableDataMap.emplace("b", datab.data());
     graph->InitializeVariables(variableDataMap);
 
     InputDataMap inputDataMap;
-    inputDataMap.emplace("X", dataX);
+    inputDataMap.emplace("X", dataX.data());
 
     // evaluate graph
     graph->Evaluate(inputDataMap);
 
     // otbain result
-    DataBuffer result(OutputDim);
-    DataBuffer result2(OutputDim);
-    graph->GetNodeData(&softmax, result);
-    graph->GetNodeData(&softmax2, result2);
+    DataBuffer result(BatchSize * OutputDim);
+    DataBuffer result2(BatchSize * OutputDim);
+    graph->GetNodeData(&softmax, result.data());
+    graph->GetNodeData(&softmax2, result2.data());
 
     // compute and return squared error
     float error = 0.0f;

@@ -52,8 +52,8 @@ int main(int argc, const char * const argv[])
     testMultNode.Compile(*platform);
 
     // copy input data into node working memory (will usually be done by compiled kernels for InputNode if whole graph is run; testing only single node here)
-    platform->CopyInputData(&i1, input1);
-    platform->CopyInputData(&i2, input2);
+    platform->CopyInputData(&i1, input1.data());
+    platform->CopyInputData(&i2, input2.data());
 
     // run compiled kernel
     platform->Evaluate();
@@ -61,7 +61,7 @@ int main(int argc, const char * const argv[])
     // get output (pointer to working memory of MatrixMultNode which holds the computation result)
     const MemoryDimensions resultDim = compilationMemoryMap.GetNodeMemoryDimensions(&testMultNode);
     DataBuffer result(resultDim.size());
-    platform->CopyOutputData(&testMultNode, result);
+    platform->CopyOutputData(&testMultNode, result.data());
 
     // compute and output squared error
     float error = 0.0f;

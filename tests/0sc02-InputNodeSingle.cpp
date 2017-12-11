@@ -36,11 +36,11 @@ int main(const int argc, const char * const argv[])
     // compile kernel for InputNode object
     testInputNode.Compile(*platform);
 
-    platform->CopyInputData(&testInputNode, input1);
+    platform->CopyInputData(&testInputNode, input1.data());
 
     // prepare input data
     InputDataMap inputs;
-    inputs.emplace("x", input1);
+    inputs.emplace("x", input1.data());
 
     // run compiled kernel
     platform->Evaluate(); // todo: currently InputNodes do nothing, not even copying the data.. should probably change
@@ -48,7 +48,7 @@ int main(const int argc, const char * const argv[])
     // get output (pointer to working memory of InputNode which holds the computation result)
     const MemoryDimensions resultDim = compilationMemoryMap.GetNodeMemoryDimensions(&testInputNode);
     DataBuffer result(resultDim.size());
-    platform->CopyOutputData(&testInputNode, result);
+    platform->CopyOutputData(&testInputNode, result.data());
 
     // compute and output squared error
     float error = 0.0f;

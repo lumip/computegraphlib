@@ -216,8 +216,8 @@ int main(int argc, const char * const argv[])
     std::fill(std::begin(biasData), std::end(biasData), 0.0f);
 
     InputDataMap variablesDataMap;
-    variablesDataMap.emplace("Weights", weightsData);
-    variablesDataMap.emplace("Bias", biasData);
+    variablesDataMap.emplace("Weights", weightsData.data());
+    variablesDataMap.emplace("Bias", biasData.data());
     graph->InitializeVariables(variablesDataMap);
 
     // ####### fetch input data #######
@@ -227,8 +227,8 @@ int main(int argc, const char * const argv[])
 
     // ####### prepare input feeding dict #######
     InputDataMap inputDataMap;
-    inputDataMap.emplace("ImgBatch", imgInputData);
-    inputDataMap.emplace("Classes", classesInputData);
+    inputDataMap.emplace("ImgBatch", imgInputData.data());
+    inputDataMap.emplace("Classes", classesInputData.data());
 
     // ####### run training iterations until loss converges #######
     long long time_start = PAPI_get_real_nsec();
@@ -246,7 +246,7 @@ int main(int argc, const char * const argv[])
             moreBatches = dataset.GetTrainingBatch(imgInputData, classesInputData, BatchSize);
             graph->Evaluate(inputDataMap);
 
-            graph->GetNodeData(loss, lossOutput);
+            graph->GetNodeData(loss, lossOutput.data());
             epochLoss += lossOutput[0];
             ++epochBatchCount;
         } while (!moreBatches);
@@ -269,8 +269,8 @@ int main(int argc, const char * const argv[])
     std::unique_ptr<CompiledGraph> evalGraph = compiler.Compile(evalSoftmax, variableDimensions);
 
     // ####### initialize variables in evaluation graph with values trained in training graph #######
-    graph->GetNodeData(graphTemplate.GetWeightsNode(), weightsData);
-    graph->GetNodeData(graphTemplate.GetBiasNode(), biasData);
+    graph->GetNodeData(graphTemplate.GetWeightsNode(), weightsData.data());
+    graph->GetNodeData(graphTemplate.GetBiasNode(), biasData.data());
     evalGraph->InitializeVariables(variablesDataMap);
 
     // ####### prepare testing/evaluation data #######
@@ -279,7 +279,7 @@ int main(int argc, const char * const argv[])
     dataset.GetTestBatch(evalInputData, evalLabels, TestSampleCount);
 
     InputDataMap evalInputDataMap;
-    evalInputDataMap.emplace("ImgBatch", evalInputData);
+    evalInputDataMap.emplace("ImgBatch", evalInputData.data());
     DataBuffer evalPredictions(TestSampleCount * OutputDim);
 
     // ####### run evaluation graph on evaluation input data #######
@@ -287,7 +287,7 @@ int main(int argc, const char * const argv[])
 
     // ####### retrieve predictions and calculate classifier precision #######
     // note: this could also be a graph computation
-    evalGraph->GetNodeData(evalSoftmax, evalPredictions);
+    evalGraph->GetNodeData(evalSoftmax, evalPredictions.data());
     size_t correct = 0;
     for (size_t i = 0; i < TestSampleCount; ++i)
     {

@@ -52,12 +52,12 @@ void CompiledGraph::InitializeVariables(const InputDataMap& inputData)
     }
 }
 
-void CompiledGraph::GetNodeData(const ConstNodePtr node, DataBuffer& outputBuffer) const
+void CompiledGraph::GetNodeData(const ConstNodePtr node, float* outputBuffer) const
 {
     _platform->CopyOutputData(node, outputBuffer);
 }
 
-void CompiledGraph::SetNodeData(const ConstNodePtr node, InputDataBuffer& inputBuffer)
+void CompiledGraph::SetNodeData(const ConstNodePtr node, float const* inputBuffer)
 {
     _platform->CopyInputData(node, inputBuffer);
 }

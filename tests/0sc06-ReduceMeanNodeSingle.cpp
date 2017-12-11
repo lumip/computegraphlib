@@ -35,7 +35,7 @@ float testReduceMeanNode(const MemoryDimensions input1Dim, const InputDataBuffer
     reduceMeanNode.Compile(*platform);
 
     // copy input data into node working memory (will usually be done by compiled kernels for InputNode if whole graph is run; testing only single node here)
-    platform->CopyInputData(&i1, input1);
+    platform->CopyInputData(&i1, input1.data());
 
     // run compiled kernel
     platform->Evaluate();
@@ -43,7 +43,7 @@ float testReduceMeanNode(const MemoryDimensions input1Dim, const InputDataBuffer
     // get output (pointer to working memory of ReduceMeanNode which holds the computation result)
     const MemoryDimensions resultDim = compilationMemoryMap.GetNodeMemoryDimensions(&reduceMeanNode);
     DataBuffer result(resultDim.size());
-    platform->CopyOutputData(&reduceMeanNode, result);
+    platform->CopyOutputData(&reduceMeanNode, result.data());
 
     // compute and return squared error
     float error = 0.0f;

@@ -92,20 +92,20 @@ int main(int argc, const char * const argv[])
     }
 
     InputDataMap variablesDataMap;
-    variablesDataMap.emplace("Weights", weightsData);
-    variablesDataMap.emplace("Bias", biasData);
+    variablesDataMap.emplace("Weights", weightsData.data());
+    variablesDataMap.emplace("Bias", biasData.data());
     graph->InitializeVariables(variablesDataMap);
 
     InputDataMap inputDataMap;
-    inputDataMap.emplace("ImgBatch", imgInputData);
-    inputDataMap.emplace("Classes", classesInputData);
+    inputDataMap.emplace("ImgBatch", imgInputData.data());
+    inputDataMap.emplace("Classes", classesInputData.data());
 
     long long time_start = PAPI_get_real_nsec();
     graph->Evaluate(inputDataMap);
     long long time_stop = PAPI_get_real_nsec();
 
     DataBuffer lossOutput(1);
-    graph->GetNodeData(&loss, lossOutput);
+    graph->GetNodeData(&loss, lossOutput.data());
     std::cout << lossOutput.size() << std::endl;
     std::cout << "Loss: " << lossOutput[0] << std::endl;
 
