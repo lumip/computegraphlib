@@ -208,6 +208,13 @@ int main(int argc, const char * const argv[])
         }
     }
 
+    int retval = PAPI_library_init(PAPI_VER_CURRENT);
+    if(retval != PAPI_VER_CURRENT)
+    {
+        std::cout << "could not initialize PAPI" << std::endl;
+        return -1;
+    }
+
     // ####### load training data #######
     MNISTDataset dataset(mnistDataDir);
     assert(dataset.GetTrainingSampleCount() % BatchSize == 0); // to simplify stuff: assert that BatchSize divides available training samples evenly

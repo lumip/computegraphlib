@@ -105,6 +105,13 @@ int main(int argc, const char * const argv[])
     }
     const std::string mnistDataDir(argv[1]);
 
+    int retval = PAPI_library_init(PAPI_VER_CURRENT);
+    if(retval != PAPI_VER_CURRENT)
+    {
+        std::cout << "could not initialize PAPI" << std::endl;
+        return -1;
+    }
+
     DataBuffer inputs(BatchSize * InputDim);
     DataBuffer classes(BatchSize * OutputDim);
     DataBuffer weights(InputDim * OutputDim);

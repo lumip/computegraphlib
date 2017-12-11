@@ -19,6 +19,13 @@ int main(int argc, const char * const argv[])
     const size_t sharedDim = 100;
     const size_t branches = 1 << 13; // number of parallel multiplications
 
+    int retval = PAPI_library_init(PAPI_VER_CURRENT);
+    if(retval != PAPI_VER_CURRENT)
+    {
+        std::cout << "could not initialize PAPI" << std::endl;
+        return -1;
+    }
+
     // create a graph of thousands of parallel branches matrix multiplication followed by element-wise logarithm and then summing up the results.
     // each single multiplication is rather small, so this tests benefits of parallelizing kernel execution.
 
