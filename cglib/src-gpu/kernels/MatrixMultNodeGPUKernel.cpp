@@ -25,12 +25,15 @@ __kernel void main(__global float* matA, __global float* matB, __global float* m
         }
         work_group_barrier(CLK_LOCAL_MEM_FENCE);
 
-        float val = 0.0f;
-        for (uint k = 0; k < d; ++k)
+        if (j < n)
         {
-            val += a_i[k] * matB[k * n + j];
+            float val = 0.0f;
+            for (uint k = 0; k < d; ++k)
+            {
+                val += a_i[k] * matB[k * n + j];
+            }
+            matResult[i * n + j] = val;
         }
-        matResult[i * n + j] = val;
     }
 }
 )==kernel==";
@@ -109,11 +112,11 @@ void MatrixMultNodeGPUKernel::Run()
     clSetKernelArg(_kernel, 4, sizeof(cl_uint), &_n);
     clSetKernelArg(_kernel, 5, sizeof(cl_uint), &_d);
     clSetKernelArg(_kernel, 6, sizeof(float) * _d, nullptr);
-    size_t globalWorkSize[1] = { _n };
+    std::pair<size_t, size_t> workSize = GetWorkSize(_n);
     std::vector<cl_event> inputEvents = GetNodeInputEvents();
     cl_event ownEvent;
     OCLWrappers::CheckCLError(
-        clEnqueueNDRangeKernel(_queue, _kernel, 1, nullptr, globalWorkSize, nullptr, inputEvents.size(), inputEvents.data(), &ownEvent)
+        clEnqueueNDRangeKernel(_queue, _kernel, 1, nullptr, &(workSize.first), &(workSize.second), inputEvents.size(), inputEvents.data(), &ownEvent)
     , "clEnqueueNDRangeKernel (for MatrixMultNodeGPUKernel)");
     SetEvent(ownEvent);
 }
