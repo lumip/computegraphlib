@@ -13,6 +13,7 @@ public:
     OpenCLCompiler() { }
     virtual ~OpenCLCompiler() { }
     virtual cl_kernel CompileKernel(const std::string& kernelSource) = 0;
+    virtual size_t GetComputeUnitCount() const = 0;
 };
 
 #endif

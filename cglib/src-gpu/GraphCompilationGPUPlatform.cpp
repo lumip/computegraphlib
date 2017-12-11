@@ -12,6 +12,7 @@ GraphCompilationGPUPlatform::GraphCompilationGPUPlatform(const CompilationMemory
     , _clDevice(SelectDevice())
     , _clMemoryQueue(CreateCommandQueue())
     , _clExecutionQueue(CreateCommandQueue())
+    , _computeUnitCount(QueryComputeUnitCount())
     , _kernels()
     , _memoryBufferLocations()
     , _clPrograms()
@@ -48,6 +49,15 @@ cl_device_id GraphCompilationGPUPlatform::SelectDevice()
     std::vector<cl_device_id> devices(contextDeviceCount);
     OCLWrappers::CheckCLError(clGetContextInfo(_clContext.get(), CL_CONTEXT_DEVICES, contextDeviceCount, devices.data(), nullptr), "clGetContextInfo");
     return devices[0];
+}
+
+size_t GraphCompilationGPUPlatform::QueryComputeUnitCount()
+{
+    cl_uint computeUnits = 0;
+    OCLWrappers::CheckCLError(
+        clGetDeviceInfo(_clDevice, CL_DEVICE_MAX_COMPUTE_UNITS, sizeof(cl_uint), &computeUnits, nullptr)
+    , "clGetDeviceInfo(CL_DEVICE_MAX_COMPUTE_UNITS) (for SelectDevice)");
+    return computeUnits;
 }
 
 OCLWrappers::Queue GraphCompilationGPUPlatform::CreateCommandQueue()
@@ -226,6 +236,11 @@ cl_kernel GraphCompilationGPUPlatform::CompileKernel(const std::string& kernelSo
     _clKernels[kernelSource] = std::move(kernel);
     _clPrograms.push_back(std::move(program)); // if all checks go well, store handle of program. if not, it will be released automatically upon method exit
     return clKernel;
+}
+
+size_t GraphCompilationGPUPlatform::GetComputeUnitCount() const
+{
+    return _computeUnitCount;
 }
 
 GPUKernel const* GraphCompilationGPUPlatform::GetNodeKernel(ConstNodePtr node) const

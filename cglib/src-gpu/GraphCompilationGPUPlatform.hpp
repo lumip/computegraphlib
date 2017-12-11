@@ -24,6 +24,7 @@ private:
     const cl_device_id _clDevice; // we do not allocate the device so we do not have a wrapper keeping care of releasing it
     const OCLWrappers::Queue _clMemoryQueue;
     const OCLWrappers::Queue _clExecutionQueue;
+    const size_t _computeUnitCount;
     std::vector<std::unique_ptr<Kernel>> _kernels;
     std::vector<OCLWrappers::Memory> _memoryBufferLocations;
     std::vector<OCLWrappers::Program> _clPrograms;
@@ -34,6 +35,7 @@ private:
     std::map<std::string, std::pair<OCLWrappers::Memory, float*>> _mappedInputBuffers;
 private:
     cl_device_id SelectDevice();
+    size_t QueryComputeUnitCount();
     OCLWrappers::Queue CreateCommandQueue();
     MemoryHandle GetMemoryLocation(const ConstNodePtr node) const;
     GPUKernel const* GetNodeKernel(ConstNodePtr node) const;
@@ -51,6 +53,7 @@ public:
     float* GetMappedInputBuffer(std::string const& inputName);
 
     cl_kernel CompileKernel(const std::string& kernelSource);
+    size_t GetComputeUnitCount() const;
 
     void CompileConstMultNode(const ConstMultNode* const node);
     void CompileExpFuncNode(const ExpFuncNode* const node);
