@@ -80,7 +80,7 @@ __kernel void main(__global float const * const matA, __global float const * con
 //)==kernel==";
 
 MatrixMultNodeGPUKernel::MatrixMultNodeGPUKernel(OpenCLCompiler& compiler, const cl_command_queue queue, const GPUKernel::ConstList& inputKernels, cl_mem memA, cl_mem memB, cl_mem memRes, size_t m, size_t n, size_t d)
-    : GPUKernel(queue, compiler.CompileKernel(KernelSource), inputKernels), _memA(memA), _memB(memB), _memRes(memRes), _m(m), _n(n), _d(d)
+    : GPUKernel(compiler.GetComputeUnitCount(), queue, compiler.CompileKernel(KernelSource), inputKernels), _memA(memA), _memB(memB), _memRes(memRes), _m(m), _n(n), _d(d)
 { }
 
 MatrixMultNodeGPUKernel::~MatrixMultNodeGPUKernel() { }

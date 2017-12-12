@@ -15,7 +15,7 @@ __kernel void main(__global float const * const memIn, __global float* const mem
 )==kernel==";
 
 LogFuncNodeGPUKernel::LogFuncNodeGPUKernel(OpenCLCompiler& compiler, const cl_command_queue queue, const GPUKernel::ConstList& inputKernels, cl_mem memIn, cl_mem memOut,  size_t size)
-    : GPUKernel(queue, compiler.CompileKernel(KernelSource), inputKernels), _memIn(memIn), _memOut(memOut), _size(size)
+    : GPUKernel(compiler.GetComputeUnitCount(), queue, compiler.CompileKernel(KernelSource), inputKernels), _memIn(memIn), _memOut(memOut), _size(size)
 { }
 
 LogFuncNodeGPUKernel::~LogFuncNodeGPUKernel() { }

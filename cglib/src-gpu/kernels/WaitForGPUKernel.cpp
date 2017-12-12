@@ -2,8 +2,10 @@
 
 #include <assert.h>
 
+#include "OpenCLCompiler.hpp"
+
 WaitForGPUKernel::WaitForGPUKernel(OpenCLCompiler& compiler, cl_command_queue queue, const GPUKernel::ConstList inputKernels)
-    : GPUKernel(queue, 0, inputKernels)
+    : GPUKernel(compiler.GetComputeUnitCount(), queue, 0, inputKernels)
 { }
 
 WaitForGPUKernel::~WaitForGPUKernel() { }

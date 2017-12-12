@@ -20,7 +20,7 @@ __kernel void main(__global float const * const memIn, __global float* const mem
 )==kernel==";
 
 ReduceSumNodeGPUKernel::ReduceSumNodeGPUKernel(OpenCLCompiler& compiler, cl_command_queue queue, const GPUKernel::ConstList& inputKernels, cl_mem memIn, cl_mem memOut, const MemoryDimensions dimIn, size_t axis)
-    : GPUKernel(queue, compiler.CompileKernel(KernelSource), inputKernels), _memIn(memIn), _memOut(memOut), _dimIn(dimIn), _axis(axis)
+    : GPUKernel(compiler.GetComputeUnitCount(), queue, compiler.CompileKernel(KernelSource), inputKernels), _memIn(memIn), _memOut(memOut), _dimIn(dimIn), _axis(axis)
 {
     assert(_axis == 0 || _axis == 1);
 }

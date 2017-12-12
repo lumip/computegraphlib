@@ -16,7 +16,7 @@ __kernel void main(__global float const * const memIn, __global float* const mem
 )==kernel==";
 
 ConstMultNodeGPUKernel::ConstMultNodeGPUKernel(OpenCLCompiler& compiler, cl_command_queue queue, const GPUKernel::ConstList& inputKernels, cl_mem memIn, cl_mem memOut, float factor, size_t size)
-    : GPUKernel(queue, compiler.CompileKernel(KernelSource), inputKernels), _memIn(memIn), _memOut(memOut), _factor(factor), _size(size)
+    : GPUKernel(compiler.GetComputeUnitCount(), queue, compiler.CompileKernel(KernelSource), inputKernels), _memIn(memIn), _memOut(memOut), _factor(factor), _size(size)
 { }
 
 ConstMultNodeGPUKernel::~ConstMultNodeGPUKernel() { }

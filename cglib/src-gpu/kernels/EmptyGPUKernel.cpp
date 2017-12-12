@@ -2,8 +2,8 @@
 
 #include "OpenCLCompiler.hpp"
 
-EmptyGPUKernel::EmptyGPUKernel(cl_command_queue queue, const GPUKernel::ConstList& inputKernels)
-    : GPUKernel(queue, 0, inputKernels)
+EmptyGPUKernel::EmptyGPUKernel(OpenCLCompiler& compiler, cl_command_queue queue, const GPUKernel::ConstList& inputKernels)
+    : GPUKernel(compiler.GetComputeUnitCount(), queue, 0, inputKernels)
 { }
 
 EmptyGPUKernel::~EmptyGPUKernel() { }

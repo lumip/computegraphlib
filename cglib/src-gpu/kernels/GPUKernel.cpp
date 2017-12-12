@@ -5,8 +5,9 @@
 #include "nodes/Node.hpp"
 #include "OpenCLCompiler.hpp"
 
-GPUKernel::GPUKernel(cl_command_queue queue, cl_kernel kernel, const GPUKernel::ConstList& inputKernels)
-    : _inputKernels(inputKernels)
+GPUKernel::GPUKernel(size_t numberOfCUs, cl_command_queue queue, cl_kernel kernel, const GPUKernel::ConstList& inputKernels)
+    : _numberCUs(numberOfCUs)
+    , _inputKernels(inputKernels)
     , _event()
     , _kernel(kernel)
     , _queue(queue)
@@ -58,10 +59,9 @@ size_t GPUKernel::GetMaxWorkGroupSize() const
 
 std::pair<size_t, size_t> GPUKernel::GetWorkSize(size_t workItemCount) const
 {
-    const size_t NUMBER_OF_COMPUTE_UNITS = 2; // todo: build architecture so that it reads the correct values here.
     size_t preferredMultiple = GetPreferredWorkGroupMultiple();
 
-    size_t usedCus = std::min((workItemCount / (GetMaxWorkGroupSize() / 2)) + 1, NUMBER_OF_COMPUTE_UNITS);
+    size_t usedCus = std::min((workItemCount / (GetMaxWorkGroupSize() / 2)) + 1, _numberCUs);
     size_t workGroupsPerCU = ((workItemCount/(usedCus * GetMaxWorkGroupSize())) + 1);
     size_t workGroupCount = (workGroupsPerCU * usedCus);
     size_t workGroupSize = workItemCount / workGroupCount;

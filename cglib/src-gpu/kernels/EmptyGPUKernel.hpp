@@ -3,10 +3,12 @@
 
 #include "GPUKernel.hpp"
 
+class OpenCLCompiler;
+
 class EmptyGPUKernel : public GPUKernel
 {
 public:
-    EmptyGPUKernel(cl_command_queue queue, const GPUKernel::ConstList& inputKernels);
+    EmptyGPUKernel(OpenCLCompiler& compiler, cl_command_queue queue, const GPUKernel::ConstList& inputKernels);
     virtual ~EmptyGPUKernel();
     void Run();
 };

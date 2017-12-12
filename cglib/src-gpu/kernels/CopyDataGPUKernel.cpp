@@ -15,7 +15,7 @@ __kernel void main(__global float const * const memIn, __global float* const mem
 )==kernel==";
 
 CopyDataGPUKernel::CopyDataGPUKernel(OpenCLCompiler& compiler, cl_command_queue queue, const GPUKernel::ConstList& inputKernels, cl_mem memIn, cl_mem memOut, size_t count, size_t offsetIn, size_t offsetOut, size_t strideIn, size_t strideOut)
-    : GPUKernel(queue, compiler.CompileKernel(KernelSource), inputKernels), _memIn(memIn), _memOut(memOut), _count(count), _offsetIn(offsetIn), _offsetOut(offsetOut), _strideIn(strideIn), _strideOut(strideOut)
+    : GPUKernel(compiler.GetComputeUnitCount(), queue, compiler.CompileKernel(KernelSource), inputKernels), _memIn(memIn), _memOut(memOut), _count(count), _offsetIn(offsetIn), _offsetOut(offsetOut), _strideIn(strideIn), _strideOut(strideOut)
 { }
 
 CopyDataGPUKernel::~CopyDataGPUKernel() { }

@@ -44,7 +44,8 @@ void GraphCompilationGPUPlatform::CompileExpFuncNode(const ExpFuncNode* const no
 
 void GraphCompilationGPUPlatform::CompileInputNode(const InputNode* const node)
 {
-    EmptyGPUKernel* kernel = new EmptyGPUKernel(_clExecutionQueue.get(),
+    EmptyGPUKernel* kernel = new EmptyGPUKernel(*this,
+                                                _clExecutionQueue.get(),
                                                 GPUKernel::ConstList());
     _nodeKernels[node] = kernel;
     _kernels.emplace_back(kernel);
@@ -271,7 +272,8 @@ void GraphCompilationGPUPlatform::CompileVariableNode(const VariableNode* const 
     }
     if (kernel == nullptr)
     {
-        kernel = new EmptyGPUKernel(_clExecutionQueue.get(),
+        kernel = new EmptyGPUKernel(*this,
+                                    _clExecutionQueue.get(),
                                     inputKernels);
     }
     _nodeKernels[node] = kernel;

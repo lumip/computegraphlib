@@ -11,6 +11,7 @@ class GPUKernel : public Kernel
 public:
     typedef std::vector<GPUKernel const *> ConstList;
 private:
+    const size_t _numberCUs;
     const GPUKernel::ConstList _inputKernels;
     OCLWrappers::Event _event;
 protected:
@@ -20,7 +21,7 @@ protected:
     std::vector<cl_event> GetNodeInputEvents() const;
     void SetEvent(cl_event event);
 public:
-    GPUKernel(cl_command_queue queue, cl_kernel kernel, const GPUKernel::ConstList& inputKernels);
+    GPUKernel(size_t numberOfCUs, cl_command_queue queue, cl_kernel kernel, const GPUKernel::ConstList& inputKernels);
     virtual ~GPUKernel();
     virtual cl_event GetEvent() const;
     virtual size_t GetPreferredWorkGroupMultiple() const;

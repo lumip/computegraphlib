@@ -28,7 +28,7 @@ __kernel void main(__global float const * const vecA, __global float const * con
 )==kernel==";
 
 VectorDivNodeGPUKernel::VectorDivNodeGPUKernel(OpenCLCompiler& compiler, cl_command_queue queue, const GPUKernel::ConstList& inputKernels, cl_mem memA, cl_mem memB, cl_mem memRes, MemoryDimensions dimA, MemoryDimensions dimB)
-    : GPUKernel(queue, compiler.CompileKernel(KernelSource), inputKernels), _memA(memA), _memB(memB), _memRes(memRes), _dimA(dimA), _dimB(dimB)
+    : GPUKernel(compiler.GetComputeUnitCount(), queue, compiler.CompileKernel(KernelSource), inputKernels), _memA(memA), _memB(memB), _memRes(memRes), _dimA(dimA), _dimB(dimB)
 {
     assert(((_dimA.xDim == _dimB.xDim) && (_dimA.yDim % _dimB.yDim == 0)) ||
            ((_dimA.yDim == _dimB.yDim) && (_dimA.xDim % _dimB.xDim == 0)));

@@ -2,8 +2,10 @@
 
 #include <assert.h>
 
+#include "OpenCLCompiler.hpp"
+
 ReduceMeanNodeGPUKernel::ReduceMeanNodeGPUKernel(OpenCLCompiler& compiler, cl_command_queue queue, const GPUKernel::ConstList& inputKernels, cl_mem memIn, cl_mem memOut, const MemoryDimensions dimIn, size_t axis)
-    : GPUKernel(queue, 0, inputKernels)
+    : GPUKernel(compiler.GetComputeUnitCount(), queue, 0, inputKernels)
     , _reducSumNode(compiler, queue, inputKernels, memIn, memOut, dimIn, axis)
     , _constDivNode(compiler, queue, inputKernels, memOut, memOut, 1.0f/static_cast<float>(dimIn.dims[axis]), dimIn.dims[1-axis])
 {
