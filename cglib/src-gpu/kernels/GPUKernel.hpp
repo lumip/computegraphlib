@@ -23,6 +23,9 @@ public:
     GPUKernel(cl_command_queue queue, cl_kernel kernel, const GPUKernel::ConstList& inputKernels);
     virtual ~GPUKernel();
     virtual cl_event GetEvent() const;
+    virtual size_t GetPreferredWorkGroupMultiple() const;
+    virtual size_t GetMaxWorkGroupSize() const;
+    virtual std::pair<size_t, size_t> GetWorkSize(size_t workItemCount) const;
 };
 
 #endif
