@@ -7,7 +7,7 @@
 
 // global definitions for data dimensions
 const size_t InputDim = 784;
-const size_t BatchSize = 500;
+size_t BatchSize = 500;
 const size_t OutputDim = 10;
 
 typedef std::vector<float> DataBuffer;
@@ -100,10 +100,15 @@ int main(int argc, const char * const argv[])
     // Check command line arguments
     if (argc < 2)
     {
-        std::cout << "Usage: " << argv[0] << " <path to MNIST dataset>" << std::endl;
+        std::cout << "Usage: " << argv[0] << " <path to MNIST dataset> [<training batch size>]" << std::endl;
         return -1;
     }
     const std::string mnistDataDir(argv[1]);
+
+    if (argc > 2)
+    {
+        BatchSize = std::stoi(argv[2]);
+    }
 
     int retval = PAPI_library_init(PAPI_VER_CURRENT);
     if(retval != PAPI_VER_CURRENT)
