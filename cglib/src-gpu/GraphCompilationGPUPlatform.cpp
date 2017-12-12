@@ -78,15 +78,6 @@ GraphCompilationGPUPlatform::MemoryHandle GraphCompilationGPUPlatform::GetMemory
     return _memoryBufferLocations[GetNodeMemoryBuffer(node)].get();
 }
 
-/*void GraphCompilationGPUPlatform::AllocateMemory(MemoryBufferHandle buffer, size_t size)
-{
-    _memoryBufferLocations.resize(buffer + 1); // todo: this is not too nice, find better solution...
-    cl_int status = CL_SUCCESS;
-    OCLWrappers::Memory mem = clCreateBuffer(_clContext.get(), CL_MEM_READ_WRITE, size * sizeof(float), nullptr, &status);
-    OCLWrappers::CheckCLError(status, "clCreateBuffer");
-    _memoryBufferLocations[buffer] = std::move(mem);
-}*/
-
 void GraphCompilationGPUPlatform::AllocateMappedMemory(std::string const& inputName, ConstNodePtr const node)
 {
     MemoryDimensions const dims = _dimensionsMap.GetNodeMemoryDimensions(node);
@@ -135,7 +126,7 @@ void GraphCompilationGPUPlatform::CopyOutputData(const ConstNodePtr outputNode, 
     const cl_mem nodeMemBuffer = GetMemoryLocation(outputNode);
     clFinish(_clExecutionQueue.get());
     OCLWrappers::CheckCLError(
-        clEnqueueReadBuffer(_clMemoryQueue.get(), nodeMemBuffer, CL_TRUE, 0, size * sizeof(float), outputBuffer, 0, nullptr, nullptr) // todo: temporarily (?) blocking
+        clEnqueueReadBuffer(_clMemoryQueue.get(), nodeMemBuffer, CL_TRUE, 0, size * sizeof(float), outputBuffer, 0, nullptr, nullptr)
     );
 }
 
@@ -145,7 +136,7 @@ void GraphCompilationGPUPlatform::CopyInputData(const ConstNodePtr inputNode, fl
     const cl_mem nodeMemBuffer = GetMemoryLocation(inputNode);
     clFinish(_clExecutionQueue.get());
     OCLWrappers::CheckCLError(
-        clEnqueueWriteBuffer(_clMemoryQueue.get(), nodeMemBuffer, CL_FALSE, 0, dims.size() * sizeof(float), inputBuffer, 0, nullptr, nullptr) // todo: handle events?
+        clEnqueueWriteBuffer(_clMemoryQueue.get(), nodeMemBuffer, CL_FALSE, 0, dims.size() * sizeof(float), inputBuffer, 0, nullptr, nullptr)
     , "clEnqueueWriteBuffer (for CopyInputData)");
 }
 
