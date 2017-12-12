@@ -16,6 +16,11 @@ Node::ConstNodeList InputNode::GetInputs() const
     return ConstNodeList();
 }
 
+const std::string& InputNode::GetName() const
+{
+    return _name;
+}
+
 std::string InputNode::ToString() const
 {
     return "<InputNode " + _name + ">";

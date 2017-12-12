@@ -13,6 +13,7 @@ public:
     ConstNodeList GetInputs() const;
     void Compile(GraphCompilationPlatform& platform) const;
     void GetMemoryDimensions(CompilationMemoryMap& memoryMap) const;
+    const std::string& GetName() const;
     std::string ToString() const;
 };
 
