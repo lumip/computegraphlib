@@ -192,13 +192,13 @@ if (${MNIST_FOUND} AND ${PAPI_FOUND})
     target_include_directories(1gp03g_MNISTGraph PRIVATE ${PAPI_INCLUDE_DIRS} ${MNIST_INCLUDE_DIR})
     target_link_libraries(1gp03g_MNISTGraph cgLibGPU ${PAPI_LIBRARIES})
 
-    ###### MNIST tasks baseline/benchmark non-abstracted CPU implementation
+    ###### MNIST forward only baseline/benchmark non-abstracted CPU implementation
     add_executable(1gp02b_MNISTGraphForwardOnlyBaseline "1gp02b-MNISTGraphForwardOnlyBaseline.cpp")
-    target_compile_definitions(1gp02b_MNISTGraphForwardOnlyBaseline PRIVATE)
     target_include_directories(1gp02b_MNISTGraphForwardOnlyBaseline PRIVATE ${PAPI_INCLUDE_DIRS} ${MNIST_INCLUDE_DIR})
     target_link_libraries(1gp02b_MNISTGraphForwardOnlyBaseline ${PAPI_LIBRARIES})
-    add_executable(1gp03b_MNISTGraphBaseline "1gp03b-MNISTGraphBaseline.cpp")
-    target_compile_definitions(1gp03b_MNISTGraphBaseline PRIVATE)
-    target_include_directories(1gp03b_MNISTGraphBaseline PRIVATE ${PAPI_INCLUDE_DIRS} ${MNIST_INCLUDE_DIR})
-    target_link_libraries(1gp03b_MNISTGraphBaseline ${PAPI_LIBRARIES})
+
+    ###### MNIST forward only baseline/benchmark non-abstracted GPU implementation
+    add_executable(1gp02bg_MNISTGraphForwardOnlyGPUBaseline "1gp02bg-MNISTGraphForwardOnlyGPUBaseline.cpp")
+    target_include_directories(1gp02bg_MNISTGraphForwardOnlyGPUBaseline PRIVATE ${OpenCL_INCLUDE_DIRS} ${PAPI_INCLUDE_DIRS} ${MNIST_INCLUDE_DIR})
+    target_link_libraries(1gp02bg_MNISTGraphForwardOnlyGPUBaseline ${OpenCL_LIBRARY} ${PAPI_LIBRARIES})
 endif (${MNIST_FOUND} AND ${PAPI_FOUND})
