@@ -31,7 +31,7 @@ private:
     std::map<std::string, OCLWrappers::Kernel> _clKernels;
     OCLWrappers::Event _executionFinishedEvent;
     std::atomic<bool> _isRunning; // used in (asynchronous) OpenCL callback
-    std::map<ConstNodePtr, GPUKernel const*> _nodeKernels;
+    std::map<ConstNodePtr, GPUKernel*> _nodeKernels;
     std::map<std::string, std::pair<OCLWrappers::Memory, float*>> _mappedInputBuffers;
 private:
     cl_device_id SelectDevice();

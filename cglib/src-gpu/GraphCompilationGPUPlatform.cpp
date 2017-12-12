@@ -5,6 +5,8 @@
 
 #include "CompilationMemoryMap.hpp"
 #include "Kernel.hpp"
+#include "nodes/Node.hpp"
+#include "kernels/GPUKernel.hpp"
 
 GraphCompilationGPUPlatform::GraphCompilationGPUPlatform(const CompilationMemoryMap& compilationMemoryMap, OCLWrappers::Context&& context)
     : GraphCompilationPlatform(compilationMemoryMap)
@@ -134,16 +136,30 @@ void GraphCompilationGPUPlatform::CopyInputData(const ConstNodePtr inputNode, fl
 {
     MemoryDimensions dims = _dimensionsMap.GetNodeMemoryDimensions(inputNode);
     const cl_mem nodeMemBuffer = GetMemoryLocation(inputNode);
-    clFinish(_clExecutionQueue.get());
+    //clFinish(_clExecutionQueue.get());
+    std::vector<cl_event> waitList;
+    for (ConstNodePtr const subscriber : inputNode->GetSubscribers())
+    {
+        GPUKernel const* kernel = _nodeKernels[subscriber];
+        if (kernel->HasEvent())
+        {
+            waitList.push_back(_nodeKernels[subscriber]->GetEvent());
+        }
+    }
+    cl_event* rawWaitList = nullptr;
+    if (waitList.size() > 0)
+    {
+        rawWaitList = waitList.data();
+    }
     OCLWrappers::CheckCLError(
-        clEnqueueWriteBuffer(_clMemoryQueue.get(), nodeMemBuffer, CL_FALSE, 0, dims.size() * sizeof(float), inputBuffer, 0, nullptr, nullptr)
+        clEnqueueWriteBuffer(_clMemoryQueue.get(), nodeMemBuffer, CL_FALSE, 0, dims.size() * sizeof(float), inputBuffer, waitList.size(), rawWaitList, nullptr)
     , "clEnqueueWriteBuffer (for CopyInputData)");
 }
 
 void GraphCompilationGPUPlatform::Evaluate()
 {
     clFinish(_clMemoryQueue.get());
-    clFinish(_clExecutionQueue.get()); // make sure that all memory copy and previous executions have finished
+    //clFinish(_clExecutionQueue.get()); // make sure that all memory copy and previous executions have finished
     _isRunning = true;
     for (const std::unique_ptr<Kernel>& kernel : _kernels)
     {

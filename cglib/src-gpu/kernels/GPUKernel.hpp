@@ -19,10 +19,11 @@ protected:
     const cl_command_queue _queue;
 protected:
     std::vector<cl_event> GetNodeInputEvents() const;
-    void SetEvent(cl_event event);
 public:
     GPUKernel(size_t numberOfCUs, cl_command_queue queue, cl_kernel kernel, const GPUKernel::ConstList& inputKernels);
     virtual ~GPUKernel();
+    void SetEvent(cl_event event);
+    virtual bool HasEvent() const;
     virtual cl_event GetEvent() const;
     virtual size_t GetPreferredWorkGroupMultiple() const;
     virtual size_t GetMaxWorkGroupSize() const;

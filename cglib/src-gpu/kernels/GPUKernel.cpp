@@ -34,6 +34,11 @@ void GPUKernel::SetEvent(cl_event event)
     _event = OCLWrappers::Event(event);
 }
 
+bool GPUKernel::HasEvent() const
+{
+    return _event.valid();
+}
+
 cl_event GPUKernel::GetEvent() const
 {
     return _event.get();

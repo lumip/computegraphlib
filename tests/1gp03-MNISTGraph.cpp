@@ -184,7 +184,7 @@ int main(int argc, const char * const argv[])
     const size_t InputDim = 784;
     const size_t OutputDim = 10;
     size_t BatchSize = 500;
-    float StopThreshold = 0.01f;
+    //float StopThreshold = 0.01f;
     float LearningRate = 0.1f;
 
     // Check command line arguments
@@ -203,7 +203,7 @@ int main(int argc, const char * const argv[])
             LearningRate = std::stof(argv[3]);
             if (argc > 4)
             {
-                StopThreshold = std::stof(argv[4]);
+                //StopThreshold = std::stof(argv[4]);
             }
         }
     }
@@ -260,28 +260,32 @@ int main(int argc, const char * const argv[])
 
     // ####### run training iterations until loss converges #######
     long long time_start = PAPI_get_real_nsec();
-    float previousLoss = std::numeric_limits<float>::infinity();
-    float currentLoss = std::numeric_limits<float>::infinity();
-    do
+    //float previousLoss = std::numeric_limits<float>::infinity();
+    //float currentLoss = std::numeric_limits<float>::infinity();
+    for (size_t epoch = 0; epoch < 8; ++epoch)
+    //do
     {
-        previousLoss = currentLoss;
-        float epochLoss = 0.0f;
-        size_t epochBatchCount = 0;
+        //previousLoss = currentLoss;
+        //float epochLoss = 0.0f;
+        //size_t epochBatchCount = 0;
         bool epochDone = false;
         do
         {
             epochDone = dataset.GetTrainingBatch(imgInputData, classesInputData, BatchSize);
             graph->Evaluate(inputDataMap);
 
-            float lossOutput;
-            graph->GetNodeData(loss, &lossOutput);
-            epochLoss += lossOutput;
-            ++epochBatchCount;
+            //float lossOutput;
+            //graph->GetNodeData(loss, &lossOutput);
+            //epochLoss += lossOutput;
+            //++epochBatchCount;
         } while (!epochDone);
 
-        currentLoss = epochLoss / static_cast<float>(epochBatchCount);
-        std::cout << "Loss: " << currentLoss << std::endl;
-    } while (previousLoss - currentLoss > StopThreshold);
+        //currentLoss = epochLoss / static_cast<float>(epochBatchCount);
+        //std::cout << "Loss: " << currentLoss << std::endl;
+    }// while (previousLoss - currentLoss > StopThreshold);
+    float lossVal = 0;
+    graph->GetNodeData(loss, &lossVal);
+    std::cout << "Final Loss: " << lossVal << std::endl;
     long long time_stop = PAPI_get_real_nsec();
 
 
