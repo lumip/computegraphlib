@@ -6,7 +6,7 @@
 #include "../OCLWrappers.hpp"
 
 const std::string LogFuncNodeGPUKernel::KernelSource = R"==kernel==(
-__kernel void main(__global float* memIn, __global float* memOut, uint maxId)
+__kernel void main(__global float const * const memIn, __global float* const memOut, uint const maxId)
 {
     uint id = get_global_id(0);
     if (id >= maxId) return;

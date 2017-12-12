@@ -6,7 +6,7 @@
 #include "../OCLWrappers.hpp"
 
 const std::string CopyDataGPUKernel::KernelSource = R"==kernel==(
-__kernel void main(__global float* memIn, __global float* memOut, uint offsetIn, uint offsetOut, uint strideIn, uint strideOut, uint maxId)
+__kernel void main(__global float const * const memIn, __global float* const memOut, uint const offsetIn, uint const offsetOut, uint const strideIn, uint const strideOut, uint const maxId)
 {
     uint i = get_global_id(0);
     if (i >= maxId) return;

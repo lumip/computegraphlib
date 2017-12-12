@@ -11,7 +11,7 @@
 // b global  / a local  : 2.918 s / 7.795 s
 // b private / a local  : 2.662 s / 7.692 s
 const std::string MatrixMultNodeGPUKernel::KernelSource = R"==kernel==(
-__kernel void main(__global float* matA, __global float* matB, __global float* matResult, uint m, uint n, uint d, __local float* a_i)
+__kernel void main(__global float const * const matA, __global float const * const matB, __global float* const matResult, uint const m, uint const n, uint const d, __local float* const a_i)
 {
     uint j = get_global_id(0);
     uint lid = get_local_id(0);
@@ -46,7 +46,7 @@ __kernel void main(__global float* matA, __global float* matB, __global float* m
 //// a global  / b local  : 8.137 s
 //// a private / b local  : 2.764 s
 //const std::string MatrixMultNodeGPUKernel::KernelSource = R"==kernel==(
-//__kernel void main(__global float* matA, __global float* matB, __global float* matResult, uint m, uint n, uint d, __local float* b_j)
+//__kernel void main(__global float const * const matA, __global float const * const matB, __global float* const matResult, uint const m, uint const n, uint const d, __local float* const b_j)
 //{
 //    uint i = get_global_id(0);
 //    uint lid = get_local_id(0);
@@ -78,24 +78,6 @@ __kernel void main(__global float* matA, __global float* matB, __global float* m
 //    }
 //}
 //)==kernel==";
-
-/*
-const std::string MatrixMultNodeGPUKernel::KernelSource = R"==kernel==(
-__kernel void main(__global float* matA, __global float* matB, __global float* matResult, uint n, uint d)
-{
-    uint i = get_global_id(0);
-
-    for (uint j = 0; j < n; ++j)
-    {
-        float val = 0.0f;
-        for (uint k = 0; k < d; ++k)
-        {
-            val += matA[i * d + k] * matB[k * n + j];
-        }
-        matResult[i * n + j] = val;
-    }
-}
-)==kernel==";*/
 
 MatrixMultNodeGPUKernel::MatrixMultNodeGPUKernel(OpenCLCompiler& compiler, const cl_command_queue queue, const GPUKernel::ConstList& inputKernels, cl_mem memA, cl_mem memB, cl_mem memRes, size_t m, size_t n, size_t d)
     : GPUKernel(queue, compiler.CompileKernel(KernelSource), inputKernels), _memA(memA), _memB(memB), _memRes(memRes), _m(m), _n(n), _d(d)

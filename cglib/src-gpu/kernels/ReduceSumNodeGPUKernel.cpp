@@ -6,7 +6,7 @@
 #include "../OCLWrappers.hpp"
 
 const std::string ReduceSumNodeGPUKernel::KernelSource = R"==kernel==(
-__kernel void main(__global float* memIn, __global float* memOut, uint offsetStride, uint sumStride, uint count, uint maxId)
+__kernel void main(__global float const * const memIn, __global float* const memOut, uint const offsetStride, uint const sumStride, uint const count, uint const maxId)
 {
     size_t id = get_global_id(0);
     if (id >= maxId) return;

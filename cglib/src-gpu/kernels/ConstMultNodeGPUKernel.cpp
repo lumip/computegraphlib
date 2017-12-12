@@ -7,7 +7,7 @@
 #include "../OCLWrappers.hpp"
 
 const std::string ConstMultNodeGPUKernel::KernelSource = R"==kernel==(
-__kernel void main(__global float* memIn, __global float* memOut, float factor, uint maxId)
+__kernel void main(__global float const * const memIn, __global float* const memOut, float const factor, uint const maxId)
 {
     uint id = get_global_id(0);
     if (id >= maxId) return;

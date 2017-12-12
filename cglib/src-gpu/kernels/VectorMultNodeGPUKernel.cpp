@@ -6,12 +6,12 @@
 #include "../OCLWrappers.hpp"
 
 const std::string VectorMultNodeGPUKernel::KernelSource = R"==kernel==(
-uint getIndex(uint y, uint x, uint stride)
+uint getIndex(uint const y, uint const x, uint const stride)
 {
     return y * stride + x;
 }
 
-__kernel void main(__global float* vecA, __global float* vecB, __global float* vecResult, uint sizeAx, uint sizeBy, uint sizeBx, uint maxId)
+__kernel void main(__global float const * const vecA, __global float const * const vecB, __global float* const vecResult, uint const sizeAx, uint const sizeBy, uint const sizeBx, uint const maxId)
 {
     // get id into vector A -- the bigger one
     uint idA = get_global_id(0);
