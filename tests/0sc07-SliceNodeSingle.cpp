@@ -10,7 +10,7 @@
 
 float testSliceNode(const MemoryDimensions input1Dim, const InputDataBuffer& input1, const size_t sliceId, const size_t axis, const MemoryDimensions expectedDim, ConstDataBuffer& expected)
 {
-    InputNode i1("x", input1Dim.xDim);
+    InputNode i1("x");
     SliceNode sliceNode(&i1, sliceId, axis);
 
     // create InputDimensionsMap object to provide input dimensions to graph compilation routines
@@ -26,14 +26,16 @@ float testSliceNode(const MemoryDimensions input1Dim, const InputDataBuffer& inp
     compilationMemoryMap.RegisterNodeMemory(&i1, input1Dim);
     sliceNode.GetMemoryDimensions(compilationMemoryMap);
 
-    platform->AllocateMemory(&i1);
-    platform->AllocateMemory(&sliceNode);
+    platform->ReserveMemoryBuffer(&i1);
+    platform->ReserveMemoryBuffer(&sliceNode);
+    platform->AllocateAllMemory();
 
-    // compile kernel for SliceNode object
+    // compile kernels
+    i1.Compile(*platform);
     sliceNode.Compile(*platform);
 
     // copy input data into node working memory (will usually be done by compiled kernels for InputNode if whole graph is run; testing only single node here)
-    platform->CopyInputData(&i1, input1);
+    platform->CopyInputData(&i1, input1.data());
 
     // run compiled kernel
     platform->Evaluate();
@@ -41,7 +43,7 @@ float testSliceNode(const MemoryDimensions input1Dim, const InputDataBuffer& inp
     // get output (pointer to working memory of SliceNode which holds the computation result)
     const MemoryDimensions resultDim = compilationMemoryMap.GetNodeMemoryDimensions(&sliceNode);
     DataBuffer result(resultDim.size());
-    platform->CopyOutputData(&sliceNode, result);
+    platform->CopyOutputData(&sliceNode, result.data());
 
     // compute and return squared error
     float error = 0.0f;

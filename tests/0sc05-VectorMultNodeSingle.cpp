@@ -10,8 +10,8 @@
 
 float testVectorMultNode(const MemoryDimensions input1Dim, InputDataBuffer& input1, const MemoryDimensions input2Dim, InputDataBuffer& input2, const MemoryDimensions expectedDim, ConstDataBuffer& expected)
 {
-    InputNode i1("x", input1Dim.xDim);
-    InputNode i2("y", input2Dim.xDim);
+    InputNode i1("x");
+    InputNode i2("y");
     VectorMultNode testMultNode(&i1, &i2);
 
     // create InputDimensionsMap object to provide input dimensions to graph compilation routines
@@ -29,16 +29,19 @@ float testVectorMultNode(const MemoryDimensions input1Dim, InputDataBuffer& inpu
     compilationMemoryMap.RegisterNodeMemory(&i2, input2Dim);
     testMultNode.GetMemoryDimensions(compilationMemoryMap);
 
-    platform->AllocateMemory(&i1);
-    platform->AllocateMemory(&i2);
-    platform->AllocateMemory(&testMultNode);
+    platform->ReserveMemoryBuffer(&i1);
+    platform->ReserveMemoryBuffer(&i2);
+    platform->ReserveMemoryBuffer(&testMultNode);
+    platform->AllocateAllMemory();
 
-    // compile kernel for VectorMultNode object
+    // compile kernels
+    i1.Compile(*platform);
+    i2.Compile(*platform);
     testMultNode.Compile(*platform);
 
     // copy input data into node working memory (will usually be done by compiled kernels for InputNode if whole graph is run; testing only single node here)
-    platform->CopyInputData(&i1, input1);
-    platform->CopyInputData(&i2, input2);
+    platform->CopyInputData(&i1, input1.data());
+    platform->CopyInputData(&i2, input2.data());
 
     // run compiled kernel
     platform->Evaluate();
@@ -46,7 +49,7 @@ float testVectorMultNode(const MemoryDimensions input1Dim, InputDataBuffer& inpu
     // get output (pointer to working memory of VectorMultNode which holds the computation result)
     const MemoryDimensions resultDim = compilationMemoryMap.GetNodeMemoryDimensions(&testMultNode);
     DataBuffer result(resultDim.size());
-    platform->CopyOutputData(&testMultNode, result);
+    platform->CopyOutputData(&testMultNode, result.data());
 
     // compute and return squared error
     float error = 0.0f;

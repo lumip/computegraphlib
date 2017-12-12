@@ -21,25 +21,12 @@ int main(int argc, const char * const argv[])
     }
 
     size_t dim = 1000;
-    size_t n = 100000;
+    size_t n = 50000;
     size_t size = dim * n;
 
-    InputNode i1("x", dim);
-    InputNode i2("y", dim);
+    InputNode i1("x");
+    InputNode i2("y");
     VectorAddNode testAddNode(&i1, &i2);
-
-    // generate input data
-    std::cout << "generating input data..." << std::endl;
-    DataBuffer input1(size);
-    DataBuffer input2(size);
-
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_real_distribution<float> dist(-100.f, 100.f);
-
-    std::generate(std::begin(input1), std::end(input1), [&dist, &gen]()->float {return dist(gen);});
-    std::generate(std::begin(input2), std::end(input2), [&dist, &gen]()->float {return dist(gen);});
-    std::cout << "done generating input data" << std::endl;
 
     std::cout << "compiling graph and setting up runtime..." << std::endl;
     // provide input data dimensions
@@ -50,40 +37,62 @@ int main(int argc, const char * const argv[])
 
     // set up graph compilation context and platform
     ImplementationStrategyFactory fact;
-    CompilationMemoryMap CompilationMemoryMap(inputDimensions);
-    std::unique_ptr<GraphCompilationPlatform> platform = fact.CreateGraphCompilationTargetStrategy(CompilationMemoryMap);
+    CompilationMemoryMap compilationMemoryMap(inputDimensions);
+    std::unique_ptr<GraphCompilationPlatform> platform = fact.CreateGraphCompilationTargetStrategy(compilationMemoryMap);
+
+    long long time_setup_start = PAPI_get_real_nsec();
 
     // set up working memory for input nodes (will usually be done during compilation if whole graph is compiled; testing only single node here)
-    CompilationMemoryMap.RegisterNodeMemory(&i1, dims);
-    CompilationMemoryMap.RegisterNodeMemory(&i2, dims);
-    testAddNode.GetMemoryDimensions(CompilationMemoryMap);
+    compilationMemoryMap.RegisterNodeMemory(&i1, dims);
+    compilationMemoryMap.RegisterNodeMemory(&i2, dims);
+    compilationMemoryMap.RegisterInputNode("x", &i1);
+    compilationMemoryMap.RegisterInputNode("y", &i2);
+    testAddNode.GetMemoryDimensions(compilationMemoryMap);
 
-    platform->AllocateMemory(&i1);
-    platform->AllocateMemory(&i2);
-    platform->AllocateMemory(&testAddNode);
+    platform->ReserveMemoryBuffer(&i1);
+    platform->ReserveMemoryBuffer(&i2);
+    platform->ReserveMemoryBuffer(&testAddNode);
+    platform->AllocateAllMemory();
 
-    // compile kernel for VectorAddNode object
+    // compile kernels
+    i1.Compile(*platform);
+    i2.Compile(*platform);
     testAddNode.Compile(*platform);
 
+    long long time_setup_stop = PAPI_get_real_nsec();
     std::cout << "done setting up" << std::endl;
 
-    std::cout << "copying data and running computation" << std::endl;
+    // get mapped memory of working nodes and fill it with random data
+    std::cout << "generating input data..." << std::endl;
+    float* const mappedInput1 = platform->GetMappedInputBuffer("x");
+    float* const mappedInput2 = platform->GetMappedInputBuffer("y");
 
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<float> dist(-100.f, 100.f);
+
+    std::generate(mappedInput1, mappedInput1 + size, [&dist, &gen]()->float {return dist(gen);});
+    std::generate(mappedInput2, mappedInput2 + size, [&dist, &gen]()->float {return dist(gen);});
+    std::cout << "done generating input data" << std::endl;
+
+    std::cout << "copying data" << std::endl;
     long long time_copy_start = PAPI_get_real_nsec();
 
     // copy input data into node working memory (will usually be done by compiled kernels for InputNode if whole graph is run; testing only single node here)
-    platform->CopyInputData(&i1, input1);
-    platform->CopyInputData(&i2, input2);
+    platform->CopyInputData(&i1, mappedInput1);
+    platform->CopyInputData(&i2, mappedInput2);
+    platform->WaitUntilDataTransferFinished();
 
+    long long time_copy_stop = PAPI_get_real_nsec();
+    std::cout << "running computation" << std::endl;
     long long time_start = PAPI_get_real_nsec();
-    long long cycs_start = PAPI_get_real_cyc();
 
     // run compiled kernel
     platform->Evaluate();
+    platform->WaitUntilEvaluationFinished();
 
-    long long cycs_stop = PAPI_get_real_cyc();
     long long time_stop = PAPI_get_real_nsec();
 
-    std::cout << "Computation on " << size << " elements took " << cycs_stop - cycs_start << " cycles in "<< time_stop - time_start << " ns and " << time_start - time_copy_start << " ns to copy input data" << std::endl;
-    return -0;
+    std::cout << "Setup: " << time_setup_stop - time_setup_start << " ns; Copy: "<< time_copy_stop - time_copy_start << " ns; Compute: " << time_stop - time_start << " ns" << std::endl;
+    return 0;
 }

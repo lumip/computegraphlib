@@ -1,6 +1,7 @@
 #include <iostream>
 #include <sstream>
 #include <cmath>
+#include <memory>
 
 #include "types.hpp"
 #include "nodes/InputNode.hpp"
@@ -14,7 +15,8 @@ float testStackNode(const MemoryDimensions sliceDim, const std::vector<DataBuffe
     const size_t sliceCount = slices.size();
 
     // Create, and set up InputNodes holding the slices data
-    std::vector<NodePtr> sliceInputs(sliceCount);
+    std::vector<std::unique_ptr<Node>> createdNodes(sliceCount); // keep track of dynamically allocated nodes so that they get freed upon returning
+    std::vector<NodePtr> sliceInputs(sliceCount); // vector holding plain pointers to feed into StackNode
     ImplementationStrategyFactory fact;
     CompilationMemoryMap compilationMemoryMap;
     std::unique_ptr<GraphCompilationPlatform> platform = fact.CreateGraphCompilationTargetStrategy(compilationMemoryMap);
@@ -23,18 +25,27 @@ float testStackNode(const MemoryDimensions sliceDim, const std::vector<DataBuffe
     {
         std::stringstream ss;
         ss << i;
-        NodePtr node = new InputNode(ss.str(), sliceDim.xDim);
+        NodePtr node = new InputNode(ss.str());
+        createdNodes[i] = std::unique_ptr<Node>(node);
         sliceInputs[i] = node;
         compilationMemoryMap.RegisterNodeMemory(node, sliceDim);
-        platform->AllocateMemory(node);
-        platform->CopyInputData(node, slices[i]);
+        platform->ReserveMemoryBuffer(node);
+        node->Compile(*platform);
     }
 
     // create, set up and compile StackNode
     StackNode stackNode(sliceInputs, axis);
     stackNode.GetMemoryDimensions(compilationMemoryMap);
-    platform->AllocateMemory(&stackNode);
+    platform->ReserveMemoryBuffer(&stackNode);
+    platform->AllocateAllMemory();
+
     stackNode.Compile(*platform);
+
+    // copy input data
+    for (size_t i = 0; i < sliceCount; ++i)
+    {
+        platform->CopyInputData(sliceInputs[i], slices[i].data());
+    }
 
     // run compiled kernel
     platform->Evaluate();
@@ -42,7 +53,7 @@ float testStackNode(const MemoryDimensions sliceDim, const std::vector<DataBuffe
     // get output (pointer to working memory of StackNode which holds the computation result)
     const MemoryDimensions resultDim = compilationMemoryMap.GetNodeMemoryDimensions(&stackNode);
     DataBuffer result(resultDim.size());
-    platform->CopyOutputData(&stackNode, result);
+    platform->CopyOutputData(&stackNode, result.data());
 
     // compute and return squared error
     float error = 0.0f;

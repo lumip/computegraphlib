@@ -6,7 +6,8 @@
 #include "GraphCompilationPlatform.hpp"
 
 ExpFuncNode::ExpFuncNode(NodePtr input)
-    : _input(input)
+    : Node(true, false)
+    , _input(input)
 {
     this->SubscribeTo(input);
 }
@@ -23,11 +24,6 @@ std::string ExpFuncNode::ToString() const
     std::stringstream ss;
     ss << "<ExpFuncNode " << (this) << ">";
     return ss.str();
-}
-
-bool ExpFuncNode::IsInitialized() const
-{
-    return false;
 }
 
 void ExpFuncNode::Compile(GraphCompilationPlatform& platform) const

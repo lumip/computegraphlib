@@ -1,5 +1,6 @@
 #include "ConstMultNodeGPUKernel.hpp"
 #include "CopyDataGPUKernel.hpp"
+#include "EmptyGPUKernel.hpp"
 #include "ExpFuncNodeGPUKernel.hpp"
 #include "LogFuncNodeGPUKernel.hpp"
 #include "MatrixMultNodeGPUKernel.hpp"
@@ -9,3 +10,4 @@
 #include "VectorAddNodeGPUKernel.hpp"
 #include "VectorDivNodeGPUKernel.hpp"
 #include "VectorMultNodeGPUKernel.hpp"
+#include "WaitForGPUKernel.hpp"

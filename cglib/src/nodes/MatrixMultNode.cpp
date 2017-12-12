@@ -6,7 +6,8 @@
 #include "GraphCompilationPlatform.hpp"
 
 MatrixMultNode::MatrixMultNode(NodePtr a, NodePtr b)
-    : _a(a)
+    : Node(false, false)
+    , _a(a)
     , _b(b)
 {
     this->SubscribeTo(a);
@@ -25,11 +26,6 @@ std::string MatrixMultNode::ToString() const
     std::stringstream ss;
     ss << "<MatrixMultNode " << (this) << ">";
     return ss.str();
-}
-
-bool MatrixMultNode::IsInitialized() const
-{
-    return false;
 }
 
 void MatrixMultNode::Compile(GraphCompilationPlatform& platform) const

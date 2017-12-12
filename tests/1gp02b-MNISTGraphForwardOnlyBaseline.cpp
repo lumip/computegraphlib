@@ -1,6 +1,5 @@
 #include <iostream>
 #include <algorithm>
-#include <random>
 #include <cmath>
 #include "immintrin.h"
 #include <assert.h>
@@ -11,8 +10,8 @@
 // global definitions for data dimensions
 const size_t InputDim = 784;
 const size_t InputDimMem = 784; // multiple of 8
-const size_t BatchSize = 500;
-const size_t BatchSizeMem = 504; // multiple of 8
+size_t BatchSize = 500;
+size_t BatchSizeMem = 504; // multiple of 8
 const size_t OutputDim = 10;
 const size_t OutputDimMem = 16; // multiple of 8
 
@@ -43,20 +42,9 @@ void initializeData(const std::string& mnistDataDir, DataBuffer& inputs, DataBuf
         inputs[i] /= 255.0f;
     }
 
-    // fill weights and bias with random numbers
-    std::mt19937 gen(22); // with fixed seed, reproducible results
-    std::uniform_real_distribution<float> dist(-1.f, 1.f);
-
-    //std::generate_n(weights, InputDim * OutputDim, [&dist, &gen]()->float {return dist(gen);});
-    for (size_t i = 0; i < InputDimMem; ++i)
-    {
-        for (size_t j = 0; j < OutputDim; ++j)
-        {
-            size_t id = getIndex(i, j, OutputDimMem);
-            weights[id] = dist(gen);
-        }
-    }
-    std::generate_n(bias, OutputDim, [&dist, &gen]()->float {return dist(gen);}); // we write the bias values into an additional row of inputs
+    // fill weights and bias with zeroes
+    std::fill_n(weights, InputDimMem * OutputDimMem, 0.0f);
+    std::fill_n(bias, OutputDimMem, 0.0f);
 }
 
 inline void multiplyInputAndWeights(const DataBuffer matA, DataBuffer matB, DataBuffer matRes)
@@ -159,10 +147,23 @@ int main(int argc, const char * const argv[])
     // Check command line arguments
     if (argc < 2)
     {
-        std::cout << "Usage: " << argv[0] << " <path to MNIST dataset>" << std::endl;
+        std::cout << "Usage: " << argv[0] << " <path to MNIST dataset> [<training batch size>]" << std::endl;
         return -1;
     }
     const std::string mnistDataDir(argv[1]);
+
+    if (argc > 2)
+    {
+        BatchSize = std::stoi(argv[2]);
+        BatchSizeMem = ((BatchSize / 8) + 1) * 8; // make BatchSizeMem the next larger multiple of 8 of BatchSize
+    }
+
+    int retval = PAPI_library_init(PAPI_VER_CURRENT);
+    if(retval != PAPI_VER_CURRENT)
+    {
+        std::cout << "could not initialize PAPI" << std::endl;
+        return -1;
+    }
 
     DataBuffer inputs = static_cast<DataBuffer>(aligned_alloc(32, (BatchSizeMem * InputDimMem) * sizeof(float)));
     DataBuffer classes = static_cast<DataBuffer>(aligned_alloc(32, (BatchSizeMem * OutputDimMem) * sizeof(float)));
@@ -173,16 +174,14 @@ int main(int argc, const char * const argv[])
 
     DataBuffer buffer = static_cast<DataBuffer>(aligned_alloc(32, (BatchSizeMem * OutputDimMem) * sizeof(float)));
 
-    long long time_start = PAPI_get_real_nsec();
-    long long cycs_start = PAPI_get_real_cyc();
+    long long time_start = PAPI_get_real_nsec();;
     multiplyInputAndWeights(inputs, weights, buffer);
     addBiasAndComputeSoftmax(buffer, bias, buffer);
     float loss = computeLoss(buffer, classes);
     long long time_stop = PAPI_get_real_nsec();
-    long long cycs_stop = PAPI_get_real_cyc();
 
     std::cout << "Loss: " << loss << std::endl;
-    std::cout << "Computation on " << BatchSize << " samples took " << cycs_stop - cycs_start << " cycles in "<< time_stop - time_start << " ns and " << 0 << " ns to copy input data" << std::endl;
+    std::cout << "Setup: 0 ns; Copy: 0 ns; Compute: " << time_stop - time_start << " ns" << std::endl;
 
     return 0;
 }

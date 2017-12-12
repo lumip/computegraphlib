@@ -14,15 +14,20 @@ private:
     typedef float* MemoryHandle;
 private:
     std::vector<std::unique_ptr<Kernel>> _kernels;
-    std::map<ConstNodePtr, std::unique_ptr<float[]>> _bufferMap;
-    const CompilationMemoryMap& _dimensionsMap;
+    std::vector<std::unique_ptr<float[]>> _memoryBufferLocations;
+private:
+    MemoryHandle GetMemoryLocation(const ConstNodePtr node) const;
 public:
-    GraphCompilationCPUPlatform(const CompilationMemoryMap& CompilationMemoryMap);
+    GraphCompilationCPUPlatform(const CompilationMemoryMap& compilationMemoryMap);
     ~GraphCompilationCPUPlatform();
-    void AllocateMemory(const ConstNodePtr node);
-    void CopyOutputData(const ConstNodePtr outputNode, DataBuffer& outputBuffer) const;
-    void CopyInputData(const ConstNodePtr inputNode, InputDataBuffer& inputBuffer);
+    void AllocateAllMemory();
+    void CopyOutputData(const ConstNodePtr outputNode, float* outputBuffer) const;
+    void CopyInputData(const ConstNodePtr inputNode, float const* inputBuffer);
     void Evaluate();
+    bool IsEvaluating() const;
+    void WaitUntilEvaluationFinished() const;
+    void WaitUntilDataTransferFinished() const;
+    float* GetMappedInputBuffer(std::string const& inputName);
 
     void CompileConstMultNode(const ConstMultNode* const node);
     void CompileExpFuncNode(const ExpFuncNode* const node);

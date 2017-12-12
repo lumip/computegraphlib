@@ -9,7 +9,7 @@ typedef std::vector<float> DataBuffer; // todo: consider using std::valarray
 typedef const DataBuffer ConstDataBuffer;
 typedef ConstDataBuffer InputDataBuffer;
 
-typedef std::map<std::string, std::reference_wrapper<InputDataBuffer>> InputDataMap;
+typedef std::map<std::string, float const*> InputDataMap;
 struct MemoryDimensions
 {
     union {
@@ -31,6 +31,26 @@ inline bool operator ==(const MemoryDimensions& lhs, const MemoryDimensions& rhs
 inline bool operator !=(const MemoryDimensions& lhs, const MemoryDimensions& rhs)
 {
     return !(lhs == rhs);
+}
+
+inline bool operator <=(const MemoryDimensions& lhs, const MemoryDimensions& rhs)
+{
+    return lhs.yDim <= rhs.yDim && lhs.xDim <= rhs.xDim;
+}
+
+inline bool operator <(const MemoryDimensions& lhs, const MemoryDimensions& rhs)
+{
+    return lhs <= rhs && lhs != rhs;
+}
+
+inline bool operator >=(const MemoryDimensions& lhs, const MemoryDimensions& rhs)
+{
+    return lhs.yDim >= rhs.yDim && lhs.xDim >= rhs.xDim;
+}
+
+inline bool operator >(const MemoryDimensions& lhs, const MemoryDimensions& rhs)
+{
+    return lhs >= rhs && lhs != rhs;
 }
 
 typedef std::map<std::string, const MemoryDimensions> InputDimensionsMap;

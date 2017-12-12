@@ -3,10 +3,9 @@
 #include "CompilationMemoryMap.hpp"
 #include "GraphCompilationPlatform.hpp"
 
-VariableNode::VariableNode(std::string name, size_t xDim, size_t yDim)
-    : _name(name)
-    , _xDim(xDim)
-    , _yDim(yDim)
+VariableNode::VariableNode(std::string name)
+    : Node(true, true)
+    , _name(name)
     , _input(nullptr)
 {
 }
@@ -40,11 +39,6 @@ std::string VariableNode::ToString() const
     return "<VariableNode " + _name + ">";
 }
 
-bool VariableNode::IsInitialized() const
-{
-    return true;
-}
-
 void VariableNode::Compile(GraphCompilationPlatform& platform) const
 {
     platform.CompileVariableNode(this);
@@ -53,15 +47,6 @@ void VariableNode::Compile(GraphCompilationPlatform& platform) const
 void VariableNode::GetMemoryDimensions(CompilationMemoryMap& memoryMap) const
 {
     const MemoryDimensions initDim = memoryMap.GetInputDimensions(_name);
-    // todo: what if input node didn't yet register its memory dimensions?
-    /*if (_input != nullptr)
-    {
-        const MemoryDimensions inputNodeDim = memoryMap.GetNodeMemoryDimensions(_input);
-        if (initDim != inputNodeDim)
-        {
-            throw std::runtime_error("The dimensions of initialization data and input node data are different for this VariableNode.");
-        }
-    }*/
     memoryMap.RegisterNodeMemory(this, initDim);
-    memoryMap.RegisterInputMemory(_name, this);
+    memoryMap.RegisterVariableNode(_name, this);
 }

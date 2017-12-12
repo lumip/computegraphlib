@@ -2,9 +2,9 @@
 
 CompilationMemoryMap::CompilationMemoryMap(const InputDimensionsMap inputDimensions)
     : _inputDimensions(std::move(inputDimensions))
-    , _memoryMap()
-    , _inputMemoryMap()
-    , _outputMemoryMap()
+    , _memoryDimensions()
+    , _inputNodes()
+    , _variableNodes()
 {
 }
 
@@ -14,14 +14,14 @@ CompilationMemoryMap::~CompilationMemoryMap() { }
 
 CompilationMemoryMap::CompilationMemoryMap(const CompilationMemoryMap& other)
     : _inputDimensions(other._inputDimensions)
-    , _memoryMap(other._memoryMap)
-    , _inputMemoryMap(other._inputMemoryMap)
-    , _outputMemoryMap(other._outputMemoryMap)
+    , _memoryDimensions(other._memoryDimensions)
+    , _inputNodes(other._inputNodes)
+    , _variableNodes(other._variableNodes)
 {
 }
 
 CompilationMemoryMap::CompilationMemoryMap(CompilationMemoryMap&& other)
-    : _inputDimensions(), _memoryMap(), _inputMemoryMap(), _outputMemoryMap()
+    : _inputDimensions(), _memoryDimensions(), _inputNodes(), _variableNodes()
 {
     swap(*this, other);
 }
@@ -29,9 +29,9 @@ CompilationMemoryMap::CompilationMemoryMap(CompilationMemoryMap&& other)
 void CompilationMemoryMap::swap(CompilationMemoryMap& a, CompilationMemoryMap& b)
 {
     std::swap(a._inputDimensions, b._inputDimensions);
-    std::swap(a._memoryMap, b._memoryMap);
-    std::swap(a._inputMemoryMap, b._inputMemoryMap);
-    std::swap(a._outputMemoryMap, b._outputMemoryMap);
+    std::swap(a._memoryDimensions, b._memoryDimensions);
+    std::swap(a._inputNodes, b._inputNodes);
+    std::swap(a._variableNodes, b._variableNodes);
 }
 
 CompilationMemoryMap& CompilationMemoryMap::operator=(CompilationMemoryMap other)
@@ -42,35 +42,55 @@ CompilationMemoryMap& CompilationMemoryMap::operator=(CompilationMemoryMap other
 
 void CompilationMemoryMap::RegisterNodeMemory(const ConstNodePtr node, const MemoryDimensions memoryDimensions)
 {
-    this->_memoryMap.emplace(node, memoryDimensions);
+    this->_memoryDimensions.emplace(node, memoryDimensions);
 }
 
 MemoryDimensions CompilationMemoryMap::GetNodeMemoryDimensions(const ConstNodePtr node) const
 {
-    return this->_memoryMap.at(node);
+    return this->_memoryDimensions.at(node);
 }
 
-MemoryDimensions CompilationMemoryMap::GetInputDimensions(std::string inputName) const
+MemoryDimensions CompilationMemoryMap::GetInputDimensions(const std::string& inputName) const
 {
     return this->_inputDimensions.at(inputName);
 }
 
-void CompilationMemoryMap::RegisterInputMemory(const std::string inputName, const ConstNodePtr node)
+void CompilationMemoryMap::RegisterInputNode(const std::string& inputName, const ConstNodePtr node)
 {
-    this->_inputMemoryMap.emplace(inputName, node);
+    this->_inputNodes.emplace(inputName, node);
 }
 
-void CompilationMemoryMap::RegisterOutputMemory(const std::string outputName, const ConstNodePtr node)
+ConstNodePtr CompilationMemoryMap::GetInputNode(const std::string& inputName) const
 {
-    this->_outputMemoryMap.emplace(outputName, node);
+    return this->_inputNodes.at(inputName);
 }
 
-ConstNodePtr CompilationMemoryMap::GetInputNode(const std::string inputName) const
+void CompilationMemoryMap::RegisterVariableNode(const std::string& variableName, const ConstNodePtr node)
 {
-    return this->_inputMemoryMap.at(inputName);
+    this->_variableNodes.emplace(variableName, node);
 }
 
-ConstNodePtr CompilationMemoryMap::GetOutputNode(const std::string outputName) const
+ConstNodePtr CompilationMemoryMap::GetVariableNode(const std::string& variableName) const
 {
-    return this->_outputMemoryMap.at(outputName);
+    return this->_variableNodes.at(variableName);
+}
+
+std::vector<std::string> CompilationMemoryMap::GetInputNames() const
+{
+    std::vector<std::string> names;
+    for (auto elem : this->_inputNodes)
+    {
+        names.push_back(elem.first);
+    }
+    return names;
+}
+
+std::vector<std::string> CompilationMemoryMap::GetVariableNames() const
+{
+    std::vector<std::string> names;
+    for (auto elem : this->_variableNodes)
+    {
+        names.push_back(elem.first);
+    }
+    return names;
 }

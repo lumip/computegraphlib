@@ -10,8 +10,8 @@
 
 float testVectorAddNode(const MemoryDimensions input1Dim, InputDataBuffer& input1, const MemoryDimensions input2Dim, InputDataBuffer& input2, const MemoryDimensions& expectedDim, ConstDataBuffer& expected)
 {
-    InputNode i1("x", input1Dim.xDim);
-    InputNode i2("y", input2Dim.xDim);
+    InputNode i1("x");
+    InputNode i2("y");
     VectorAddNode testAddNode(&i1, &i2);
 
     // create InputDimensionsMap object to provide input dimensions to graph compilation routines
@@ -29,16 +29,19 @@ float testVectorAddNode(const MemoryDimensions input1Dim, InputDataBuffer& input
     compilationMemoryMap.RegisterNodeMemory(&i2, input2Dim);
     testAddNode.GetMemoryDimensions(compilationMemoryMap);
 
-    platform->AllocateMemory(&i1);
-    platform->AllocateMemory(&i2);
-    platform->AllocateMemory(&testAddNode);
+    platform->ReserveMemoryBuffer(&i1);
+    platform->ReserveMemoryBuffer(&i2);
+    platform->ReserveMemoryBuffer(&testAddNode);
+    platform->AllocateAllMemory();
 
-    // compile kernel for VectorAddNode object
+    // compile kernels
+    i1.Compile(*platform);
+    i2.Compile(*platform);
     testAddNode.Compile(*platform);
 
     // copy input data into node working memory (will usually be done by compiled kernels for InputNode if whole graph is run; testing only single node here)
-    platform->CopyInputData(&i1, input1);
-    platform->CopyInputData(&i2, input2);
+    platform->CopyInputData(&i1, input1.data());
+    platform->CopyInputData(&i2, input2.data());
 
     // run compiled kernel
     platform->Evaluate();
@@ -46,7 +49,7 @@ float testVectorAddNode(const MemoryDimensions input1Dim, InputDataBuffer& input
     // get output (pointer to working memory of VectorAddNode which holds the computation result)
     const MemoryDimensions resultDim = compilationMemoryMap.GetNodeMemoryDimensions(&testAddNode);
     DataBuffer result(resultDim.size());
-    platform->CopyOutputData(&testAddNode, result);
+    platform->CopyOutputData(&testAddNode, result.data());
 
     // compute and return squared error
     float error = 0.0f;

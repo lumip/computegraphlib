@@ -6,7 +6,8 @@
 #include "GraphCompilationPlatform.hpp"
 
 VectorMultNode::VectorMultNode(NodePtr a, NodePtr b)
-    : _inputA(a)
+    : Node(true, false)
+    , _inputA(a)
     , _inputB(b)
 {
     this->SubscribeTo(a);
@@ -25,11 +26,6 @@ std::string VectorMultNode::ToString() const
     std::stringstream ss;
     ss << "<VectorMultNode " << (this) << ">";
     return ss.str();
-}
-
-bool VectorMultNode::IsInitialized() const
-{
-    return false;
 }
 
 void VectorMultNode::Compile(GraphCompilationPlatform& platform) const

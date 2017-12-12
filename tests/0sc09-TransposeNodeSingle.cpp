@@ -13,7 +13,7 @@ int main(int argc, const char * const argv[])
     size_t m = 5;
     size_t n = 4;
 
-    InputNode i1("x", n);
+    InputNode i1("x");
     TransposeNode transposeNode(&i1);
 
     // define input and expected output data
@@ -33,14 +33,16 @@ int main(int argc, const char * const argv[])
     compilationMemoryMap.RegisterNodeMemory(&i1, {m, n});
     transposeNode.GetMemoryDimensions(compilationMemoryMap);
 
-    platform->AllocateMemory(&i1);
-    platform->AllocateMemory(&transposeNode);
+    platform->ReserveMemoryBuffer(&i1);
+    platform->ReserveMemoryBuffer(&transposeNode);
+    platform->AllocateAllMemory();
 
-    // compile kernel for TransposeNode object
+    // compile kernels
+    i1.Compile(*platform);
     transposeNode.Compile(*platform);
 
     // copy input data into node working memory (will usually be done by compiled kernels for InputNode if whole graph is run; testing only single node here)
-    platform->CopyInputData(&i1, input1);
+    platform->CopyInputData(&i1, input1.data());
 
     // run compiled kernel
     platform->Evaluate();
@@ -48,7 +50,7 @@ int main(int argc, const char * const argv[])
     // get output (pointer to working memory of TransposeNode which holds the computation result)
     const MemoryDimensions resultDim = compilationMemoryMap.GetNodeMemoryDimensions(&transposeNode);
     DataBuffer result(resultDim.size());
-    platform->CopyOutputData(&transposeNode, result);
+    platform->CopyOutputData(&transposeNode, result.data());
 
     // compute and output squared error
     float error = 0.0f;

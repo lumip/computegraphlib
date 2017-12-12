@@ -1,7 +1,10 @@
 #ifndef _GRAPH_COMPILATION_PLATFORM_HPP_
 #define _GRAPH_COMPILATION_PLATFORM_HPP_
 
+#include <set>
+
 #include "types.hpp"
+#include "CompilationMemoryMap.hpp"
 
 class ConstMultNode;
 class ExpFuncNode;
@@ -21,18 +24,33 @@ class VectorMultNode;
 
 class GraphCompilationPlatform
 {
+protected:
+    struct MemoryBuffer
+    {
+        MemoryDimensions Dimensions;
+        std::set<ConstNodePtr> Subscribers;
+    };
 public:
-    GraphCompilationPlatform() { }
-    virtual ~GraphCompilationPlatform() { }
-    virtual void AllocateMemory(const ConstNodePtr node) = 0;
-    virtual void CopyOutputData(const ConstNodePtr outputNode, DataBuffer& outputBuffer) const = 0;
-    virtual void CopyInputData(const ConstNodePtr inputNode, InputDataBuffer& inputBuffer) = 0;
+    typedef size_t MemoryBufferHandle;
+protected: // todo: consider making these private and offer interface
+    std::vector<MemoryBuffer> _memoryBuffers;
+    std::map<ConstNodePtr, MemoryBufferHandle> _nodeMemoryAssignments;
+    const CompilationMemoryMap& _dimensionsMap;
+public:
+    GraphCompilationPlatform(const CompilationMemoryMap& compilationMemoryMap);
+    virtual ~GraphCompilationPlatform();
+    MemoryBufferHandle ReserveMemoryBuffer(const ConstNodePtr node);
+    void AssignMemoryBuffer(const ConstNodePtr node, MemoryBufferHandle memory);
+    MemoryBufferHandle GetNodeMemoryBuffer(const ConstNodePtr node) const;
+    bool NodeIsAssigned(const ConstNodePtr node) const;
+    virtual void AllocateAllMemory() = 0;
+    virtual void CopyOutputData(const ConstNodePtr outputNode, float* outputBuffer) const = 0;
+    virtual void CopyInputData(const ConstNodePtr inputNode, float const* inputBuffer) = 0;
     virtual void Evaluate() = 0;
-    /* todo: think about identifying memory by some handle instead of by node. this would allow
-     * for abstracting lookup of memory dimensions (which is currently duplicated in the subclasses).
-     * platform specific implementations could then really focus on just providing the platform
-     * dependent code without duplicating the code looking up memory sizes etc
-     */
+    virtual bool IsEvaluating() const = 0;
+    virtual void WaitUntilEvaluationFinished() const = 0;
+    virtual void WaitUntilDataTransferFinished() const = 0;
+    virtual float* GetMappedInputBuffer(std::string const& inputName) = 0;
 
     /* todo: remove all graph-specific compilation state from out of this class. make it truly just a "platform" which can be reused */
 

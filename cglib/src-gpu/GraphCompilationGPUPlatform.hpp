@@ -2,6 +2,7 @@
 #define _GRAPH_COMPILATION_GPU_STRATEGY_HPP_
 
 #include <memory>
+#include <atomic>
 
 #include <CL/cl.h>
 
@@ -18,25 +19,41 @@ class GraphCompilationGPUPlatform : public GraphCompilationPlatform, public Open
 {
 private:
     typedef cl_mem MemoryHandle;
-    const CompilationMemoryMap& _dimensionsMap;
+private:
     const OCLWrappers::Context _clContext;
     const cl_device_id _clDevice; // we do not allocate the device so we do not have a wrapper keeping care of releasing it
     const OCLWrappers::Queue _clMemoryQueue;
     const OCLWrappers::Queue _clExecutionQueue;
+    const size_t _computeUnitCount;
     std::vector<std::unique_ptr<Kernel>> _kernels;
-    std::map<ConstNodePtr, OCLWrappers::Memory> _bufferMap;
-    std::vector<OCLWrappers::Program> _programs;
+    std::vector<OCLWrappers::Memory> _memoryBufferLocations;
+    std::vector<OCLWrappers::Program> _clPrograms;
+    std::map<std::string, OCLWrappers::Kernel> _clKernels;
+    OCLWrappers::Event _executionFinishedEvent;
+    std::atomic<bool> _isRunning; // used in (asynchronous) OpenCL callback
+    std::map<ConstNodePtr, GPUKernel const*> _nodeKernels;
+    std::map<std::string, std::pair<OCLWrappers::Memory, float*>> _mappedInputBuffers;
 private:
     cl_device_id SelectDevice();
+    size_t QueryComputeUnitCount();
     OCLWrappers::Queue CreateCommandQueue();
+    MemoryHandle GetMemoryLocation(const ConstNodePtr node) const;
+    GPUKernel const* GetNodeKernel(ConstNodePtr node) const;
+    void AllocateMappedMemory(std::string const& inputName, ConstNodePtr const node);
 public:
-    GraphCompilationGPUPlatform(const CompilationMemoryMap& CompilationMemoryMap, OCLWrappers::Context&& context);
+    GraphCompilationGPUPlatform(const CompilationMemoryMap& compilationMemoryMap, OCLWrappers::Context&& context);
     ~GraphCompilationGPUPlatform();
-    void AllocateMemory(const ConstNodePtr node);
-    void CopyOutputData(const ConstNodePtr outputNode, DataBuffer& outputBuffer) const;
-    void CopyInputData(const ConstNodePtr inputNode, InputDataBuffer& inputBuffer);
+    void AllocateAllMemory();
+    void CopyOutputData(const ConstNodePtr outputNode, float* outputBuffer) const;
+    void CopyInputData(const ConstNodePtr inputNode, float const* inputBuffer);
     void Evaluate();
-    OCLWrappers::Kernel CompileKernel(const std::string& kernelSource);
+    bool IsEvaluating() const;
+    void WaitUntilEvaluationFinished() const;
+    void WaitUntilDataTransferFinished() const;
+    float* GetMappedInputBuffer(std::string const& inputName);
+
+    cl_kernel CompileKernel(const std::string& kernelSource);
+    size_t GetComputeUnitCount() const;
 
     void CompileConstMultNode(const ConstMultNode* const node);
     void CompileExpFuncNode(const ExpFuncNode* const node);

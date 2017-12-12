@@ -6,7 +6,8 @@
 #include "GraphCompilationPlatform.hpp"
 
 ConstMultNode::ConstMultNode(NodePtr input, float constantFactor)
-    : _input(input)
+    : Node(true, false)
+    , _input(input)
     , _factor(constantFactor)
 {
     this->SubscribeTo(input);
@@ -24,11 +25,6 @@ std::string ConstMultNode::ToString() const
     std::stringstream ss;
     ss << "<ConstMultNode " << (this) << ">";
     return ss.str();
-}
-
-bool ConstMultNode::IsInitialized() const
-{
-    return false;
 }
 
 void ConstMultNode::Compile(GraphCompilationPlatform& platform) const

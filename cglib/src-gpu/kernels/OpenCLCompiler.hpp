@@ -2,14 +2,18 @@
 #define _OPENCL_COMPILER_HPP_
 
 #include <string>
-#include "../OCLWrappers.hpp"
+#include <vector>
+#include <CL/cl.h>
 
-class OpenCLCompiler
+class GPUKernel;
+
+class OpenCLCompiler // rename to OpenCLRuntime ?
 {
 public:
     OpenCLCompiler() { }
     virtual ~OpenCLCompiler() { }
-    virtual OCLWrappers::Kernel CompileKernel(const std::string& kernelSource) = 0;
+    virtual cl_kernel CompileKernel(const std::string& kernelSource) = 0;
+    virtual size_t GetComputeUnitCount() const = 0;
 };
 
 #endif

@@ -6,7 +6,8 @@
 #include "GraphCompilationPlatform.hpp"
 
 TransposeNode::TransposeNode(NodePtr input)
-    : _input(input)
+    : Node(false, false)
+    , _input(input)
 {
     this->SubscribeTo(input);
 }
@@ -23,11 +24,6 @@ std::string TransposeNode::ToString() const
     std::stringstream ss;
     ss << "<TransposeNode " << (this) << ">";
     return ss.str();
-}
-
-bool TransposeNode::IsInitialized() const
-{
-    return false;
 }
 
 void TransposeNode::Compile(GraphCompilationPlatform& platform) const

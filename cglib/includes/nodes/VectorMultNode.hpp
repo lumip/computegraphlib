@@ -15,7 +15,6 @@ public:
     void Compile(GraphCompilationPlatform& platform) const;
     void GetMemoryDimensions(CompilationMemoryMap& memoryMap) const;
     std::string ToString() const;
-    bool IsInitialized() const;
 };
 
 #endif

@@ -6,7 +6,8 @@
 #include "GraphCompilationPlatform.hpp"
 
 ReduceMeanNode::ReduceMeanNode(NodePtr input, size_t axis)
-    : _input(input)
+    : Node(false, false)
+    , _input(input)
     , _axis(axis)
 {
     this->SubscribeTo(input);
@@ -24,11 +25,6 @@ std::string ReduceMeanNode::ToString() const
     std::stringstream ss;
     ss << "<ReduceMeanNode " << (this) << ">";
     return ss.str();
-}
-
-bool ReduceMeanNode::IsInitialized() const
-{
-    return false;
 }
 
 void ReduceMeanNode::Compile(GraphCompilationPlatform& platform) const

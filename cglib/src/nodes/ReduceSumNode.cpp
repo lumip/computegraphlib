@@ -6,7 +6,8 @@
 #include "GraphCompilationPlatform.hpp"
 
 ReduceSumNode::ReduceSumNode(NodePtr input, size_t axis)
-    : _input(input)
+    : Node(false, false)
+    , _input(input)
     , _axis(axis)
 {
     this->SubscribeTo(input);
@@ -24,11 +25,6 @@ std::string ReduceSumNode::ToString() const
     std::stringstream ss;
     ss << "<ReduceSumNode " << (this) << ">";
     return ss.str();
-}
-
-bool ReduceSumNode::IsInitialized() const
-{
-    return false;
 }
 
 void ReduceSumNode::Compile(GraphCompilationPlatform& platform) const
