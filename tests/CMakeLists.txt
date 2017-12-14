@@ -176,7 +176,7 @@ if (${MNIST_FOUND} AND ${PAPI_FOUND})
     add_executable(1gp03c_MNISTGraph "1gp03-MNISTGraph.cpp")
     target_compile_definitions(1gp03c_MNISTGraph PRIVATE -DCPU)
     target_include_directories(1gp03c_MNISTGraph PRIVATE ${PAPI_INCLUDE_DIRS} ${MNIST_INCLUDE_DIR})
-    target_link_libraries(1gp03c_MNISTGraph cgLibGPU ${PAPI_LIBRARIES})
+    target_link_libraries(1gp03c_MNISTGraph cgLibCPU ${PAPI_LIBRARIES})
 
     ###### Performance tests on GPU
     add_executable(1gp01g_Graph "1gp01-Graph.cpp")
