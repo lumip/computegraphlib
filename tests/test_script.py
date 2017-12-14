@@ -22,8 +22,10 @@ print("running " + str(n_iterations) + " instances of " + process_name + " and w
 with open(logfile_dir + logfile_name, "w") as f:
     print("time_setup, time_copy, time_compute", file=f)
     for i in range(n_iterations):
-        result = subprocess.run([process_path], stdout=subprocess.PIPE).stdout.decode('utf-8')
+        args = ' '.join(sys.argv[2:])
+        result = subprocess.run([process_path, args], stdout=subprocess.PIPE).stdout.decode('utf-8')
+        print(result)
         print(", ".join(s for s in result.split() if s.isdigit()), file=f) # assuming that only the last lines prints the three performance numbers
-print(".", end='', flush=True)
+        print(".", end='', flush=True)
 
 print("")
