@@ -6,7 +6,7 @@
 #include "nodes/SliceNode.hpp"
 #include "CompilationMemoryMap.hpp"
 #include "GraphCompilationPlatform.hpp"
-#include "ImplementationStrategyFactory.hpp"
+#include "GraphCompilationPlatformFactory.hpp"
 
 float testSliceNode(const MemoryDimensions input1Dim, const InputDataBuffer& input1, const size_t sliceId, const size_t axis, const MemoryDimensions expectedDim, ConstDataBuffer& expected)
 {
@@ -18,7 +18,7 @@ float testSliceNode(const MemoryDimensions input1Dim, const InputDataBuffer& inp
     inputDimensions.emplace("x", input1Dim);
 
     // set up graph compilation context and platform
-    ImplementationStrategyFactory fact;
+    GraphCompilationPlatformFactory fact;
     CompilationMemoryMap compilationMemoryMap(inputDimensions);
     std::unique_ptr<GraphCompilationPlatform> platform = fact.CreateGraphCompilationTargetStrategy(compilationMemoryMap);
 

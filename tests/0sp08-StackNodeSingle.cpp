@@ -10,7 +10,7 @@
 #include "nodes/StackNode.hpp"
 #include "CompilationMemoryMap.hpp"
 #include "GraphCompilationPlatform.hpp"
-#include "ImplementationStrategyFactory.hpp"
+#include "GraphCompilationPlatformFactory.hpp"
 
 int main(int argc, const char * const argv[])
 {
@@ -33,7 +33,7 @@ int main(int argc, const char * const argv[])
 
     std::cout << "compiling graph and setting up runtime..." << std::endl;
     // Create, and set up InputNodes holding the slices data
-    ImplementationStrategyFactory fact;
+    GraphCompilationPlatformFactory fact;
     CompilationMemoryMap compilationMemoryMap;
     std::vector<std::unique_ptr<InputNode>> createdNodes(size); // keep track of dynamically allocated nodes so that they get freed upon returning
     std::vector<NodePtr> sliceInputs(size); // vector holding plain pointers to feed into StackNode

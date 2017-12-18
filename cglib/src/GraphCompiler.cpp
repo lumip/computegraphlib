@@ -6,9 +6,9 @@
 #include "CompilationMemoryMap.hpp"
 #include "CompiledGraph.hpp"
 #include "GraphCompilationPlatform.hpp"
-#include "ImplementationStrategyFactory.hpp"
+#include "GraphCompilationPlatformFactory.hpp"
 
-GraphCompiler::GraphCompiler(std::unique_ptr<const ImplementationStrategyFactory>&& strategyFactory)
+GraphCompiler::GraphCompiler(std::unique_ptr<const GraphCompilationPlatformFactory>&& strategyFactory)
     : _strategyFactory(std::move(strategyFactory))
 {
 

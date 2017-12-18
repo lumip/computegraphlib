@@ -7,7 +7,7 @@
 #include "CompilationMemoryMap.hpp"
 #include "GraphCompiler.hpp"
 #include "CompiledGraph.hpp"
-#include "ImplementationStrategyFactory.hpp"
+#include "GraphCompilationPlatformFactory.hpp"
 
 int main(int argc, const char * const argv[])
 {
@@ -50,7 +50,7 @@ int main(int argc, const char * const argv[])
     inputDimensions.emplace("b", MemoryDimensions({1, OutputDim}));
 
     // compile the graph
-    GraphCompiler compiler(std::unique_ptr<const ImplementationStrategyFactory>(new ImplementationStrategyFactory));
+    GraphCompiler compiler(std::unique_ptr<const GraphCompilationPlatformFactory>(new GraphCompilationPlatformFactory));
     const std::unique_ptr<CompiledGraph> graph = compiler.Compile(&combiner, inputDimensions);  // we compile combiner node
                                                                                                 // but we will ignore it afterwards
                                                                                                 // and get results from the sotmax nodes

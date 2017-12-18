@@ -12,7 +12,7 @@
 #include "GraphCompiler.hpp"
 #include "CompiledGraph.hpp"
 
-#include "ImplementationStrategyFactory.hpp"
+#include "GraphCompilationPlatformFactory.hpp"
 
 #include "Kernel.hpp"
 #include "../src-gpu/OCLWrappers.hpp"
@@ -117,7 +117,7 @@ int main(int argc, const char* argv[])
     TestForwardNode f("f", false, {&g});
     e.SetInputs({&f});
 
-    GraphCompiler compiler(std::unique_ptr<const ImplementationStrategyFactory>(new ImplementationStrategyFactory));
+    GraphCompiler compiler(std::unique_ptr<const GraphCompilationPlatformFactory>(new GraphCompilationPlatformFactory));
     const std::unique_ptr<CompiledGraph> graph = compiler.Compile(&a, InputDimensionsMap());
     graph->Evaluate(InputDataMap());
 

@@ -9,7 +9,7 @@
 #include "nodes/MatrixMultNode.hpp"
 #include "CompilationMemoryMap.hpp"
 #include "GraphCompilationPlatform.hpp"
-#include "ImplementationStrategyFactory.hpp"
+#include "GraphCompilationPlatformFactory.hpp"
 
 int main(int argc, const char * const argv[])
 {
@@ -38,7 +38,7 @@ int main(int argc, const char * const argv[])
     inputDimensions.emplace("y", dims2);
 
     // set up graph compilation context and platform
-    ImplementationStrategyFactory fact;
+    GraphCompilationPlatformFactory fact;
     CompilationMemoryMap compilationMemoryMap(inputDimensions);
     std::unique_ptr<GraphCompilationPlatform> platform = fact.CreateGraphCompilationTargetStrategy(compilationMemoryMap);
 

@@ -6,7 +6,7 @@
 #include "nodes/InputNode.hpp"
 #include "CompilationMemoryMap.hpp"
 #include "GraphCompilationPlatform.hpp"
-#include "ImplementationStrategyFactory.hpp"
+#include "GraphCompilationPlatformFactory.hpp"
 
 float testVectorAddNode(const MemoryDimensions input1Dim, InputDataBuffer& input1, const MemoryDimensions input2Dim, InputDataBuffer& input2, const MemoryDimensions& expectedDim, ConstDataBuffer& expected)
 {
@@ -20,7 +20,7 @@ float testVectorAddNode(const MemoryDimensions input1Dim, InputDataBuffer& input
     inputDimensions.emplace("y", input2Dim);
 
     // set up graph compilation context and platform
-    ImplementationStrategyFactory fact;
+    GraphCompilationPlatformFactory fact;
     CompilationMemoryMap compilationMemoryMap(inputDimensions);
     std::unique_ptr<GraphCompilationPlatform> platform = fact.CreateGraphCompilationTargetStrategy(compilationMemoryMap);
 

@@ -5,7 +5,7 @@
 #include "nodes/InputNode.hpp"
 #include "CompilationMemoryMap.hpp"
 #include "GraphCompilationPlatform.hpp"
-#include "ImplementationStrategyFactory.hpp"
+#include "GraphCompilationPlatformFactory.hpp"
 
 int main(const int argc, const char * const argv[])
 {
@@ -23,7 +23,7 @@ int main(const int argc, const char * const argv[])
     inputDimensions.emplace("x", dim);
 
     // set up graph compilation context and platform
-    ImplementationStrategyFactory fact;
+    GraphCompilationPlatformFactory fact;
     CompilationMemoryMap compilationMemoryMap(inputDimensions);
     std::unique_ptr<GraphCompilationPlatform> platform = fact.CreateGraphCompilationTargetStrategy(compilationMemoryMap);
 

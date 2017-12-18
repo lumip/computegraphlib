@@ -6,7 +6,7 @@
 class GraphCompilationPlatform;
 class CompilationMemoryMap;
 
-class ImplementationStrategyFactory
+class GraphCompilationPlatformFactory
 {
 public:
     std::unique_ptr<GraphCompilationPlatform> CreateGraphCompilationTargetStrategy(CompilationMemoryMap& CompilationMemoryMap) const;

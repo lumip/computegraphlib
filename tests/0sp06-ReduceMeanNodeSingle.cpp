@@ -9,7 +9,7 @@
 #include "nodes/ReduceMeanNode.hpp"
 #include "CompilationMemoryMap.hpp"
 #include "GraphCompilationPlatform.hpp"
-#include "ImplementationStrategyFactory.hpp"
+#include "GraphCompilationPlatformFactory.hpp"
 
 int main(int argc, const char * const argv[])
 {
@@ -36,7 +36,7 @@ int main(int argc, const char * const argv[])
     inputDimensions.emplace("x", dims);
 
     // set up graph compilation context and platform
-    ImplementationStrategyFactory fact;
+    GraphCompilationPlatformFactory fact;
     CompilationMemoryMap compilationMemoryMap(inputDimensions);
     std::unique_ptr<GraphCompilationPlatform> platform = fact.CreateGraphCompilationTargetStrategy(compilationMemoryMap);
 

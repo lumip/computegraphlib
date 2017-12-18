@@ -8,7 +8,7 @@
 #include "nodes/StackNode.hpp"
 #include "CompilationMemoryMap.hpp"
 #include "GraphCompilationPlatform.hpp"
-#include "ImplementationStrategyFactory.hpp"
+#include "GraphCompilationPlatformFactory.hpp"
 
 float testStackNode(const MemoryDimensions sliceDim, const std::vector<DataBuffer> slices, const size_t axis, const MemoryDimensions expectedDim, ConstDataBuffer& expected)
 {
@@ -17,7 +17,7 @@ float testStackNode(const MemoryDimensions sliceDim, const std::vector<DataBuffe
     // Create, and set up InputNodes holding the slices data
     std::vector<std::unique_ptr<Node>> createdNodes(sliceCount); // keep track of dynamically allocated nodes so that they get freed upon returning
     std::vector<NodePtr> sliceInputs(sliceCount); // vector holding plain pointers to feed into StackNode
-    ImplementationStrategyFactory fact;
+    GraphCompilationPlatformFactory fact;
     CompilationMemoryMap compilationMemoryMap;
     std::unique_ptr<GraphCompilationPlatform> platform = fact.CreateGraphCompilationTargetStrategy(compilationMemoryMap);
 

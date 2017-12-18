@@ -2,11 +2,11 @@
 
 #include <CL/cl.h>
 
-#include "ImplementationStrategyFactory.hpp"
+#include "GraphCompilationPlatformFactory.hpp"
 
 #include "OCLWrappers.hpp"
 
-std::unique_ptr<GraphCompilationPlatform> ImplementationStrategyFactory::CreateGraphCompilationTargetStrategy(CompilationMemoryMap& CompilationMemoryMap) const
+std::unique_ptr<GraphCompilationPlatform> GraphCompilationPlatformFactory::CreateGraphCompilationTargetStrategy(CompilationMemoryMap& CompilationMemoryMap) const
 {
     cl_platform_id platformId;
     OCLWrappers::CheckCLError(clGetPlatformIDs(1, &platformId, nullptr), "clGetPlatformIDs");

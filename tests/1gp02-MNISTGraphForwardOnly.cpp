@@ -9,7 +9,7 @@
 #include "CompilationMemoryMap.hpp"
 #include "GraphCompiler.hpp"
 #include "CompiledGraph.hpp"
-#include "ImplementationStrategyFactory.hpp"
+#include "GraphCompilationPlatformFactory.hpp"
 
 std::vector<std::unique_ptr<Node>> nodes;
 
@@ -72,7 +72,7 @@ int main(int argc, const char * const argv[])
     inputDimensions.emplace("Classes", MemoryDimensions({BatchSize, OutputDim}));
 
     long long time_setup_start = PAPI_get_real_nsec();
-    GraphCompiler compiler(std::unique_ptr<const ImplementationStrategyFactory>(new ImplementationStrategyFactory));
+    GraphCompiler compiler(std::unique_ptr<const GraphCompilationPlatformFactory>(new GraphCompilationPlatformFactory));
     const std::unique_ptr<CompiledGraph> graph = compiler.Compile(&loss, inputDimensions);
     long long time_setup_stop = PAPI_get_real_nsec();
 
