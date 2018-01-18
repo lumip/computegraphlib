@@ -8,6 +8,8 @@ Applications using the framework can represent arbitrary computations on data as
 
 Currently, all node operations are implemented on a sequential CPU and OpenCL/GPU platform.
 
+In addition to the brief information on usage provided in this readme, you can find the project report which explains some of the fundamental design choices and concepts implemented and also provides a brief performance evaluation [in the wiki](https://github.com/lumip/computegraphlib/wiki/files/report.pdf).
+
 ## Repository Structure
 The repository contains the actual framework code in the *cglib* subdirectory as well as a plethora of small tests and examples in the *tests* subdirectory.
 
